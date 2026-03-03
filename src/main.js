@@ -3,13 +3,13 @@ import { apiClient } from './api/apiClient.js';
 import { session } from './utils/session.js';
 import { renderDeviceTable } from './components/DeviceTable.js';
 
-// Temporary storage for user credentials before API authentication
 let tempCredentials = {
     username: '',
-    password: '' // Stored as MD5 hash immediately for better security in memory
+    password: ''
 };
 
-// 1. Cached DOM Elements
+let selectedLockId = null;
+
 const ui = {
     screens: {
         login: document.getElementById('login-screen'),
@@ -20,6 +20,7 @@ const ui = {
         authenticate: document.getElementById('btn-authenticate'),
         logout: document.getElementById('btn-logout'),
         fetchLocks: document.getElementById('btn-fetch-locks'),
+        remoteUnlock: document.getElementById('btn-remote-unlock')
     },
     inputs: {
         username: document.getElementById('username'),
@@ -29,19 +30,20 @@ const ui = {
     },
     table: {
         container: document.getElementById('device-table'),
-        bodyId: 'device-list-body',
+        bodyId: document.getElementById('device-list-body'),
         emptyText: document.getElementById('no-devices')
     },
     texts: {
         displayClientId: document.getElementById('display-client-id'),
-        connectionStatus: document.getElementById('connection-status')
+        connectionStatus: document.getElementById('connection-status'),
+        selectedLockName: document.getElementById('selected-lock-name')
     },
     cards: {
-        config: document.getElementById('config-card')
+        config: document.getElementById('config-card'),
+        lockActions: document.getElementById('lock-actions')
     }
 };
 
-// 2. Initialization
 function init() {
     if (session.isAuthenticated()) {
         showDashboard(true);
@@ -51,7 +53,6 @@ function init() {
     setupEventListeners();
 }
 
-// 3. View Controllers
 function showDashboard(isApiConnected = false) {
     ui.screens.login.style.display = 'none';
     ui.screens.dashboard.style.display = 'block';
@@ -59,13 +60,14 @@ function showDashboard(isApiConnected = false) {
     if (isApiConnected) {
         ui.texts.displayClientId.innerText = session.getClientId();
         ui.texts.connectionStatus.innerText = "● System Active";
-        ui.texts.connectionStatus.style.color = "#4CAF50"; // Green
+        ui.texts.connectionStatus.style.color = "#4CAF50";
         ui.buttons.fetchLocks.disabled = false;
-        ui.cards.config.style.display = 'none'; // Hide config card once connected
+        
+        if (ui.cards.config) ui.cards.config.style.display = 'none';
     } else {
         ui.texts.displayClientId.innerText = "Pending Configuration";
         ui.texts.connectionStatus.innerText = "● Waiting for API Auth";
-        ui.texts.connectionStatus.style.color = "#FFC107"; // Yellow
+        ui.texts.connectionStatus.style.color = "#FFC107";
         ui.buttons.fetchLocks.disabled = true;
     }
 }
@@ -75,21 +77,15 @@ function showLogin() {
     ui.screens.dashboard.style.display = 'none';
 }
 
-// 4. Events
 function setupEventListeners() {
     ui.buttons.enterApp.addEventListener('click', handleEnterApp);
     ui.buttons.authenticate.addEventListener('click', handleAuthenticateAPI);
-    ui.buttons.logout.addEventListener('click', () => {
-        session.clear();
-        tempCredentials = { username: '', password: '' };
-        location.reload();
-    });
+    ui.buttons.logout.addEventListener('click', handleLogout);
     ui.buttons.fetchLocks.addEventListener('click', handleFetchLocks);
+    ui.table.bodyId.addEventListener('click', handleLockSelection);
+    ui.buttons.remoteUnlock.addEventListener('click', handleRemoteUnlock);
 }
 
-// 5. Business Logic (Handlers)
-
-// Step 1: User logs into the local app using TTLock account details
 function handleEnterApp() {
     const username = ui.inputs.username.value;
     const rawPassword = ui.inputs.password.value;
@@ -99,15 +95,12 @@ function handleEnterApp() {
         return;
     }
 
-    // Save in memory temporarily to use with the API call later
     tempCredentials.username = username;
     tempCredentials.password = md5(rawPassword); 
 
-    // Move to dashboard, but API is not connected yet
     showDashboard(false);
 }
 
-// Step 2: User provides Client ID/Secret in the dashboard to authenticate with TTLock API
 async function handleAuthenticateAPI() {
     const clientId = ui.inputs.clientId.value;
     const clientSecret = ui.inputs.clientSecret.value;
@@ -118,7 +111,7 @@ async function handleAuthenticateAPI() {
     }
 
     if (!tempCredentials.username || !tempCredentials.password) {
-        alert("Session expired. Please log out and enter your username/password again.");
+        alert("Session expired. Please log out and authenticate again.");
         return;
     }
 
@@ -128,7 +121,7 @@ async function handleAuthenticateAPI() {
         clientId,
         clientSecret,
         username: tempCredentials.username,
-        password: tempCredentials.password // already MD5 hashed from Step 1
+        password: tempCredentials.password 
     };
 
     try {
@@ -136,16 +129,23 @@ async function handleAuthenticateAPI() {
 
         if (data.access_token) {
             session.save(data.access_token, credentials.clientId);
-            showDashboard(true); // Update UI to reflect active connection
+            showDashboard(true);
             alert("API Authenticated Successfully!");
         } else {
             alert("Login failed: " + (data.description || "Check your credentials."));
         }
     } catch (err) {
-        alert("Connection error. Is the Proxy Server (Port 3001) running?");
+        alert("Connection error. Is the proxy server running?");
+        console.error(err);
     } finally {
         ui.buttons.authenticate.innerText = "Connect API";
     }
+}
+
+function handleLogout() {
+    session.clear();
+    tempCredentials = { username: '', password: '' };
+    location.reload();
 }
 
 async function handleFetchLocks() {
@@ -155,7 +155,7 @@ async function handleFetchLocks() {
 
     try {
         const data = await apiClient.fetchLocks(clientId, token);
-        const hasLocks = renderDeviceTable(data.list, ui.table.bodyId);
+        const hasLocks = renderDeviceTable(data.list, 'device-list-body');
 
         if (hasLocks) {
             ui.table.emptyText.style.display = 'none';
@@ -163,13 +163,60 @@ async function handleFetchLocks() {
         } else {
             ui.table.emptyText.innerText = "No locks bound to this account.";
             ui.table.emptyText.style.display = 'block';
+            ui.table.container.style.display = 'none';
         }
     } catch (err) {
         alert("Error fetching device list.");
+        console.error(err);
     } finally {
         ui.buttons.fetchLocks.innerText = "Fetch Device List";
     }
 }
 
-// Start the application
+function handleLockSelection(event) {
+    if (event.target.classList.contains('select-btn')) {
+        const button = event.target;
+        selectedLockId = button.getAttribute('data-id');
+        const lockName = button.getAttribute('data-name');
+
+        ui.cards.lockActions.style.display = 'block';
+        if (ui.texts.selectedLockName) {
+            ui.texts.selectedLockName.innerText = lockName;
+        }
+
+        const allRows = ui.table.bodyId.querySelectorAll('tr');
+        allRows.forEach(row => row.style.backgroundColor = ''); 
+        button.closest('tr').style.backgroundColor = '#e6f2ff'; 
+    }
+}
+
+async function handleRemoteUnlock() {
+    if (!selectedLockId) {
+        alert("Please select a lock first.");
+        return;
+    }
+
+    const token = session.getToken();
+    const clientId = session.getClientId();
+    
+    ui.buttons.remoteUnlock.innerText = "Unlocking...";
+    ui.buttons.remoteUnlock.disabled = true;
+
+    try {
+        const data = await apiClient.remoteUnlock(clientId, token, selectedLockId);
+        
+        if (data.errcode === 0) {
+            alert("Success! Lock opened.");
+        } else {
+            alert(`Failed to unlock: ${data.errmsg || data.description || 'Unknown error'}`);
+        }
+    } catch (err) {
+        alert("Error communicating with the proxy server.");
+        console.error(err);
+    } finally {
+        ui.buttons.remoteUnlock.innerText = "Remote Unlock";
+        ui.buttons.remoteUnlock.disabled = false;
+    }
+}
+
 init();
