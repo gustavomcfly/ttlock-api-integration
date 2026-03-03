@@ -11,13 +11,10 @@
         <div id="login-screen" class="overlay">
             <div class="login-card">
                 <h2>TTLock R&D Login</h2>
-                <p>Enter platform and account credentials</p>
-                <input type="text" id="clientId" placeholder="Client ID">
-                <input type="password" id="clientSecret" placeholder="Client Secret">
-                <hr>
-                <input type="text" id="username" placeholder="TTLock Username">
+                <p>Enter your TTLock account credentials</p>
+                <input type="text" id="username" placeholder="TTLock Username (Email)">
                 <input type="password" id="password" placeholder="TTLock Password">
-                <button id="btn-connect">Initialize Session</button>
+                <button id="btn-enter-app">Enter Dashboard</button>
             </div>
         </div>
 
@@ -25,7 +22,7 @@
             <nav class="top-nav">
                 <div class="nav-left">
                     <strong>TTLock R&D Console</strong>
-                    <span id="connection-status">● System Active</span>
+                    <span id="connection-status">● Waiting for API Auth</span>
                 </div>
                 <div class="nav-links">
                     <button id="btn-logout" class="nav-item">Logout</button>
@@ -35,16 +32,26 @@
             <main class="container">
                 <header class="dashboard-header">
                     <h2>Test Environment Overview</h2>
-                    <p>Active Client ID: <span id="display-client-id"></span></p>
+                    <p>Active Client ID: <span id="display-client-id">Not Configured</span></p>
                 </header>
                 
                 <section class="card-grid-top">
+                    <div class="card" id="config-card">
+                        <div class="icon">⚙️</div>
+                        <h3>API Configuration</h3>
+                        <p>Enter your developer credentials to connect to TTLock.</p>
+                        <input type="text" id="clientId" placeholder="Client ID" style="margin-bottom: 10px; width: 100%;">
+                        <input type="password" id="clientSecret" placeholder="Client Secret" style="margin-bottom: 10px; width: 100%;">
+                        <button id="btn-authenticate" class="action-btn">Connect API</button>
+                    </div>
+
                     <div class="card">
                         <div class="icon">🔌</div>
                         <h3>Lock Management</h3>
                         <p>Fetch and view all locks paired with this account.</p>
-                        <button id="btn-fetch-locks" class="action-btn">Fetch Device List</button>
+                        <button id="btn-fetch-locks" class="action-btn" disabled>Fetch Device List</button>
                     </div>
+
                     <div class="card">
                         <div class="icon">🔓</div>
                         <h3>Remote Operations</h3>
@@ -69,7 +76,7 @@
                             </thead>
                             <tbody id="device-list-body"></tbody>
                         </table>
-                        <p id="no-devices">No devices loaded yet. Click "Fetch Device List".</p>
+                        <p id="no-devices">No devices loaded yet. Authenticate and click "Fetch Device List".</p>
                     </div>
                 </section>
             </main>
