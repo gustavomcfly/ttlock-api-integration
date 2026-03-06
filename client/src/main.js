@@ -25,8 +25,7 @@ const ui = {
     inputs: {
         username: document.getElementById('username'),
         password: document.getElementById('password'),
-        clientId: document.getElementById('clientId'),
-        clientSecret: document.getElementById('clientSecret')
+
     },
     table: {
         container: document.getElementById('device-table'),
@@ -102,14 +101,6 @@ function handleEnterApp() {
 }
 
 async function handleAuthenticateAPI() {
-    const clientId = ui.inputs.clientId.value;
-    const clientSecret = ui.inputs.clientSecret.value;
-
-    if (!clientId || !clientSecret) {
-        alert("Insira suas credenciais da plataforma do desenvolvedor TTlock (Client ID e Client Secret).");
-        return;
-    }
-
     if (!tempCredentials.username || !tempCredentials.password) {
         alert("Sessão expirada. Por favor faça logout e login novamente.");
         return;
@@ -118,8 +109,6 @@ async function handleAuthenticateAPI() {
     ui.buttons.authenticate.innerText = "Conectando...";
 
     const credentials = {
-        clientId,
-        clientSecret,
         username: tempCredentials.username,
         password: tempCredentials.password 
     };
@@ -128,7 +117,7 @@ async function handleAuthenticateAPI() {
         const data = await apiClient.login(credentials);
 
         if (data.access_token) {
-            session.save(data.access_token, credentials.clientId);
+            session.save(data.access_token);
             showDashboard(true);
             alert("Autentificação bem sucedida!");
         } else {
@@ -150,11 +139,10 @@ function handleLogout() {
 
 async function handleFetchLocks() {
     const token = session.getToken();
-    const clientId = session.getClientId();
     ui.buttons.fetchLocks.innerText = "Carregando...";
 
     try {
-        const data = await apiClient.fetchLocks(clientId, token);
+        const data = await apiClient.fetchLocks(token);
         const hasLocks = renderDeviceTable(data.list, 'device-list-body');
 
         if (hasLocks) {
@@ -197,13 +185,12 @@ async function handleRemoteUnlock() {
     }
 
     const token = session.getToken();
-    const clientId = session.getClientId();
     
     ui.buttons.remoteUnlock.innerText = "Desbloqueando...";
     ui.buttons.remoteUnlock.disabled = true;
 
     try {
-        const data = await apiClient.remoteUnlock(clientId, token, selectedLockId);
+        const data = await apiClient.remoteUnlock(token, selectedLockId);
         
         if (data.errcode === 0) {
             alert("Sucesso! Fechadura desbloqueada.");

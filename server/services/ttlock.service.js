@@ -3,10 +3,10 @@ import axios from 'axios';
 const BASE_URL = 'https://api.sciener.com';
 
 export const ttlockService = {
-    async authenticate({ clientId, clientSecret, username, password }) {
+    async authenticate({ username, password }) {
         const params = new URLSearchParams({
-            client_id: clientId,
-            client_secret: clientSecret,
+            client_id: process.env.TTLOCK_CLIENT_ID,
+            client_secret: process.env.TTLOCK_CLIENT_SECRET,
             username: username,
             password: password,
             grant_type: 'password'
@@ -15,17 +15,22 @@ export const ttlockService = {
         return response.data;
     },
 
-    async fetchLocks(clientId, accessToken) {
+    async fetchLocks(accessToken) {
         const response = await axios.get(`${BASE_URL}/v3/lock/list`, {
-            params: { clientId, accessToken, pageNo: 1, pageSize: 50, date: Date.now() }
+            params: { 
+                clientId: process.env.TTLOCK_CLIENT_ID, 
+                accessToken, 
+                pageNo: 1, 
+                pageSize: 50, 
+                date: Date.now() 
+            }
         });
         return response.data;
     },
 
-    // Remote Unlock Method
-    async remoteUnlock(clientId, accessToken, lockId) {
+    async remoteUnlock(accessToken, lockId) {
         const params = new URLSearchParams({
-            clientId: clientId,
+            clientId: process.env.TTLOCK_CLIENT_ID,
             accessToken: accessToken,
             lockId: lockId,
             date: Date.now()

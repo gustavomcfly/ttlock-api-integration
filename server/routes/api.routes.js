@@ -13,20 +13,19 @@ router.post('/auth/token', async (req, res) => {
 });
 
 router.post('/lock/list', async (req, res) => {
-    const { clientId, accessToken } = req.body;
+    const { accessToken } = req.body;
     try {
-        const data = await ttlockService.fetchLocks(clientId, accessToken);
+        const data = await ttlockService.fetchLocks(accessToken);
         res.json(data);
     } catch (error) {
         res.status(500).json(error.response?.data || { error: "Failed to fetch lock list" });
     }
 });
 
-// Remote Unlock Route
 router.post('/lock/unlock', async (req, res) => {
-    const { clientId, accessToken, lockId } = req.body;
+    const { accessToken, lockId } = req.body;
     try {
-        const data = await ttlockService.remoteUnlock(clientId, accessToken, lockId);
+        const data = await ttlockService.remoteUnlock(accessToken, lockId);
         res.json(data);
     } catch (error) {
         res.status(500).json(error.response?.data || { error: "Failed to execute remote unlock" });
