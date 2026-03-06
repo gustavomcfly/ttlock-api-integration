@@ -1,12 +1,13 @@
 import axios from 'axios';
+import 'dotenv/config'; 
 
 const BASE_URL = 'https://api.sciener.com';
 
 export const ttlockService = {
     async authenticate({ username, password }) {
         const params = new URLSearchParams({
-            client_id: process.env.TTLOCK_CLIENT_ID,
-            client_secret: process.env.TTLOCK_CLIENT_SECRET,
+            client_id: process.env.TTLOCK_CLIENT_ID,        
+            client_secret: process.env.TTLOCK_CLIENT_SECRET, 
             username: username,
             password: password,
             grant_type: 'password'
@@ -18,8 +19,8 @@ export const ttlockService = {
     async fetchLocks(accessToken) {
         const response = await axios.get(`${BASE_URL}/v3/lock/list`, {
             params: { 
-                clientId: process.env.TTLOCK_CLIENT_ID, 
-                accessToken, 
+                clientId: process.env.TTLOCK_CLIENT_ID,      
+                accessToken: accessToken, 
                 pageNo: 1, 
                 pageSize: 50, 
                 date: Date.now() 
@@ -30,7 +31,7 @@ export const ttlockService = {
 
     async remoteUnlock(accessToken, lockId) {
         const params = new URLSearchParams({
-            clientId: process.env.TTLOCK_CLIENT_ID,
+            clientId: process.env.TTLOCK_CLIENT_ID,         
             accessToken: accessToken,
             lockId: lockId,
             date: Date.now()

@@ -13,7 +13,7 @@ router.post('/auth/token', async (req, res) => {
 });
 
 router.post('/lock/list', async (req, res) => {
-    const { accessToken } = req.body;
+    const { accessToken } = req.body; 
     try {
         const data = await ttlockService.fetchLocks(accessToken);
         res.json(data);
@@ -23,7 +23,7 @@ router.post('/lock/list', async (req, res) => {
 });
 
 router.post('/lock/unlock', async (req, res) => {
-    const { accessToken, lockId } = req.body;
+    const { accessToken, lockId } = req.body; 
     try {
         const data = await ttlockService.remoteUnlock(accessToken, lockId);
         res.json(data);

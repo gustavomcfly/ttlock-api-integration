@@ -3,26 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TTLock R&D Dashboard</title>
+    <title>Pado TestLock</title>
     <link rel="stylesheet" href="/src/style.css">
 </head>
 <body>
     <div id="app">
         <div id="login-screen" class="overlay">
             <div class="login-card">
-                <h2>TTLock R&D Login</h2>
-                <p>Enter your TTLock account credentials</p>
-                <input type="text" id="username" placeholder="TTLock Username (Email)">
-                <input type="password" id="password" placeholder="TTLock Password">
-                <button id="btn-enter-app">Enter Dashboard</button>
+                <h2>Login Pado TestLock</h2>
+                <p>Insira as credenciais da sua conta Pado Digital Locking</p>
+                <input type="text" id="username" placeholder="Email">
+                <input type="password" id="password" placeholder="Senha">
+                <button id="btn-enter-app">Entrar no sistema</button>
             </div>
         </div>
 
         <div id="dashboard" style="display: none;">
             <nav class="top-nav">
                 <div class="nav-left">
-                    <strong>TTLock R&D Console</strong>
-                    <span id="connection-status">● Waiting for API Auth</span>
+                    <strong>Pado TestLock</strong>
+                    <span id="connection-status">● Aguardanto autenticação</span>
                 </div>
                 <div class="nav-links">
                     <button id="btn-logout" class="nav-item">Logout</button>
@@ -31,49 +31,42 @@
 
             <main class="container">
                 <header class="dashboard-header">
-                    <h2>Test Environment Overview</h2>
-                    <p>Active Client ID: <span id="display-client-id">Not Configured</span></p>
+                    <h2>Visão geral do ambiente de testes</h2>
+                    <p>Status da API: <span id="display-client-id">Não autentificada</span></p>
                 </header>
-                
-                    <div class="card" id="config-card">
-                        <div class="icon">⚙️</div>
-                        <h3>API Configuration</h3>
-                        <p>Click below to securely authenticate your Pado account with the TTLock API.</p>
-                        <button id="btn-authenticate" class="action-btn">Connect API</button>
-                    </div>
 
                     <div class="card">
                         <div class="icon">🔌</div>
-                        <h3>Lock Management</h3>
-                        <p>Fetch and view all locks paired with this account.</p>
-                        <button id="btn-fetch-locks" class="action-btn" disabled>Fetch Device List</button>
+                        <h3>Gerenciamento de Fechaduras</h3>
+                        <p>Busque e visualize todas as fechaduras vinculadas a esta conta.</p>
+                        <button id="btn-fetch-locks" class="action-btn" disabled>Encontrar Dispositivos</button>
                     </div>
 
                     <div class="card">
                         <div class="icon">🔓</div>
-                        <h3>Remote Operations</h3>
-                        <p>Select a lock from the list below to enable controls.</p>
+                        <h3>Operações Remotas</h3>
+                        <p>Selecione uma fechadura na lista abaixo para habilitar os controles.</p>
                         <div id="lock-actions" style="margin-top: 15px; display: none;">
-                            <button id="btn-remote-unlock" class="action-btn secondary">Remote Unlock</button>
+                            <button id="btn-remote-unlock" class="action-btn secondary">Abertura Remota</button>
                         </div>
                     </div>
                 </section>
 
                 <section class="device-list-container">
-                    <h3>Connected Devices</h3>
+                    <h3>Dispositivos Conectados</h3>
                     <div class="table-wrapper">
                         <table id="device-table" style="display: none;">
                             <thead>
                                 <tr>
-                                    <th>Lock Name</th>
-                                    <th>Lock ID</th>
-                                    <th>Battery</th>
-                                    <th>Action</th>
+                                    <th>Nome da Fechadura</th>
+                                    <th>ID da Fechadura</th>
+                                    <th>Bateria</th>
+                                    <th>Ação</th>
                                 </tr>
                             </thead>
                             <tbody id="device-list-body"></tbody>
                         </table>
-                        <p id="no-devices">No devices loaded yet. Authenticate and click "Fetch Device List".</p>
+                        <p id="no-devices">Nenhum dispositivo carregado. Autentique-se e clique em "Encontrar Dispositivos".".</p>
                     </div>
                 </section>
             </main>
