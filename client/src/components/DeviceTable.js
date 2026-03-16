@@ -36,7 +36,7 @@ export class DeviceTable {
         }
     }
 
-    render(locks) {
+render(locks) {
         this.tbody.innerHTML = ''; 
         if (!locks || locks.length === 0) {
             this.emptyText.innerText = "Não há fechaduras vinculadas a esta conta.";
@@ -51,12 +51,19 @@ export class DeviceTable {
         locks.forEach(lock => {
             const tr = document.createElement('tr');
             const lockName = lock.lockAlias || 'Sem Nome';
+            
+            // Usando classes do Tailwind para as linhas da tabela
+            tr.className = "hover:bg-muted/50 transition-colors";
             tr.innerHTML = `
-                <td>${lockName}</td>
-                <td>${lock.lockId}</td>
-                <td>${lock.electricQuantity}%</td>
-                <td>
-                    <button class="select-btn action-btn" data-id="${lock.lockId}" data-name="${lockName}">
+                <td class="px-6 py-4 whitespace-nowrap font-medium">${lockName}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-muted-foreground">${lock.lockId}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800">
+                        ${lock.electricQuantity}%
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <button class="select-btn bg-inverted text-inverted-foreground hover:bg-inverted/80 px-4 py-1.5 rounded-md text-sm font-semibold transition-colors shadow-sm" data-id="${lock.lockId}" data-name="${lockName}">
                         Selecionar
                     </button>
                 </td>
@@ -73,9 +80,14 @@ export class DeviceTable {
             
             appState.setLock(id, name);
             
+            // Reseta a cor de fundo de todas as linhas
             const allRows = this.tbody.querySelectorAll('tr');
-            allRows.forEach(row => row.style.backgroundColor = ''); 
-            button.closest('tr').style.backgroundColor = '#e6f2ff'; 
+            allRows.forEach(row => {
+                row.classList.remove('bg-accent/20');
+            }); 
+            
+            // Destaca a linha selecionada usando a cor de acento do Tailwind
+            button.closest('tr').classList.add('bg-accent/20');
             
             this.onLockSelected();
         }

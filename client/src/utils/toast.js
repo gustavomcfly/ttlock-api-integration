@@ -1,5 +1,5 @@
 import Toastify from 'toastify-js';
-import "toastify-js/src/toastify.css"; // Vite will automatically bundle this CSS!
+import "toastify-js/src/toastify.css";
 
 export const toast = {
     success(message) {
