@@ -6,8 +6,9 @@
     <title>Pado TestLock</title>
     <link rel="stylesheet" href="/src/style.css" />
   </head>
-  <body class="bg-background text-foreground antialiased min-h-screen">
+  <body class="bg-background text-foreground antialiased min-h-screen overflow-x-hidden">
     <div id="app">
+      
       <div
         id="login-screen"
         class="fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm z-50 overflow-hidden"
@@ -86,146 +87,137 @@
       <div
         id="dashboard"
         style="display: none"
-        class="flex flex-col min-h-screen"
+        class="flex flex-col min-h-screen relative"
       >
+
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 hidden transition-opacity opacity-0"></div>
+        <aside id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-card border-r border-border z-50 transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+            <div class="p-6 border-b border-border flex justify-between items-center">
+                <h2 class="text-xl font-black tracking-tight">Pado Menu</h2>
+                <button id="btn-close-sidebar" class="text-muted-foreground hover:text-foreground">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <nav class="flex-1 p-4 flex flex-col gap-2">
+                <a href="#" id="btn-sidebar-home" class="px-4 py-3 rounded-lg bg-primary/10 text-primary font-semibold">Home</a>                <a href="#" class="px-4 py-3 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">Testes</a>
+                <a href="#" class="px-4 py-3 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">Relatórios</a>
+                <a href="#" class="px-4 py-3 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">Configurações</a>
+            </nav>
+            <div class="p-4 border-t border-border">
+                <button id="btn-logout" class="w-full px-4 py-2 bg-destructive/10 text-destructive rounded-lg font-semibold hover:bg-destructive/20 transition-colors">
+                    Sair da Conta
+                </button>
+            </div>
+        </aside>
+
         <nav
           class="flex justify-between items-center px-6 py-4 bg-card border-b border-border shadow-sm"
         >
           <div class="flex items-center gap-4">
-            <strong class="text-lg tracking-wide">Pado TestLock</strong>
-            <span
-              id="connection-status"
-              class="text-xs px-3 py-1 rounded-full bg-yellow-100 text-yellow-800 font-semibold uppercase tracking-wider"
-            >
-              ● Aguardando Autenticação
-            </span>
+            <button id="btn-open-sidebar" class="p-2 -ml-2 rounded-md hover:bg-muted transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </button>
+            <strong class="text-lg tracking-wide hidden sm:block">Console Pado TestLock</strong>
           </div>
-          <button
-            id="btn-logout"
-            class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+          <span
+            id="connection-status"
+            class="text-xs px-3 py-1 rounded-full bg-yellow-100 text-yellow-800 font-semibold uppercase tracking-wider"
           >
-            Sair da Conta
-          </button>
+            ● Aguardando Autenticação
+          </span>
         </nav>
 
-        <main class="container mx-auto max-w-5xl p-6 mt-6">
-          <header class="mb-8">
-            <h2 class="text-3xl font-bold tracking-tight">
-              Visão Geral do Ambiente de Testes
-            </h2>
-            <p class="text-muted-foreground mt-1">
-              Status da API:
-              <span id="display-client-id" class="font-medium text-foreground"
-                >Não Autenticado</span
-              >
-            </p>
-          </header>
-
-          <section class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div
-              class="bg-card border border-border rounded-xl p-6 shadow-sm flex flex-col items-start gap-4 hover:border-border-hover transition-colors"
-            >
-              <div class="text-3xl bg-muted p-3 rounded-lg">🔌</div>
-              <div>
-                <h3 class="text-xl font-semibold mb-1">
-                  Gerenciamento de Fechaduras
-                </h3>
-                <p class="text-muted-foreground text-sm">
-                  Busque e visualize todas as fechaduras vinculadas a esta
-                  conta.
-                </p>
-              </div>
-              <button
-                id="btn-fetch-locks"
-                class="mt-auto bg-primary text-primary-foreground hover:bg-primary-hover px-5 py-2.5 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm w-full md:w-auto"
-                disabled
-              >
-                Encontrar Dispositivos
-              </button>
-            </div>
-
-            <div
-              class="bg-card border border-border rounded-xl p-6 shadow-sm flex flex-col items-start gap-4 hover:border-border-hover transition-colors"
-            >
-              <div class="text-3xl bg-muted p-3 rounded-lg">🔓</div>
-              <div>
-                <h3 class="text-xl font-semibold mb-1">Operações Remotas</h3>
-                <p class="text-muted-foreground text-sm">
-                  Selecione uma fechadura na lista abaixo para habilitar os
-                  controles.
-                </p>
-              </div>
-              <div
-                id="lock-actions"
-                class="mt-auto w-full"
-                style="display: none"
-              >
-                <button
-                  id="btn-remote-unlock"
-                  class="w-full bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground px-5 py-2.5 rounded-lg font-bold transition-all shadow-sm"
+        <main class="container mx-auto max-w-5xl p-4 sm:p-6 mt-2 flex-1 relative">
+            
+            <div id="view-home" class="block transition-opacity duration-300">
+                <header class="mb-6">
+                    <h2 class="text-3xl font-bold tracking-tight">Meus Dispositivos</h2>
+                    <p class="text-muted-foreground mt-1">Selecione uma fechadura para gerenciar.</p>
+                </header>
+                
+                <section
+                  class="bg-card border border-border rounded-xl shadow-sm overflow-hidden"
                 >
-                  Abertura Remota
-                </button>
-              </div>
-            </div>
-          </section>
-
-          <section
-            class="bg-card border border-border rounded-xl shadow-sm overflow-hidden"
-          >
-            <div
-              class="p-4 sm:p-6 border-b border-border bg-muted/30 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
-            >
-              <h3 class="text-xl font-semibold">Dispositivos Conectados</h3>
-
-              <div
-                class="flex gap-1 bg-muted p-1 rounded-lg border border-border"
-              >
-                <button
-                  id="tab-online"
-                  class="px-4 py-1.5 rounded-md text-sm font-semibold bg-background shadow-sm text-foreground transition-all cursor-pointer"
-                >
-                  Online
-                </button>
-                <button
-                  id="tab-offline"
-                  class="px-4 py-1.5 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground transition-all cursor-pointer"
-                >
-                  Offline
-                </button>
-              </div>
-            </div>
-
-            <div class="overflow-x-auto">
-              <table
-                id="device-table"
-                class="w-full text-left border-collapse"
-                style="display: none"
-              >
-                <thead>
-                  <tr
-                    class="bg-muted text-muted-foreground text-xs uppercase tracking-wider border-b border-border"
+                  <div
+                    class="p-4 sm:p-6 border-b border-border bg-muted/30 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
                   >
-                    <th class="px-6 py-4 font-semibold">Nome da Fechadura</th>
-                    <th class="px-6 py-4 font-semibold">ID da Fechadura</th>
-                    <th class="px-6 py-4 font-semibold">Bateria</th>
-                    <th class="px-6 py-4 font-semibold">Ação</th>
-                  </tr>
-                </thead>
-                <tbody
-                  id="device-list-body"
-                  class="divide-y divide-border"
-                ></tbody>
-              </table>
-              <div
-                id="no-devices"
-                class="p-10 text-center text-muted-foreground text-sm"
-              >
-                Nenhum dispositivo carregado. Autentique-se e clique em
-                "Encontrar Dispositivos".
-              </div>
+                    <h3 class="text-xl font-semibold">Lista de Fechaduras</h3>
+
+                    <div
+                      class="flex gap-1 bg-muted p-1 rounded-lg border border-border"
+                    >
+                      <button
+                        id="tab-online"
+                        class="px-4 py-1.5 rounded-md text-sm font-semibold bg-background shadow-sm text-foreground transition-all cursor-pointer"
+                      >
+                        Online
+                      </button>
+                      <button
+                        id="tab-offline"
+                        class="px-4 py-1.5 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground transition-all cursor-pointer"
+                      >
+                        Offline
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="overflow-x-auto">
+                    <table
+                      id="device-table"
+                      class="w-full text-left border-collapse"
+                      style="display: none"
+                    >
+                      <thead>
+                        <tr
+                          class="bg-muted text-muted-foreground text-xs uppercase tracking-wider border-b border-border"
+                        >
+                          <th class="px-6 py-4 font-semibold">Nome da Fechadura</th>
+                          <th class="px-6 py-4 font-semibold">ID da Fechadura</th>
+                          <th class="px-6 py-4 font-semibold">Bateria</th>
+                          <th class="px-6 py-4 font-semibold">Ação</th>
+                        </tr>
+                      </thead>
+                      <tbody
+                        id="device-list-body"
+                        class="divide-y divide-border"
+                      ></tbody>
+                    </table>
+                    <div
+                      id="no-devices"
+                      class="p-10 text-center text-muted-foreground text-sm"
+                    >
+                      Nenhum dispositivo carregado.
+                    </div>
+                  </div>
+                </section>
             </div>
-          </section>
+
+            <div id="view-lock" class="hidden transition-opacity duration-300">
+                <button id="btn-back-home" class="mb-6 flex items-center gap-2 text-muted-foreground hover:text-foreground font-medium transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                    Voltar para a lista
+                </button>
+                
+                <header class="mb-8">
+                    <h2 id="lock-view-name" class="text-4xl font-bold tracking-tight">Nome da Fechadura</h2>
+                    <p class="text-muted-foreground mt-1">ID: <span id="lock-view-id" class="font-mono">---</span></p>
+                </header>
+
+                <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-card border border-border rounded-xl p-8 shadow-sm flex flex-col items-center justify-center gap-6 hover:border-border-hover transition-colors text-center">
+                        <div>
+                            <h3 class="text-2xl font-semibold mb-2">Abertura Remota</h3>
+                            <p class="text-muted-foreground text-sm max-w-xs mx-auto">Envia um comando via gateway para destrancar a fechadura instantaneamente.</p>
+                        </div>
+                        <button id="btn-remote-unlock" class="w-full max-w-xs bg-primary text-primary-foreground hover:bg-primary-hover px-6 py-4 rounded-xl font-bold text-lg transition-all shadow-md">
+                            Destrancar Agora
+                        </button>
+                    </div>
+                </section>
+            </div>
+
+          
+
         </main>
       </div>
     </div>
