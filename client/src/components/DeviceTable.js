@@ -87,7 +87,7 @@ render(locks) {
             }); 
             
             // Destaca a linha selecionada usando a cor de acento do Tailwind
-            button.closest('tr').classList.add('bg-accent/20');
+            button.closest('tr').classList.add('bg-accent/50');
             
             this.onLockSelected();
         }
