@@ -1,21 +1,74 @@
-<div id="view-lock" class="hidden transition-opacity duration-300">
+<div id="view-lock" class="hidden transition-opacity duration-300 w-full">
     <button id="btn-back-home" class="mb-6 flex items-center gap-2 text-muted-foreground hover:text-foreground font-medium transition-colors">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         Voltar para a lista
     </button>
-    <header class="mb-8">
-        <h2 id="lock-view-name" class="text-4xl font-bold tracking-tight">Nome da Fechadura</h2>
-        <p class="text-muted-foreground mt-1">ID: <span id="lock-view-id" class="font-mono">---</span></p>
+    
+    <header class="mb-8 flex justify-between items-end">
+        <div>
+            <h2 id="lock-view-name" class="text-4xl font-bold tracking-tight">Nome da Fechadura</h2>
+            <p class="text-muted-foreground mt-1">ID: <span id="lock-view-id" class="font-mono">---</span></p>
+        </div>
+        <button id="btn-refresh-details" class="p-2 bg-muted text-muted-foreground hover:text-foreground rounded-lg transition-colors" title="Atualizar Detalhes">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        </button>
     </header>
-    <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="bg-card border border-border rounded-xl p-8 shadow-sm flex flex-col items-center justify-center gap-6 hover:border-border-hover transition-colors text-center">
-            <div>
-                <h3 class="text-2xl font-semibold mb-2">Abertura Remota</h3>
-                <p class="text-muted-foreground text-sm max-w-xs mx-auto">Envia um comando via gateway para destrancar a fechadura instantaneamente.</p>
-            </div>
-            <button id="btn-remote-unlock" class="w-full max-w-xs bg-primary text-primary-foreground hover:bg-primary-hover px-6 py-4 rounded-xl font-bold text-lg transition-all shadow-md">
+
+    <div id="lock-details-panel" class="mb-6 p-4 bg-muted/30 border border-border rounded-lg text-sm grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div><span class="text-muted-foreground block text-xs">Bateria</span><strong id="detail-battery">--%</strong></div>
+        <div><span class="text-muted-foreground block text-xs">MAC Address</span><strong id="detail-mac">--:--:--</strong></div>
+        <div><span class="text-muted-foreground block text-xs">Versão Firmware</span><strong id="detail-firmware">--</strong></div>
+        <div><span class="text-muted-foreground block text-xs">Modo Passagem</span><strong id="detail-passage">--</strong></div>
+    </div>
+
+    <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        
+        <div class="bg-card border border-border rounded-xl p-6 shadow-sm flex flex-col items-center justify-center gap-4 text-center">
+            <h3 class="text-xl font-semibold">Abertura Remota</h3>
+            <p class="text-muted-foreground text-sm mb-2">Destrancar instantaneamente via Gateway.</p>
+            <button id="btn-remote-unlock" class="w-full bg-primary text-primary-foreground hover:bg-primary-hover px-4 py-3 rounded-xl font-bold transition-all shadow-md">
                 Destrancar Agora
             </button>
         </div>
+
+        <div class="bg-card border border-border rounded-xl p-6 shadow-sm flex flex-col gap-4">
+            <h3 class="text-xl font-semibold border-b border-border pb-2">Configurações</h3>
+            
+            <div class="flex flex-col gap-2">
+                <label class="text-xs text-muted-foreground font-semibold uppercase">Renomear Fechadura</label>
+                <div class="flex gap-2">
+                    <input type="text" id="input-new-name" placeholder="Novo nome" class="flex-1 px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:border-primary text-sm">
+                    <button id="btn-rename" class="bg-secondary text-secondary-foreground px-3 py-2 rounded-lg font-semibold text-sm hover:bg-muted transition-colors">Salvar</button>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label class="text-xs text-muted-foreground font-semibold uppercase">Super Senha</label>
+                <div class="flex gap-2">
+                    <input type="password" id="input-super-passcode" placeholder="Nova senha (4-9 digitos)" class="flex-1 px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:border-primary text-sm">
+                    <button id="btn-change-passcode" class="bg-secondary text-secondary-foreground px-3 py-2 rounded-lg font-semibold text-sm hover:bg-muted transition-colors">Salvar</button>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label class="text-xs text-muted-foreground font-semibold uppercase">Modo Passagem</label>
+                <div class="flex gap-2">
+                    <select id="select-passage-mode" class="flex-1 px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:border-primary text-sm">
+                        <option value="0">Desativado (Tranca auto)</option>
+                        <option value="1">Ativado (Sempre aberta)</option>
+                    </select>
+                    <button id="btn-config-passage" class="bg-secondary text-secondary-foreground px-3 py-2 rounded-lg font-semibold text-sm hover:bg-muted transition-colors">Aplicar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-card border border-red-900/30 rounded-xl p-6 shadow-sm flex flex-col items-center justify-center gap-4 text-center">
+            <h3 class="text-xl font-semibold text-red-500">Zona de Perigo</h3>
+            <p class="text-muted-foreground text-sm mb-2">Excluir esta fechadura apagará todos os dados, senhas e biometrias permanentemente.</p>
+            <button id="btn-delete-lock" class="w-full bg-destructive text-destructive-foreground hover:bg-red-600 px-4 py-3 rounded-xl font-bold transition-all shadow-md">
+                Excluir Fechadura
+            </button>
+        </div>
+
     </section>
 </div>

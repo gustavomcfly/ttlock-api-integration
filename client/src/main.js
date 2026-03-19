@@ -85,6 +85,10 @@ function navigateToLockView(lockId, lockName) {
     if (viewHome && viewLock) {
         viewHome.classList.add('hidden');
         viewLock.classList.remove('hidden');
+
+        try {
+            document.getElementById('btn-refresh-details').click();
+        } catch(e) {}
     }
 }
 
