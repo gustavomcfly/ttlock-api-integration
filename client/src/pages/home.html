@@ -1,0 +1,29 @@
+<div id="view-home" class="block transition-opacity duration-300">
+    <header class="mb-6">
+        <h2 class="text-3xl font-bold tracking-tight">Meus Dispositivos</h2>
+        <p class="text-muted-foreground mt-1">Selecione uma fechadura para gerenciar.</p>
+    </header>
+    <section class="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
+        <div class="p-4 sm:p-6 border-b border-border bg-muted/30 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <h3 class="text-xl font-semibold">Lista de Fechaduras</h3>
+            <div class="flex gap-1 bg-muted p-1 rounded-lg border border-border">
+                <button id="tab-online" class="px-4 py-1.5 rounded-md text-sm font-semibold bg-background shadow-sm text-foreground transition-all cursor-pointer">Online</button>
+                <button id="tab-offline" class="px-4 py-1.5 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground transition-all cursor-pointer">Offline</button>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table id="device-table" class="w-full text-left border-collapse" style="display: none">
+                <thead>
+                    <tr class="bg-muted text-muted-foreground text-xs uppercase tracking-wider border-b border-border">
+                        <th class="px-6 py-4 font-semibold">Nome da Fechadura</th>
+                        <th class="px-6 py-4 font-semibold">ID da Fechadura</th>
+                        <th class="px-6 py-4 font-semibold">Bateria</th>
+                        <th class="px-6 py-4 font-semibold">Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="device-list-body" class="divide-y divide-border"></tbody>
+            </table>
+            <div id="no-devices" class="p-10 text-center text-muted-foreground text-sm">Nenhum dispositivo carregado.</div>
+        </div>
+    </section>
+</div>

@@ -1,0 +1,21 @@
+<div id="view-lock" class="hidden transition-opacity duration-300">
+    <button id="btn-back-home" class="mb-6 flex items-center gap-2 text-muted-foreground hover:text-foreground font-medium transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        Voltar para a lista
+    </button>
+    <header class="mb-8">
+        <h2 id="lock-view-name" class="text-4xl font-bold tracking-tight">Nome da Fechadura</h2>
+        <p class="text-muted-foreground mt-1">ID: <span id="lock-view-id" class="font-mono">---</span></p>
+    </header>
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-card border border-border rounded-xl p-8 shadow-sm flex flex-col items-center justify-center gap-6 hover:border-border-hover transition-colors text-center">
+            <div>
+                <h3 class="text-2xl font-semibold mb-2">Abertura Remota</h3>
+                <p class="text-muted-foreground text-sm max-w-xs mx-auto">Envia um comando via gateway para destrancar a fechadura instantaneamente.</p>
+            </div>
+            <button id="btn-remote-unlock" class="w-full max-w-xs bg-primary text-primary-foreground hover:bg-primary-hover px-6 py-4 rounded-xl font-bold text-lg transition-all shadow-md">
+                Destrancar Agora
+            </button>
+        </div>
+    </section>
+</div>

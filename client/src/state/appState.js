@@ -1,21 +1,28 @@
 export const appState = {
-    credentials: { username: '', password: '' }, 
+    username: '',
+    password: '',
     selectedLockId: null,
-    selectedLockName: '',
-    
-    setCredentials(user, pass) {
-        this.credentials.username = user;
-        this.credentials.password = pass;
+    selectedLockName: null,
+
+    setCredentials(username, password) {
+        this.username = username;
+        this.password = password;
     },
-    
+
     setLock(id, name) {
         this.selectedLockId = id;
         this.selectedLockName = name;
     },
-    
-    clear() {
-        this.credentials = { username: '', password: '' };
+
+    clearLock() {
         this.selectedLockId = null;
-        this.selectedLockName = '';
+        this.selectedLockName = null;
+    },
+
+    clear() {
+        this.username = '';
+        this.password = '';
+        this.selectedLockId = null;
+        this.selectedLockName = null;
     }
 };

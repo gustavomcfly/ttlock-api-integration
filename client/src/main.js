@@ -1,29 +1,42 @@
+import loginHtml from './pages/login.html?raw';
+import sidebarHtml from './pages/sidebar.html?raw';
+import topbarHtml from './pages/topbar.html?raw';
+import homeHtml from './pages/home.html?raw';
+import lockHtml from './pages/lock.html?raw';
+
+document.getElementById('app').innerHTML = `
+    ${loginHtml}
+    <div id="dashboard" style="display: none;" class="flex flex-col min-h-screen relative">
+        ${sidebarHtml}
+        ${topbarHtml}
+        <main class="container mx-auto max-w-5xl p-4 sm:p-6 mt-2 flex-1 relative">
+            ${homeHtml}
+            ${lockHtml}
+        </main>
+    </div>
+`;
+
 import { session } from './utils/session.js';
 import { appState } from './state/appState.js';
-
 import { LoginScreen } from './components/LoginScreen.js';
 import { DeviceTable } from './components/DeviceTable.js';
 import { ActionPanel } from './components/ActionPanel.js';
 
 const dashboardElement = document.getElementById('dashboard');
 const btnLogout = document.getElementById('btn-logout');
-
-// Sidebar Elements
 const sidebar = document.getElementById('sidebar');
 const sidebarOverlay = document.getElementById('sidebar-overlay');
 const btnOpenSidebar = document.getElementById('btn-open-sidebar');
 const btnCloseSidebar = document.getElementById('btn-close-sidebar');
-const btnSidebarHome = document.getElementById('btn-sidebar-home'); // <-- New
+const btnSidebarHome = document.getElementById('btn-sidebar-home'); 
 
-// View Elements
 const viewHome = document.getElementById('view-home');
 const viewLock = document.getElementById('view-lock');
 const btnBackHome = document.getElementById('btn-back-home');
 
 function init() {
-    // Initialize ActionPanel safely
     let actionPanel;
-    try { actionPanel = new ActionPanel(); } catch(e) { console.error("ActionPanel init error:", e); }
+    try { actionPanel = new ActionPanel(); } catch(e) {}
     
     const deviceTable = new DeviceTable((lockId, lockName) => {
         navigateToLockView(lockId, lockName);
@@ -35,24 +48,21 @@ function init() {
         deviceTable.fetchLocks(); 
     });
 
-    // Attach Event Listeners
     if (btnLogout) btnLogout.addEventListener('click', handleLogout);
     if (btnOpenSidebar) btnOpenSidebar.addEventListener('click', openSidebar);
     if (btnCloseSidebar) btnCloseSidebar.addEventListener('click', closeSidebar);
     if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
     
-    // Fix: Back Button
     if (btnBackHome) {
         btnBackHome.addEventListener('click', (e) => {
-            e.preventDefault(); // Prevents default browser behaviors
+            e.preventDefault(); 
             navigateToHomeView();
         });
     }
 
-    // Fix: Sidebar Home Button
     if (btnSidebarHome) {
         btnSidebarHome.addEventListener('click', (e) => {
-            e.preventDefault(); // Prevents the "#" link from jumping the page
+            e.preventDefault();
             closeSidebar();
             navigateToHomeView();
         });
@@ -72,15 +82,25 @@ function navigateToLockView(lockId, lockName) {
     document.getElementById('lock-view-name').innerText = lockName;
     document.getElementById('lock-view-id').innerText = lockId;
     
-    viewHome.classList.add('hidden');
-    viewLock.classList.remove('hidden');
+    if (viewHome && viewLock) {
+        viewHome.classList.add('hidden');
+        viewLock.classList.remove('hidden');
+    }
 }
 
 function navigateToHomeView() {
-    appState.clearLock(); 
+    try {
+        if (typeof appState.clearLock === 'function') {
+            appState.clearLock(); 
+        } else {
+            appState.setLock(null, null);
+        }
+    } catch (e) {}
     
-    viewLock.classList.add('hidden');
-    viewHome.classList.remove('hidden');
+    if (viewHome && viewLock) {
+        viewLock.classList.add('hidden');
+        viewHome.classList.remove('hidden');
+    }
 }
 
 function openSidebar() {
@@ -101,7 +121,6 @@ function closeSidebar() {
 
 function showDashboard() {
     dashboardElement.style.display = 'flex';
-    
     const statusEl = document.getElementById('connection-status');
     if (statusEl) {
         statusEl.innerText = "● Online";
