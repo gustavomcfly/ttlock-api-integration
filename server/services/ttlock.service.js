@@ -36,12 +36,9 @@ export const ttlockService = {
             lockId: lockId,
             date: Date.now()
         });
-        
         const response = await axios.post(`${BASE_URL}/v3/lock/unlock`, params.toString());
         return response.data;
     },
-
-    // NEW METHODS
 
     async getLockDetails(accessToken, lockId) {
         const response = await axios.get(`${BASE_URL}/v3/lock/detail`, {
@@ -73,9 +70,11 @@ export const ttlockService = {
             accessToken: accessToken,
             lockId: lockId,
             password: password,
+            changeType: 2, 
             date: Date.now()
         });
-        const response = await axios.post(`${BASE_URL}/v3/lock/updateAdminKeyboardPwd`, params.toString());
+
+        const response = await axios.post(`${BASE_URL}/v3/lock/changeAdminKeyboardPwd`, params.toString());
         return response.data;
     },
 
@@ -84,11 +83,13 @@ export const ttlockService = {
             clientId: process.env.TTLOCK_CLIENT_ID,
             accessToken: accessToken,
             lockId: lockId,
-            passageMode: passageMode, // 1 for ON, 2 for OFF
-            isAllDay: isAllDay,
+            passageMode: passageMode, 
+            isAllDay: isAllDay || 1,
+            type: 2, 
             date: Date.now()
         });
-        const response = await axios.post(`${BASE_URL}/v3/lock/passageMode/config`, params.toString());
+
+        const response = await axios.post(`${BASE_URL}/v3/lock/configPassageMode`, params.toString());
         return response.data;
     },
 

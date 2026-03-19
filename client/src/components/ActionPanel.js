@@ -39,22 +39,24 @@ export class ActionPanel {
 
     // --- API Calls ---
 
+
     async loadLockDetails() {
         if (!appState.selectedLockId) return;
         
-        // Brief loading state
         this.detailBattery.innerText = "...";
         this.detailMac.innerText = "...";
         
         try {
             const data = await apiClient.getLockDetails(session.getToken(), appState.selectedLockId);
-            if (data.errcode === 0) {
+            
+            // CORREÇÃO: Se não existir um erro (ou for 0), então foi um sucesso!
+            if (!data.errcode || data.errcode === 0) {
                 this.detailBattery.innerText = `${data.electricQuantity || 0}%`;
                 this.detailMac.innerText = data.lockMac || 'Desconhecido';
                 this.detailFirmware.innerText = data.firmwareRevision || 'N/A';
                 this.detailPassage.innerText = data.passageMode === 1 ? 'Ativado' : 'Desativado';
             } else {
-                toast.error("Não foi possível carregar os detalhes.");
+                toast.error(`Falha: ${data.errmsg || 'Não foi possível carregar os detalhes.'}`);
             }
         } catch (err) {
             console.error(err);
