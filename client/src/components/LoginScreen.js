@@ -1,6 +1,6 @@
 import md5 from 'blueimp-md5';
 import { appState } from '../state/appState.js';
-import { apiClient } from '../api/apiClient.js';
+import { authApi } from '../api/authApi.js';
 import { session } from '../utils/session.js';
 import { toast } from '../utils/toast.js';
 
@@ -52,7 +52,7 @@ export class LoginScreen {
         };
 
         try {
-            const data = await apiClient.login(credentials);
+            const data = await authApi.login(credentials);
 
             if (data.access_token) {
                 session.save(data.access_token);

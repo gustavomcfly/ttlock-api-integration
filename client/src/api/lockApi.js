@@ -1,17 +1,8 @@
-const API_BASE_URL = 'http://localhost:3001/api';
+const API_BASE_URL = 'http://localhost:3001/api/lock';
 
-export const apiClient = {
-    async login(credentials) {
-        const response = await fetch(`${API_BASE_URL}/auth/token`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(credentials)
-        });
-        return response.json();
-    },
-
+export const lockApi = {
     async fetchLocks(accessToken) {
-        const response = await fetch(`${API_BASE_URL}/lock/list`, {
+        const response = await fetch(`${API_BASE_URL}/list`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ accessToken })
@@ -20,7 +11,7 @@ export const apiClient = {
     },
 
     async remoteUnlock(accessToken, lockId) {
-        const response = await fetch(`${API_BASE_URL}/lock/unlock`, {
+        const response = await fetch(`${API_BASE_URL}/unlock`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ accessToken, lockId })
@@ -29,7 +20,7 @@ export const apiClient = {
     },
     
     async getLockDetails(accessToken, lockId) {
-        const response = await fetch(`${API_BASE_URL}/lock/detail`, {
+        const response = await fetch(`${API_BASE_URL}/detail`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ accessToken, lockId })
@@ -38,7 +29,7 @@ export const apiClient = {
     },
 
     async renameLock(accessToken, lockId, lockName) {
-        const response = await fetch(`${API_BASE_URL}/lock/rename`, {
+        const response = await fetch(`${API_BASE_URL}/rename`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ accessToken, lockId, lockName })
@@ -47,7 +38,7 @@ export const apiClient = {
     },
 
     async changeSuperPasscode(accessToken, lockId, password) {
-        const response = await fetch(`${API_BASE_URL}/lock/super-passcode`, {
+        const response = await fetch(`${API_BASE_URL}/super-passcode`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ accessToken, lockId, password })
@@ -56,7 +47,7 @@ export const apiClient = {
     },
 
     async configPassageMode(accessToken, lockId, passageModeData) {
-        const response = await fetch(`${API_BASE_URL}/lock/passage-mode`, {
+        const response = await fetch(`${API_BASE_URL}/passage-mode`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ accessToken, lockId, ...passageModeData })
@@ -65,7 +56,7 @@ export const apiClient = {
     },
 
     async deleteLock(accessToken, lockId) {
-        const response = await fetch(`${API_BASE_URL}/lock/delete`, {
+        const response = await fetch(`${API_BASE_URL}/delete`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ accessToken, lockId })

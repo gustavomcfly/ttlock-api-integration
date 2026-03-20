@@ -1,4 +1,4 @@
-import { apiClient } from '../api/apiClient.js';
+import { lockApi } from '../api/lockApi.js';
 import { session } from '../utils/session.js';
 import { appState } from '../state/appState.js';
 import { toast } from '../utils/toast.js';
@@ -47,9 +47,8 @@ export class ActionPanel {
         this.detailMac.innerText = "...";
         
         try {
-            const data = await apiClient.getLockDetails(session.getToken(), appState.selectedLockId);
+            const data = await lockApi.getLockDetails(session.getToken(), appState.selectedLockId);
             
-            // CORREÇÃO: Se não existir um erro (ou for 0), então foi um sucesso!
             if (!data.errcode || data.errcode === 0) {
                 this.detailBattery.innerText = `${data.electricQuantity || 0}%`;
                 this.detailMac.innerText = data.lockMac || 'Desconhecido';
@@ -71,7 +70,7 @@ export class ActionPanel {
         btn.disabled = true;
 
         try {
-            const data = await apiClient.remoteUnlock(session.getToken(), appState.selectedLockId);
+            const data = await lockApi.remoteUnlock(session.getToken(), appState.selectedLockId);
             if (data.errcode === 0) {
                 toast.success(`Fechadura desbloqueada com sucesso.`);
             } else {
@@ -91,7 +90,7 @@ export class ActionPanel {
 
         this.btnRename.innerText = "...";
         try {
-            const data = await apiClient.renameLock(session.getToken(), appState.selectedLockId, newName);
+            const data = await lockApi.renameLock(session.getToken(), appState.selectedLockId, newName);
             if (data.errcode === 0) {
                 toast.success("Nome alterado com sucesso!");
                 document.getElementById('lock-view-name').innerText = newName;
@@ -113,7 +112,7 @@ export class ActionPanel {
 
         this.btnChangePasscode.innerText = "...";
         try {
-            const data = await apiClient.changeSuperPasscode(session.getToken(), appState.selectedLockId, password);
+            const data = await lockApi.changeSuperPasscode(session.getToken(), appState.selectedLockId, password);
             if (data.errcode === 0) {
                 toast.success("Super senha alterada com sucesso!");
                 this.inputSuperPasscode.value = '';
@@ -130,19 +129,17 @@ export class ActionPanel {
     async configPassageMode() {
         const mode = parseInt(this.selectPassageMode.value);
         
-        // TTLock usually requires passageMode (1 or 2) and optionally a schedule (startDate/endDate)
-        // Adjust this payload based on your exact backend requirements.
         const payload = {
-            passageMode: mode === 1 ? 1 : 2, // 1: Auto-unlock (Passage on), 2: Auto-lock (Passage off)
-            isAllDay: 1 // Defaulting to all day for simplicity
+            passageMode: mode === 1 ? 1 : 2, 
+            isAllDay: 1 
         };
 
         this.btnConfigPassage.innerText = "...";
         try {
-            const data = await apiClient.configPassageMode(session.getToken(), appState.selectedLockId, payload);
+            const data = await lockApi.configPassageMode(session.getToken(), appState.selectedLockId, payload);
             if (data.errcode === 0) {
                 toast.success("Modo de passagem atualizado!");
-                this.loadLockDetails(); // Refresh details to show new mode
+                this.loadLockDetails(); 
             } else {
                 toast.error(`Falha: ${data.errmsg || 'Erro'}`);
             }
@@ -156,7 +153,6 @@ export class ActionPanel {
     async deleteLock() {
         if (!appState.selectedLockId) return;
         
-        // Built-in browser confirmation for dangerous actions
         const confirmDelete = confirm(`ATENÇÃO: Tem certeza que deseja excluir a fechadura "${appState.selectedLockName}"? Esta ação não pode ser desfeita.`);
         if (!confirmDelete) return;
 
@@ -164,12 +160,10 @@ export class ActionPanel {
         this.btnDeleteLock.disabled = true;
 
         try {
-            const data = await apiClient.deleteLock(session.getToken(), appState.selectedLockId);
+            const data = await lockApi.deleteLock(session.getToken(), appState.selectedLockId);
             if (data.errcode === 0) {
                 toast.success("Fechadura excluída com sucesso.");
-                // Redirect user back to home
                 document.getElementById('btn-back-home').click();
-                // Note: The device table should ideally be forced to refresh here.
             } else {
                 toast.error(`Falha: ${data.errmsg || 'Erro'}`);
                 this.btnDeleteLock.innerText = "Excluir Fechadura";

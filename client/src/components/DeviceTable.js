@@ -1,4 +1,4 @@
-import { apiClient } from '../api/apiClient.js';
+import { lockApi } from '../api/lockApi.js';
 import { session } from '../utils/session.js';
 import { appState } from '../state/appState.js';
 import { toast } from '../utils/toast.js';
@@ -42,7 +42,7 @@ export class DeviceTable {
         if (this.btnFetchLocks) this.btnFetchLocks.innerText = "Carregando...";
         
         try {
-            const data = await apiClient.fetchLocks(token);
+            const data = await lockApi.fetchLocks(token);
             this.allLocks = data.list || [];
             this.render();
             toast.info(`${this.allLocks.length} fechaduras carregadas.`);

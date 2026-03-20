@@ -1,17 +1,21 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import apiRoutes from './routes/api.routes.js';
+
+// Import modular routes
+import authRoutes from './routes/auth.routes.js';
+import lockRoutes from './routes/lock.routes.js';
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-// Delega as rotas para o módulo dedicado
-app.use('/api', apiRoutes);
+// Register base routes
+app.use('/api/auth', authRoutes);
+app.use('/api/lock', lockRoutes);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-    console.log(`🚀 Proxy Server rodando em http://localhost:${PORT}`);
+    console.log(`🚀 Proxy Server running at http://localhost:${PORT}`);
 });
