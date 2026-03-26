@@ -1,0 +1,166 @@
+<div
+  id="view-tests"
+  class="mx-auto hidden w-full max-w-5xl transition-opacity duration-300"
+>
+  <header class="mb-8">
+    <div class="mb-1 flex items-center gap-3">
+      <div class="bg-primary/10 text-primary rounded-lg p-2">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M2 12h4l2-9 5 18 2-9h5" />
+        </svg>
+      </div>
+      <h2 class="text-3xl font-bold tracking-tight">Ambiente de Testes</h2>
+    </div>
+    <p class="text-muted-foreground mt-1 ml-1">
+      Selecione a modalidade de teste que deseja executar na fechadura.
+    </p>
+  </header>
+
+  <div class="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
+    <div
+      id="card-select-quality"
+      class="bg-card hover:border-primary/50 group flex cursor-pointer flex-col gap-3 rounded-2xl border-2 border-transparent p-6 shadow-sm transition-all"
+    >
+      <div class="flex items-start justify-between">
+        <div
+          class="bg-muted group-hover:bg-primary/10 group-hover:text-primary rounded-xl p-3 transition-colors"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"
+            />
+            <path d="m9 12 2 2 4-4" />
+          </svg>
+        </div>
+        <div
+          class="test-active-indicator bg-primary hidden h-3 w-3 rounded-full shadow-[0_0_10px_rgba(var(--primary),0.8)]"
+        ></div>
+      </div>
+      <div>
+        <h3 class="text-xl font-bold">Teste de Qualidade</h3>
+        <p class="text-muted-foreground mt-1 text-sm">
+          Verificação individual de componentes, leitura de status, auditoria de
+          bateria e integridade do hardware.
+        </p>
+      </div>
+    </div>
+
+    <div
+      id="card-select-cycling"
+      class="bg-card hover:border-primary/50 group flex cursor-pointer flex-col gap-3 rounded-2xl border-2 border-transparent p-6 shadow-sm transition-all"
+    >
+      <div class="flex items-start justify-between">
+        <div
+          class="bg-muted group-hover:bg-primary/10 group-hover:text-primary rounded-xl p-3 transition-colors"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-10.02l5.67-5.67"
+            />
+          </svg>
+        </div>
+        <div
+          class="test-active-indicator bg-primary hidden h-3 w-3 rounded-full shadow-[0_0_10px_rgba(var(--primary),0.8)]"
+        ></div>
+      </div>
+      <div>
+        <h3 class="text-xl font-bold">Teste de Ciclagem</h3>
+        <p class="text-muted-foreground mt-1 text-sm">
+          Testes de estresse contínuos. Aberturas e fechamentos em loop para
+          medir durabilidade e tempo de resposta.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div
+    id="container-test-quality"
+    class="bg-card border-border hidden rounded-2xl border p-8 text-center shadow-sm"
+  >
+    <div
+      class="bg-muted mb-4 inline-flex items-center justify-center rounded-full p-4"
+    >
+      <svg
+        class="text-muted-foreground"
+        xmlns="http://www.w3.org/2000/svg"
+        width="32"
+        height="32"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path
+          d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"
+        />
+        <path d="m9 12 2 2 4-4" />
+      </svg>
+    </div>
+    <h3 class="mb-2 text-xl font-semibold">Painel de Qualidade</h3>
+    <p class="text-muted-foreground mx-auto max-w-md">
+      A interface para verificação de sensores, bateria e relatórios
+      instantâneos será implementada aqui.
+    </p>
+  </div>
+
+  <div
+    id="container-test-cycling"
+    class="bg-card border-border hidden rounded-2xl border p-8 text-center shadow-sm"
+  >
+    <div
+      class="bg-muted mb-4 inline-flex items-center justify-center rounded-full p-4"
+    >
+      <svg
+        class="text-muted-foreground"
+        xmlns="http://www.w3.org/2000/svg"
+        width="32"
+        height="32"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-10.02l5.67-5.67" />
+      </svg>
+    </div>
+    <h3 class="mb-2 text-xl font-semibold">Painel de Ciclagem Automática</h3>
+    <p class="text-muted-foreground mx-auto max-w-md">
+      Os controles para definir a quantidade de ciclos, intervalo de tempo e
+      botão de iniciar estresse serão implementados aqui.
+    </p>
+  </div>
+</div>

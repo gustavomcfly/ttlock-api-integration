@@ -4,6 +4,7 @@ import topbarHtml from "./pages/topbar.html?raw";
 import homeHtml from "./pages/home.html?raw";
 import lockHtml from "./pages/lock.html?raw";
 import passcodeHtml from "./pages/passcode.html?raw";
+import testsHtml from "./pages/tests.html?raw";
 
 document.getElementById("app").innerHTML = `
     ${loginHtml}
@@ -14,6 +15,7 @@ document.getElementById("app").innerHTML = `
             ${homeHtml}
             ${lockHtml}
             ${passcodeHtml}
+            ${testsHtml}
         </main>
     </div>
 `;
@@ -24,6 +26,7 @@ import { LoginScreen } from "./components/LoginScreen.js";
 import { DeviceTable } from "./components/DeviceTable.js";
 import { ActionPanel } from "./components/ActionPanel.js";
 import { PasscodePanel } from "./components/PasscodePanel.js";
+import { TestsPanel } from "./components/TestsPanel.js";
 
 const dashboardElement = document.getElementById("dashboard");
 const btnLogout = document.getElementById("btn-logout");
@@ -31,13 +34,22 @@ const sidebar = document.getElementById("sidebar");
 const sidebarOverlay = document.getElementById("sidebar-overlay");
 const btnOpenSidebar = document.getElementById("btn-open-sidebar");
 const btnCloseSidebar = document.getElementById("btn-close-sidebar");
-const btnSidebarHome = document.getElementById("btn-sidebar-home");
 
+// Sidebar Nav Buttons
+const btnSidebarHome = document.getElementById("btn-sidebar-home");
+const btnSidebarTests = document.getElementById("btn-sidebar-tests");
+
+// Views
 const viewHome = document.getElementById("view-home");
 const viewLock = document.getElementById("view-lock");
 const viewPasscode = document.getElementById("view-passcode");
+const viewTests = document.getElementById("view-tests");
+
 const btnBackHome = document.getElementById("btn-back-home");
 const btnBackLock = document.getElementById("btn-back-lock");
+const btnTopbarHome = document.getElementById("btn-topbar-home");
+
+let testsPanel;
 
 function init() {
   let actionPanel;
@@ -53,6 +65,11 @@ function init() {
   } catch (e) {
     console.error("PasscodePanel init error:", e);
   }
+  try {
+    testsPanel = new TestsPanel();
+  } catch (e) {
+    console.error("TestsPanel init error:", e);
+  }
 
   const deviceTable = new DeviceTable((lockId, lockName) => {
     navigateToLockView(lockId, lockName);
@@ -62,6 +79,7 @@ function init() {
     deviceTable.enable();
     showDashboard();
     deviceTable.fetchLocks();
+    navigateToHomeView(); // Ensure Home is highlighted on fresh login
   });
 
   if (btnLogout) btnLogout.addEventListener("click", handleLogout);
@@ -71,6 +89,13 @@ function init() {
 
   if (btnBackHome) {
     btnBackHome.addEventListener("click", (e) => {
+      e.preventDefault();
+      navigateToHomeView();
+    });
+  }
+
+  if (btnTopbarHome) {
+    btnTopbarHome.addEventListener("click", (e) => {
       e.preventDefault();
       navigateToHomeView();
     });
@@ -87,6 +112,7 @@ function init() {
     if (passcodePanel) passcodePanel.syncLock();
   });
 
+  // --- SIDEBAR ROUTING ---
   if (btnSidebarHome) {
     btnSidebarHome.addEventListener("click", (e) => {
       e.preventDefault();
@@ -95,34 +121,66 @@ function init() {
     });
   }
 
+  if (btnSidebarTests) {
+    btnSidebarTests.addEventListener("click", (e) => {
+      e.preventDefault();
+      closeSidebar();
+      navigateToTestsView();
+    });
+  }
+
   if (session.isAuthenticated()) {
     loginScreen.hide();
     deviceTable.enable();
     showDashboard();
     deviceTable.fetchLocks();
+    navigateToHomeView(); // Ensure Home is highlighted on refresh
   } else {
     loginScreen.show();
   }
+}
+
+// --- SIDEBAR HIGHLIGHT LOGIC ---
+function updateSidebarActiveState(activeId) {
+  const links = document.querySelectorAll(".sidebar-link");
+  links.forEach((link) => {
+    if (link.id === activeId) {
+      link.className =
+        "sidebar-link px-4 py-3 rounded-lg bg-primary/10 text-primary font-semibold transition-colors";
+    } else {
+      link.className =
+        "sidebar-link px-4 py-3 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors";
+    }
+  });
+}
+
+// --- ROUTING FUNCTIONS ---
+
+function hideAllViews() {
+  if (viewHome) viewHome.classList.add("hidden");
+  if (viewLock) viewLock.classList.add("hidden");
+  if (viewPasscode) viewPasscode.classList.add("hidden");
+  if (viewTests) viewTests.classList.add("hidden");
 }
 
 function navigateToLockView(lockId, lockName) {
   document.getElementById("lock-view-name").innerText = lockName;
   document.getElementById("lock-view-id").innerText = lockId;
 
-  if (viewHome && viewLock) {
-    viewHome.classList.add("hidden");
-    if (viewPasscode) viewPasscode.classList.add("hidden"); // hide passcode
-    viewLock.classList.remove("hidden");
+  hideAllViews();
+  if (viewLock) viewLock.classList.remove("hidden");
 
-    try {
-      document.getElementById("btn-refresh-details").click();
-    } catch (e) {}
-  }
+  updateSidebarActiveState("btn-sidebar-home"); // Lock view belongs to Home
+
+  try {
+    document.getElementById("btn-refresh-details").click();
+  } catch (e) {}
 }
 
 function navigateToLockViewFromPasscode() {
-  if (viewPasscode) viewPasscode.classList.add("hidden");
+  hideAllViews();
   if (viewLock) viewLock.classList.remove("hidden");
+  updateSidebarActiveState("btn-sidebar-home");
 }
 
 function navigateToHomeView() {
@@ -134,12 +192,23 @@ function navigateToHomeView() {
     }
   } catch (e) {}
 
-  if (viewHome && viewLock) {
-    viewLock.classList.add("hidden");
-    if (viewPasscode) viewPasscode.classList.add("hidden");
-    viewHome.classList.remove("hidden");
-  }
+  hideAllViews();
+  if (viewHome) viewHome.classList.remove("hidden");
+
+  updateSidebarActiveState("btn-sidebar-home");
 }
+
+function navigateToTestsView() {
+  if (testsPanel && typeof testsPanel.reset === "function") {
+    testsPanel.reset();
+  }
+  hideAllViews();
+  if (viewTests) viewTests.classList.remove("hidden");
+
+  updateSidebarActiveState("btn-sidebar-tests");
+}
+
+// --- UI FUNCTIONS ---
 
 function openSidebar() {
   sidebarOverlay.classList.remove("hidden");
