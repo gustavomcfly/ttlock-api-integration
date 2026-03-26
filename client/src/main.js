@@ -5,6 +5,7 @@ import homeHtml from "./pages/home.html?raw";
 import lockHtml from "./pages/lock.html?raw";
 import passcodeHtml from "./pages/passcode.html?raw";
 import testsHtml from "./pages/tests.html?raw";
+import reportsHtml from "./pages/reports.html?raw";
 
 document.getElementById("app").innerHTML = `
     ${loginHtml}
@@ -16,6 +17,7 @@ document.getElementById("app").innerHTML = `
             ${lockHtml}
             ${passcodeHtml}
             ${testsHtml}
+            ${reportsHtml}
         </main>
     </div>
 `;
@@ -38,12 +40,14 @@ const btnCloseSidebar = document.getElementById("btn-close-sidebar");
 // Sidebar Nav Buttons
 const btnSidebarHome = document.getElementById("btn-sidebar-home");
 const btnSidebarTests = document.getElementById("btn-sidebar-tests");
+const btnSidebarReports = document.getElementById("btn-sidebar-reports");
 
 // Views
 const viewHome = document.getElementById("view-home");
 const viewLock = document.getElementById("view-lock");
 const viewPasscode = document.getElementById("view-passcode");
 const viewTests = document.getElementById("view-tests");
+const viewReports = document.getElementById("view-reports");
 
 const btnBackHome = document.getElementById("btn-back-home");
 const btnBackLock = document.getElementById("btn-back-lock");
@@ -121,6 +125,14 @@ function init() {
     });
   }
 
+  if (btnSidebarReports) {
+    btnSidebarReports.addEventListener("click", (e) => {
+      e.preventDefault();
+      closeSidebar();
+      navigateToReportsView();
+    });
+  }
+
   if (btnSidebarTests) {
     btnSidebarTests.addEventListener("click", (e) => {
       e.preventDefault();
@@ -161,6 +173,7 @@ function hideAllViews() {
   if (viewLock) viewLock.classList.add("hidden");
   if (viewPasscode) viewPasscode.classList.add("hidden");
   if (viewTests) viewTests.classList.add("hidden");
+  if (viewReports) viewReports.classList.add("hidden");
 }
 
 function navigateToLockView(lockId, lockName) {
@@ -206,6 +219,12 @@ function navigateToTestsView() {
   if (viewTests) viewTests.classList.remove("hidden");
 
   updateSidebarActiveState("btn-sidebar-tests");
+}
+
+function navigateToReportsView() {
+  hideAllViews();
+  if (viewReports) viewReports.classList.remove("hidden");
+  updateSidebarActiveState("btn-sidebar-reports");
 }
 
 // --- UI FUNCTIONS ---

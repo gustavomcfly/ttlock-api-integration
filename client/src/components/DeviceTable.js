@@ -117,7 +117,7 @@ export class DeviceTable {
                     </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                    <button class="select-btn bg-inverted text-inverted-foreground hover:bg-inverted/80 px-4 py-1.5 rounded-md text-sm font-semibold transition-colors shadow-sm" data-id="${lock.lockId}" data-name="${lockName}">
+                    <button class="select-btn bg-inverted text-inverted-foreground hover:bg-primary/10 hover:text-primary px-4 py-1.5 rounded-md text-sm font-semibold transition-colors shadow-sm" data-id="${lock.lockId}" data-name="${lockName}">
                         Selecionar
                     </button>
                 </td>
@@ -127,7 +127,6 @@ export class DeviceTable {
   }
 
   handleSelection(event) {
-    // FIXED: Use .closest() to guarantee we select the button element!
     const button = event.target.closest(".select-btn");
 
     if (button) {
@@ -136,7 +135,6 @@ export class DeviceTable {
 
       appState.setLock(id, name);
 
-      // Trigger the navigation in main.js
       if (this.onLockSelected) {
         this.onLockSelected(id, name);
       }

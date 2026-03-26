@@ -1,0 +1,63 @@
+<div
+  id="view-reports"
+  class="mx-auto hidden w-full max-w-5xl transition-opacity duration-300"
+>
+  <header class="mb-8">
+    <div class="mb-1 flex items-center gap-3">
+      <div class="bg-primary/10 text-primary rounded-lg p-2">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+          />
+          <polyline points="14 2 14 8 20 8" />
+          <line x1="16" y1="13" x2="8" y2="13" />
+          <line x1="16" y1="17" x2="8" y2="17" />
+          <polyline points="10 9 9 9 8 9" />
+        </svg>
+      </div>
+      <h2 class="text-3xl font-bold tracking-tight">Relatórios de Testes</h2>
+    </div>
+    <p class="text-muted-foreground mt-1 ml-1">
+      Histórico e resultados das auditorias de qualidade e ciclagem.
+    </p>
+  </header>
+
+  <div
+    class="bg-card border-border flex flex-col items-center justify-center rounded-2xl border p-12 text-center shadow-sm sm:p-20"
+  >
+    <div class="bg-muted mb-5 rounded-full p-5">
+      <svg
+        class="text-muted-foreground"
+        xmlns="http://www.w3.org/2000/svg"
+        width="36"
+        height="36"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+        <circle cx="10" cy="13" r="2" />
+        <path d="m14 17-3.5-3.5" />
+      </svg>
+    </div>
+    <h3 class="mb-2 text-xl font-bold">Nenhum relatório encontrado</h3>
+    <p class="text-muted-foreground mx-auto max-w-sm">
+      Você ainda não realizou nenhum teste de qualidade ou ciclagem. Assim que
+      um teste for concluído, os resultados aparecerão aqui.
+    </p>
+  </div>
+</div>
