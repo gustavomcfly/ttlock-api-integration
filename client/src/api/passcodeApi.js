@@ -5,13 +5,16 @@ export const passcodeApi = {
         const response = await fetch(`${API_BASE_URL}/generate-random`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                accessToken, 
-                lockId, 
-                passcodeType, 
-                startDate, 
-                endDate 
-            })
+            body: JSON.stringify({ accessToken, lockId, passcodeType, startDate, endDate })
+        });
+        return response.json();
+    },
+
+    async addCustomPasscode(payload) {
+        const response = await fetch(`${API_BASE_URL}/add-custom`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
         });
         return response.json();
     }

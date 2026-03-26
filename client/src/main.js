@@ -3,7 +3,7 @@ import sidebarHtml from './pages/sidebar.html?raw';
 import topbarHtml from './pages/topbar.html?raw';
 import homeHtml from './pages/home.html?raw';
 import lockHtml from './pages/lock.html?raw';
-import passcodeHtml from './pages/passcode.html?raw'; // NEW
+import passcodeHtml from './pages/passcode.html?raw'; 
 
 document.getElementById('app').innerHTML = `
     ${loginHtml}
@@ -23,7 +23,7 @@ import { appState } from './state/appState.js';
 import { LoginScreen } from './components/LoginScreen.js';
 import { DeviceTable } from './components/DeviceTable.js';
 import { ActionPanel } from './components/ActionPanel.js';
-import { PasscodePanel } from './components/PasscodePanel.js'; // NEW
+import { PasscodePanel } from './components/PasscodePanel.js'; 
 
 const dashboardElement = document.getElementById('dashboard');
 const btnLogout = document.getElementById('btn-logout');
@@ -35,16 +35,16 @@ const btnSidebarHome = document.getElementById('btn-sidebar-home');
 
 const viewHome = document.getElementById('view-home');
 const viewLock = document.getElementById('view-lock');
-const viewPasscode = document.getElementById('view-passcode'); // NEW
+const viewPasscode = document.getElementById('view-passcode'); 
 const btnBackHome = document.getElementById('btn-back-home');
-const btnBackLock = document.getElementById('btn-back-lock'); // NEW
+const btnBackLock = document.getElementById('btn-back-lock'); 
 
 function init() {
     let actionPanel;
-    let passcodePanel; // NEW
+    let passcodePanel;
 
     try { actionPanel = new ActionPanel(); } catch(e) { console.error('ActionPanel init error:', e); }
-    try { passcodePanel = new PasscodePanel(); } catch(e) { console.error('PasscodePanel init error:', e); } // NEW
+    try { passcodePanel = new PasscodePanel(); } catch(e) { console.error('PasscodePanel init error:', e); } 
     
     const deviceTable = new DeviceTable((lockId, lockName) => {
         navigateToLockView(lockId, lockName);
@@ -63,12 +63,11 @@ function init() {
     
     if (btnBackHome) {
         btnBackHome.addEventListener('click', (e) => {
-            e.preventDefault(); 
+            e.preventDefault();
             navigateToHomeView();
         });
     }
 
-    // NEW: Back from passcode view → back to lock view
     if (btnBackLock) {
         btnBackLock.addEventListener('click', (e) => {
             e.preventDefault();
@@ -76,7 +75,6 @@ function init() {
         });
     }
 
-    // NEW: Listen for navigation event from ActionPanel
     document.addEventListener('navigate-passcode', () => {
         if (passcodePanel) passcodePanel.syncLock();
     });
@@ -105,7 +103,7 @@ function navigateToLockView(lockId, lockName) {
     
     if (viewHome && viewLock) {
         viewHome.classList.add('hidden');
-        if (viewPasscode) viewPasscode.classList.add('hidden'); // hide passcode too
+        if (viewPasscode) viewPasscode.classList.add('hidden'); // hide passcode
         viewLock.classList.remove('hidden');
 
         try {
@@ -114,7 +112,6 @@ function navigateToLockView(lockId, lockName) {
     }
 }
 
-// NEW: Go back to lock view from passcode page
 function navigateToLockViewFromPasscode() {
     if (viewPasscode) viewPasscode.classList.add('hidden');
     if (viewLock) viewLock.classList.remove('hidden');

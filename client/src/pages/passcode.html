@@ -1,12 +1,9 @@
-<div id="view-passcode" class="hidden transition-opacity duration-300 w-full">
-
-    <!-- Back button -->
+<div id="view-passcode" class="hidden transition-opacity duration-300 w-full max-w-5xl mx-auto">
     <button id="btn-back-lock" class="mb-6 flex items-center gap-2 text-muted-foreground hover:text-foreground font-medium transition-colors">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         Voltar para a fechadura
     </button>
 
-    <!-- Header -->
     <header class="mb-8">
         <div class="flex items-center gap-3 mb-1">
             <div class="p-2 rounded-lg bg-primary/10 text-primary">
@@ -17,96 +14,84 @@
         <p class="text-muted-foreground mt-1 ml-1">Fechadura: <span id="passcode-lock-name" class="font-semibold text-foreground">---</span></p>
     </header>
 
-    <!-- Main card -->
-    <div class="bg-card border border-border rounded-2xl shadow-sm overflow-hidden max-w-2xl">
-
-        <!-- Type selector tabs -->
+    <div class="bg-card border border-border rounded-2xl shadow-sm overflow-hidden w-full">
         <div class="border-b border-border bg-muted/30 p-4">
             <p class="text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-3">Tipo de Senha</p>
             <div class="flex flex-wrap gap-2" id="passcode-type-tabs">
-                <button class="passcode-tab active-tab px-4 py-2 rounded-lg text-sm font-semibold transition-all border" data-type="1">
-                    Permanente
-                </button>
-                <button class="passcode-tab px-4 py-2 rounded-lg text-sm font-semibold transition-all border border-transparent" data-type="2">
-                    Temporária
-                </button>
-                <button class="passcode-tab px-4 py-2 rounded-lg text-sm font-semibold transition-all border border-transparent" data-type="3">
-                    Uso Único
-                </button>
-                <button class="passcode-tab px-4 py-2 rounded-lg text-sm font-semibold transition-all border border-transparent" data-type="5">
-                    Apagar Senha
-                </button>
-                <button class="passcode-tab px-4 py-2 rounded-lg text-sm font-semibold transition-all border border-transparent" data-type="6">
-                    Congelar
-                </button>
-                <button class="passcode-tab px-4 py-2 rounded-lg text-sm font-semibold transition-all border border-transparent" data-type="7">
-                    Cíclica
-                </button>
+                <button class="passcode-tab active-tab px-4 py-2 rounded-lg text-sm font-semibold transition-all border" data-type="2">Permanente</button>
+                <button class="passcode-tab px-4 py-2 rounded-lg text-sm font-semibold transition-all border border-transparent" data-type="3">Temporária</button>
+                <button class="passcode-tab px-4 py-2 rounded-lg text-sm font-semibold transition-all border border-transparent" data-type="1">Uso Único</button>
+                <button class="passcode-tab px-4 py-2 rounded-lg text-sm font-semibold transition-all border border-transparent" data-type="4">Apagar Senha</button>
+                <button class="passcode-tab px-4 py-2 rounded-lg text-sm font-semibold transition-all border border-transparent" data-type="6">Cíclica</button>
             </div>
         </div>
 
-        <!-- Dynamic form content -->
-        <div class="p-6 flex flex-col gap-6">
-
-            <!-- Type description badge -->
+        <div class="p-6 sm:p-8 flex flex-col gap-6">
             <div id="passcode-type-description" class="flex items-start gap-3 p-4 rounded-lg bg-primary/5 border border-primary/20">
                 <svg class="mt-0.5 shrink-0 text-primary" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-                <p id="passcode-type-desc-text" class="text-sm text-muted-foreground leading-relaxed">
-                    Senha válida indefinidamente. Pode ser usada qualquer número de vezes sem restrição de data.
-                </p>
+                <p id="passcode-type-desc-text" class="text-sm text-muted-foreground leading-relaxed"></p>
             </div>
 
-            <!-- Date range fields (shown for timed / cyclic types) -->
-            <div id="passcode-date-fields" class="hidden flex flex-col gap-4">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div id="passcode-custom-input-group" class="hidden flex-col gap-1.5">
+                <label class="text-xs text-muted-foreground font-semibold uppercase tracking-wide">Senha Desejada (4 a 9 dígitos)</label>
+                <input type="text" id="input-custom-passcode" placeholder="Ex: 123456" class="px-3 py-2.5 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary text-sm transition-all" />
+            </div>
+
+            <div id="passcode-date-fields" class="hidden flex-col gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div class="flex flex-col gap-1.5">
-                        <label for="passcode-start-date" class="text-xs text-muted-foreground font-semibold uppercase tracking-wide">Data de Início</label>
-                        <input type="datetime-local" id="passcode-start-date"
-                            class="px-3 py-2.5 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary text-sm transition-all" />
+                        <label class="text-xs text-muted-foreground font-semibold uppercase tracking-wide">Data de Início</label>
+                        <input type="datetime-local" id="passcode-start-date" class="px-3 py-2.5 rounded-lg border border-border bg-background text-sm transition-all" />
                     </div>
                     <div class="flex flex-col gap-1.5">
-                        <label for="passcode-end-date" class="text-xs text-muted-foreground font-semibold uppercase tracking-wide">Data de Término</label>
-                        <input type="datetime-local" id="passcode-end-date"
-                            class="px-3 py-2.5 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary text-sm transition-all" />
+                        <label class="text-xs text-muted-foreground font-semibold uppercase tracking-wide">Data de Término</label>
+                        <input type="datetime-local" id="passcode-end-date" class="px-3 py-2.5 rounded-lg border border-border bg-background text-sm transition-all" />
                     </div>
                 </div>
-                <p class="text-xs text-muted-foreground">
-                    <svg class="inline mr-1 -mt-0.5" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                    As datas são convertidas automaticamente para o fuso horário do dispositivo.
-                </p>
             </div>
 
-            <!-- Generate button -->
-            <button id="btn-generate-passcode"
-                class="w-full bg-primary text-primary-foreground hover:bg-primary-hover px-4 py-3.5 rounded-xl font-bold text-base transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>
+            <div id="passcode-cyclic-fields" class="hidden flex-col gap-4 border-t border-border pt-6 mt-2">
+                <div class="flex flex-col gap-2">
+                    <label class="text-xs text-muted-foreground font-semibold uppercase tracking-wide">Dias da Semana</label>
+                    <div class="flex flex-wrap gap-2">
+                        <label class="flex items-center gap-1.5 text-sm bg-muted/50 px-3 py-2 rounded border border-border cursor-pointer hover:bg-muted transition-colors"><input type="checkbox" value="1" class="day-checkbox"> Seg</label>
+                        <label class="flex items-center gap-1.5 text-sm bg-muted/50 px-3 py-2 rounded border border-border cursor-pointer hover:bg-muted transition-colors"><input type="checkbox" value="2" class="day-checkbox"> Ter</label>
+                        <label class="flex items-center gap-1.5 text-sm bg-muted/50 px-3 py-2 rounded border border-border cursor-pointer hover:bg-muted transition-colors"><input type="checkbox" value="3" class="day-checkbox"> Qua</label>
+                        <label class="flex items-center gap-1.5 text-sm bg-muted/50 px-3 py-2 rounded border border-border cursor-pointer hover:bg-muted transition-colors"><input type="checkbox" value="4" class="day-checkbox"> Qui</label>
+                        <label class="flex items-center gap-1.5 text-sm bg-muted/50 px-3 py-2 rounded border border-border cursor-pointer hover:bg-muted transition-colors"><input type="checkbox" value="5" class="day-checkbox"> Sex</label>
+                        <label class="flex items-center gap-1.5 text-sm bg-muted/50 px-3 py-2 rounded border border-border cursor-pointer hover:bg-muted transition-colors"><input type="checkbox" value="6" class="day-checkbox"> Sáb</label>
+                        <label class="flex items-center gap-1.5 text-sm bg-muted/50 px-3 py-2 rounded border border-border cursor-pointer hover:bg-muted transition-colors"><input type="checkbox" value="7" class="day-checkbox"> Dom</label>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-2">
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs text-muted-foreground font-semibold uppercase tracking-wide">Hora de Início</label>
+                        <input type="time" id="passcode-start-time" value="09:00" class="px-3 py-2.5 rounded-lg border border-border bg-background text-sm transition-all" />
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs text-muted-foreground font-semibold uppercase tracking-wide">Hora de Término</label>
+                        <input type="time" id="passcode-end-time" value="17:00" class="px-3 py-2.5 rounded-lg border border-border bg-background text-sm transition-all" />
+                    </div>
+                </div>
+            </div>
+
+            <button id="btn-generate-passcode" class="w-full bg-primary text-primary-foreground hover:bg-primary-hover px-4 py-4 mt-4 rounded-xl font-bold text-base transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
                 <span id="btn-generate-text">Gerar Senha</span>
             </button>
 
-            <!-- Result card (hidden until API responds) -->
-            <div id="passcode-result" class="hidden">
-                <div class="flex flex-col items-center gap-3 p-5 rounded-xl border-2 border-primary/30 bg-primary/5 text-center">
-                    <svg class="text-primary" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                    <p class="text-sm text-muted-foreground font-medium">Senha gerada com sucesso</p>
+            <div id="passcode-result" class="hidden mt-4">
+                <div class="flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-primary/30 bg-primary/5 text-center">
+                    <p class="text-sm text-muted-foreground font-medium">Senha registrada com sucesso</p>
                     <div class="flex items-center gap-3">
-                        <span id="passcode-result-value" class="text-4xl font-black tracking-[0.3em] text-primary font-mono">------</span>
-                        <button id="btn-copy-passcode" title="Copiar senha"
-                            class="p-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
-                        </button>
+                        <span id="passcode-result-value" class="text-5xl font-black tracking-[0.25em] text-primary font-mono">------</span>
                     </div>
-                    <p id="passcode-result-validity" class="text-xs text-muted-foreground"></p>
+                    <p id="passcode-result-validity" class="text-sm text-muted-foreground mt-2"></p>
                 </div>
             </div>
-
-            <!-- Error card (hidden until error) -->
-            <div id="passcode-error" class="hidden p-4 rounded-xl border border-red-300/40 bg-red-50/10 text-sm text-red-400">
-                <div class="flex items-start gap-2">
-                    <svg class="mt-0.5 shrink-0" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-                    <span id="passcode-error-text">Falha ao gerar senha.</span>
-                </div>
+            
+            <div id="passcode-error" class="hidden p-4 mt-4 rounded-xl border border-red-300/40 bg-red-50/10 text-sm text-red-400">
+                <span id="passcode-error-text">Falha ao gerar senha.</span>
             </div>
-
         </div>
     </div>
 </div>

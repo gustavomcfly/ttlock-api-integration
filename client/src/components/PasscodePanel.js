@@ -4,47 +4,52 @@ import { appState } from '../state/appState.js';
 import { toast } from '../utils/toast.js';
 
 const TYPE_INFO = {
-    1: {
-        label: 'Permanente',
-        description: 'Senha válida indefinidamente. Pode ser usada qualquer número de vezes sem restrição de data.',
-        hasDates: false,
-    },
     2: {
-        label: 'Temporária',
-        description: 'Senha válida dentro de um intervalo de datas específico. Ideal para visitas agendadas.',
-        hasDates: true,
+        label: 'Permanente',
+        description: 'Senha aleatória válida indefinidamente. Pode ser usada qualquer número de vezes.',
+        hasDates: false,
+        isCustom: false
     },
     3: {
-        label: 'Uso Único',
-        description: 'Senha que expira após a primeira utilização. Pode ter uma janela de tempo opcional.',
+        label: 'Temporária',
+        description: 'Senha aleatória válida dentro de um intervalo de datas. (Minutos serão zerados).',
         hasDates: true,
+        isCustom: false
     },
-    5: {
-        label: 'Apagar Senha',
-        description: 'Código especial que, ao ser digitado na fechadura, apaga todas as senhas cadastradas.',
+    1: {
+        label: 'Uso Único',
+        description: 'Senha aleatória que expira após a primeira utilização.',
         hasDates: false,
+        isCustom: false
+    },
+    4: {
+        label: 'Apagar Senha',
+        description: 'Código especial que apaga todas as senhas da fechadura quando digitado no teclado.',
+        hasDates: false,
+        isCustom: false
     },
     6: {
-        label: 'Congelar',
-        description: 'Código que congela temporariamente a fechadura, impedindo abertura por outros métodos.',
-        hasDates: false,
-    },
-    7: {
         label: 'Cíclica',
-        description: 'Senha com validade cíclica: repete-se semanalmente dentro do intervalo de tempo definido.',
+        description: 'Cria uma senha personalizada via Gateway. Repete-se nos dias e horários selecionados.',
         hasDates: true,
-    },
+        isCustom: true // Routes to /v3/keyboardPwd/add instead of /get
+    }
 };
 
 export class PasscodePanel {
     constructor() {
-        this.selectedType = 1;
+        this.selectedType = 2; 
 
         this.tabs = document.querySelectorAll('.passcode-tab');
         this.dateFields = document.getElementById('passcode-date-fields');
+        this.cyclicFields = document.getElementById('passcode-cyclic-fields');
+        this.customInputGroup = document.getElementById('passcode-custom-input-group');
+        this.inputCustomPasscode = document.getElementById('input-custom-passcode');
         this.descText = document.getElementById('passcode-type-desc-text');
         this.startDateInput = document.getElementById('passcode-start-date');
         this.endDateInput = document.getElementById('passcode-end-date');
+        this.startTimeInput = document.getElementById('passcode-start-time');
+        this.endTimeInput = document.getElementById('passcode-end-time');
         this.btnGenerate = document.getElementById('btn-generate-passcode');
         this.btnGenerateText = document.getElementById('btn-generate-text');
         this.resultPanel = document.getElementById('passcode-result');
@@ -52,11 +57,10 @@ export class PasscodePanel {
         this.resultValidity = document.getElementById('passcode-result-validity');
         this.errorPanel = document.getElementById('passcode-error');
         this.errorText = document.getElementById('passcode-error-text');
-        this.btnCopy = document.getElementById('btn-copy-passcode');
         this.lockNameEl = document.getElementById('passcode-lock-name');
 
         this.bindEvents();
-        this.applyType(1);
+        this.applyType(2); 
     }
 
     bindEvents() {
@@ -67,16 +71,9 @@ export class PasscodePanel {
             });
         });
 
-        if (this.btnGenerate) {
-            this.btnGenerate.addEventListener('click', () => this.generatePasscode());
-        }
-
-        if (this.btnCopy) {
-            this.btnCopy.addEventListener('click', () => this.copyPasscode());
-        }
+        if (this.btnGenerate) this.btnGenerate.addEventListener('click', () => this.generatePasscode());
     }
 
-    // Called every time the lock view is entered, to sync the lock name
     syncLock() {
         if (this.lockNameEl && appState.selectedLockName) {
             this.lockNameEl.innerText = appState.selectedLockName;
@@ -87,7 +84,6 @@ export class PasscodePanel {
     applyType(type) {
         this.selectedType = type;
 
-        // Update tabs styling
         this.tabs.forEach(tab => {
             const t = parseInt(tab.getAttribute('data-type'));
             if (t === type) {
@@ -97,30 +93,20 @@ export class PasscodePanel {
             }
         });
 
-        const info = TYPE_INFO[type] || TYPE_INFO[1];
-
-        // Update description
+        const info = TYPE_INFO[type];
         if (this.descText) this.descText.innerText = info.description;
 
-        // Show/hide date fields
-        if (this.dateFields) {
-            if (info.hasDates) {
-                this.dateFields.classList.remove('hidden');
-                this.dateFields.classList.add('flex');
-            } else {
-                this.dateFields.classList.add('hidden');
-                this.dateFields.classList.remove('flex');
-            }
-        }
+        // Toggle visibility based on requirements
+        this.dateFields.style.display = info.hasDates ? 'flex' : 'none';
+        this.cyclicFields.style.display = info.isCustom ? 'flex' : 'none';
+        this.customInputGroup.style.display = info.isCustom ? 'flex' : 'none';
+        this.btnGenerateText.innerText = info.isCustom ? 'Registrar Senha via Gateway' : 'Gerar Senha Aleatória';
 
-        // Set default dates for timed types if empty
         if (info.hasDates) {
-            if (!this.startDateInput.value) {
-                this.startDateInput.value = this.formatDatetimeLocal(new Date());
-            }
+            if (!this.startDateInput.value) this.startDateInput.value = this.formatDatetimeLocal(new Date());
             if (!this.endDateInput.value) {
                 const future = new Date();
-                future.setDate(future.getDate() + 7);
+                future.setDate(future.getDate() + 30); 
                 this.endDateInput.value = this.formatDatetimeLocal(future);
             }
         }
@@ -134,104 +120,105 @@ export class PasscodePanel {
     }
 
     async generatePasscode() {
-        if (!appState.selectedLockId) {
-            toast.error('Nenhuma fechadura selecionada.');
-            return;
-        }
+        if (!appState.selectedLockId) return toast.error('Nenhuma fechadura selecionada.');
 
         const info = TYPE_INFO[this.selectedType];
-
-        let startDate = null;
+        let startDate = null; 
         let endDate = null;
 
+        // Date Validation
         if (info.hasDates) {
             if (!this.startDateInput.value || !this.endDateInput.value) {
-                toast.error('Por favor, preencha as datas de início e término.');
-                return;
+                return toast.error('Preencha as datas de início e término.');
             }
-            startDate = new Date(this.startDateInput.value).getTime();
-            endDate = new Date(this.endDateInput.value).getTime();
+            const startObj = new Date(this.startDateInput.value);
+            const endObj = new Date(this.endDateInput.value);
 
-            if (endDate <= startDate) {
-                toast.error('A data de término deve ser posterior à data de início.');
-                return;
+            if (!info.isCustom) {
+                startObj.setMinutes(0, 0, 0); 
+                endObj.setMinutes(0, 0, 0);
             }
+
+            startDate = startObj.getTime();
+            endDate = endObj.getTime();
+
+            if (endDate <= startDate) return toast.error('A data de término deve ser posterior à data de início.');
         }
 
-        // Set loading state
         this.btnGenerate.disabled = true;
-        this.btnGenerateText.innerText = 'Gerando...';
+        this.btnGenerateText.innerText = 'Processando...';
         this.resetResult();
 
         try {
-            const data = await passcodeApi.generateRandomPasscode(
-                session.getToken(),
-                appState.selectedLockId,
-                this.selectedType,
-                startDate,
-                endDate
-            );
+            let data;
+            
+            // Route 1: Custom Cyclic via Gateway
+            if (info.isCustom) {
+                const customCode = this.inputCustomPasscode.value.trim();
+                if (!customCode || customCode.length < 4 || customCode.length > 9) {
+                    throw new Error("A senha deve ter entre 4 e 9 dígitos.");
+                }
 
-            if (data.errcode === 0 || data.keyboardPwd) {
-                const code = data.keyboardPwd || data.passcode || '------';
+                const checkedDays = Array.from(document.querySelectorAll('.day-checkbox:checked')).map(cb => cb.value).join(',');
+                if (!checkedDays) throw new Error("Selecione pelo menos um dia da semana.");
+
+                const startTime = this.startTimeInput.value;
+                const endTime = this.endTimeInput.value;
+
+                data = await passcodeApi.addCustomPasscode({
+                    accessToken: session.getToken(),
+                    lockId: appState.selectedLockId,
+                    passcode: customCode,
+                    name: "Senha Cíclica",
+                    startDate: startDate,
+                    endDate: endDate,
+                    isAllDay: 2,
+                    weekDays: checkedDays,
+                    startTime: startTime,
+                    endTime: endTime
+                });
+            } 
+            // Route 2: Random Offline Generation
+            else {
+                data = await passcodeApi.generateRandomPasscode(
+                    session.getToken(),
+                    appState.selectedLockId,
+                    this.selectedType,
+                    startDate,
+                    endDate
+                );
+            }
+
+            // FIX: Check for !data.errcode (undefined is success) or keyboardPwdId (custom success)
+            if (!data.errcode || data.errcode === 0 || data.keyboardPwdId) {
+                const code = data.keyboardPwd || this.inputCustomPasscode.value || '------';
                 this.showResult(code, startDate, endDate, info);
-                toast.success('Senha gerada com sucesso!');
+                toast.success('Senha registrada com sucesso!');
+                this.inputCustomPasscode.value = ''; 
             } else {
-                this.showError(data.errmsg || 'Falha ao gerar a senha. Verifique as permissões.');
-                toast.error(`Erro: ${data.errmsg || 'Erro desconhecido'}`);
+                this.showError(data.errmsg || 'Falha na operação.');
             }
         } catch (err) {
-            console.error(err);
-            this.showError('Falha de conexão com o servidor.');
-            toast.error('Falha de conexão com o servidor.');
+            this.showError(err.message || 'Falha de conexão com o servidor.');
         } finally {
             this.btnGenerate.disabled = false;
-            this.btnGenerateText.innerText = 'Gerar Senha';
+            this.btnGenerateText.innerText = info.isCustom ? 'Registrar Senha via Gateway' : 'Gerar Senha Aleatória';
         }
     }
 
     showResult(code, startDate, endDate, info) {
         this.resultValue.innerText = code;
-
-        let validityText = '';
-        if (info.hasDates && startDate && endDate) {
-            const fmt = (ts) => new Date(ts).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
-            validityText = `Válida de ${fmt(startDate)} até ${fmt(endDate)}`;
-        } else if (this.selectedType === 3) {
-            validityText = 'Expira após o primeiro uso';
-        } else if (this.selectedType === 5) {
-            validityText = 'Código de limpeza de senhas';
-        } else if (this.selectedType === 6) {
-            validityText = 'Código de congelamento';
-        } else {
-            validityText = 'Sem data de expiração';
-        }
-
-        this.resultValidity.innerText = validityText;
+        this.resultValidity.innerText = info.isCustom ? 'Senha enviada remotamente via Gateway' : 'Senha offline gerada com sucesso';
         this.resultPanel.classList.remove('hidden');
-        this.errorPanel.classList.add('hidden');
     }
 
     showError(message) {
         this.errorText.innerText = message;
         this.errorPanel.classList.remove('hidden');
-        this.resultPanel.classList.add('hidden');
-    }
-
-    async copyPasscode() {
-        const code = this.resultValue.innerText;
-        if (!code || code === '------') return;
-
-        try {
-            await navigator.clipboard.writeText(code);
-            toast.success('Senha copiada!');
-        } catch {
-            toast.info(`Senha: ${code}`);
-        }
     }
 
     formatDatetimeLocal(date) {
         const pad = (n) => String(n).padStart(2, '0');
-        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:00`;
     }
 }
