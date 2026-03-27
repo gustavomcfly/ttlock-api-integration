@@ -8,6 +8,7 @@ import rfidHtml from "./pages/rfid.html?raw";
 import testsHtml from "./pages/tests.html?raw";
 import reportsHtml from "./pages/reports.html?raw";
 import lockSettingsHtml from "./pages/lockSettings.html?raw";
+import fingerprintHtml from "./pages/fingerprint.html?raw";
 
 // --- INJECT HTML ---
 document.getElementById("app").innerHTML = `
@@ -20,6 +21,7 @@ document.getElementById("app").innerHTML = `
             ${lockHtml}
             ${passcodeHtml}
             ${rfidHtml}
+            ${fingerprintHtml}
             ${testsHtml}
             ${reportsHtml}
             ${lockSettingsHtml}
@@ -35,6 +37,7 @@ import { ActionPanel } from "./components/ActionPanel.js";
 import { PasscodePanel } from "./components/PasscodePanel.js";
 import { RfidPanel } from "./components/RfidPanel.js";
 import { TestsPanel } from "./components/TestsPanel.js";
+import { FingerprintPanel } from "./components/FingerprintPanel.js";
 
 // --- DOM ELEMENTS ---
 const dashboardElement = document.getElementById("dashboard");
@@ -43,6 +46,11 @@ const sidebar = document.getElementById("sidebar");
 const sidebarOverlay = document.getElementById("sidebar-overlay");
 const btnOpenSidebar = document.getElementById("btn-open-sidebar");
 const btnCloseSidebar = document.getElementById("btn-close-sidebar");
+const viewFingerprint = document.getElementById("view-fingerprint");
+const btnGoFingerprint = document.getElementById("btn-go-fingerprint");
+const btnBackLockFromFingerprint = document.getElementById(
+  "btn-back-lock-fingerprint",
+);
 
 // Sidebar Nav Buttons
 const btnSidebarHome = document.getElementById("btn-sidebar-home");
@@ -76,6 +84,7 @@ function init() {
   let actionPanel;
   let passcodePanel;
   let rfidPanel;
+  let fingerprintPanel;
 
   try {
     actionPanel = new ActionPanel();
@@ -96,6 +105,11 @@ function init() {
     testsPanel = new TestsPanel();
   } catch (e) {
     console.error("TestsPanel init error:", e);
+  }
+  try {
+    fingerprintPanel = new FingerprintPanel();
+  } catch (e) {
+    console.error("FingerprintPanel init error:", e);
   }
 
   const deviceTable = new DeviceTable((lockId, lockName) => {
@@ -148,6 +162,15 @@ function init() {
     });
   }
 
+  if (btnGoFingerprint) {
+    btnGoFingerprint.addEventListener("click", (e) => {
+      e.preventDefault();
+      hideAllViews();
+      if (viewFingerprint) viewFingerprint.classList.remove("hidden");
+      if (fingerprintPanel) fingerprintPanel.syncLock();
+    });
+  }
+
   // --- SUB-VIEW ROUTING (BACK BUTTONS) ---
   if (btnBackLockFromPasscode) {
     btnBackLockFromPasscode.addEventListener("click", (e) => {
@@ -158,6 +181,13 @@ function init() {
 
   if (btnBackLockFromRfid) {
     btnBackLockFromRfid.addEventListener("click", (e) => {
+      e.preventDefault();
+      navigateToLockViewFromSubView();
+    });
+  }
+
+  if (btnBackLockFromFingerprint) {
+    btnBackLockFromFingerprint.addEventListener("click", (e) => {
       e.preventDefault();
       navigateToLockViewFromSubView();
     });
@@ -233,6 +263,7 @@ function hideAllViews() {
     viewLock,
     viewPasscode,
     viewRfid,
+    viewFingerprint,
     viewTests,
     viewReports,
     viewLockSettings,

@@ -1,0 +1,188 @@
+<div
+  id="view-fingerprint"
+  class="mx-auto hidden w-full max-w-5xl transition-opacity duration-300"
+>
+  <button
+    id="btn-back-lock-fingerprint"
+    class="text-muted-foreground hover:text-foreground mb-6 flex items-center gap-2 font-medium transition-colors"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path d="m15 18-6-6 6-6" />
+    </svg>
+    Voltar para a fechadura
+  </button>
+
+  <header class="mb-8">
+    <div class="mb-1 flex items-center gap-3">
+      <div class="bg-primary/10 text-primary rounded-lg p-2">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4" />
+          <path d="M15.29 14c.18 1 .44 2.15.82 3" />
+          <path d="M16 8a4 4 0 0 0-8 0c0 1.13.3 2.5 1 4" />
+          <path d="M17.58 6.64a6 6 0 0 0-11.16 0" />
+          <path d="M18.83 18.23a10 10 0 0 0-13.66 0" />
+          <path d="M2 12c0-5.52 4.48-10 10-10s10 4.48 10 10" />
+          <path d="M6 14.5c.2-.95.5-1.93.9-2.9" />
+        </svg>
+      </div>
+      <h2 class="text-3xl font-bold tracking-tight">Registrar Biometria</h2>
+    </div>
+    <p class="text-muted-foreground mt-1 ml-1">
+      Fechadura:
+      <span id="fingerprint-lock-name" class="text-foreground font-semibold"
+        >---</span
+      >
+    </p>
+  </header>
+
+  <div
+    class="bg-card border-border w-full overflow-hidden rounded-2xl border shadow-sm"
+  >
+    <div class="border-border bg-muted/30 border-b p-4">
+      <p
+        class="text-muted-foreground mb-3 text-xs font-semibold tracking-wider uppercase"
+      >
+        Validade da Biometria
+      </p>
+      <div class="flex flex-wrap gap-2" id="fingerprint-type-tabs">
+        <button
+          class="fingerprint-tab active-tab bg-primary text-primary-foreground border-primary rounded-lg border px-4 py-2 text-sm font-semibold shadow-sm transition-all"
+          data-type="1"
+        >
+          Permanente
+        </button>
+        <button
+          class="fingerprint-tab text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg border border-transparent px-4 py-2 text-sm font-semibold transition-all"
+          data-type="2"
+        >
+          Temporária
+        </button>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-6 p-6 sm:p-8">
+      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <div class="flex flex-col gap-1.5">
+          <label
+            class="text-muted-foreground text-xs font-semibold tracking-wide uppercase"
+            >Nome da Biometria</label
+          >
+          <input
+            type="text"
+            id="input-fingerprint-name"
+            placeholder="Ex: Dedo Indicador - João"
+            class="border-border bg-background focus:ring-primary rounded-lg border px-3 py-2.5 text-sm transition-all focus:ring-2 focus:outline-none"
+          />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label
+            class="text-muted-foreground text-xs font-semibold tracking-wide uppercase"
+            >Fingerprint Number <span class="text-red-500">*</span></label
+          >
+          <input
+            type="text"
+            id="input-fingerprint-number"
+            placeholder="ID de hardware da biometria"
+            class="border-border bg-background focus:ring-primary rounded-lg border px-3 py-2.5 text-sm transition-all focus:ring-2 focus:outline-none"
+          />
+        </div>
+      </div>
+
+      <div
+        id="fingerprint-date-fields"
+        class="border-border mt-2 hidden flex-col gap-4 border-t pt-6"
+      >
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <div class="flex flex-col gap-1.5">
+            <label
+              class="text-muted-foreground text-xs font-semibold tracking-wide uppercase"
+              >Data de Início</label
+            >
+            <input
+              type="datetime-local"
+              id="fingerprint-start-date"
+              class="border-border bg-background rounded-lg border px-3 py-2.5 text-sm transition-all"
+            />
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label
+              class="text-muted-foreground text-xs font-semibold tracking-wide uppercase"
+              >Data de Término</label
+            >
+            <input
+              type="datetime-local"
+              id="fingerprint-end-date"
+              class="border-border bg-background rounded-lg border px-3 py-2.5 text-sm transition-all"
+            />
+          </div>
+        </div>
+      </div>
+
+      <button
+        id="btn-add-fingerprint"
+        class="bg-primary text-primary-foreground hover:bg-primary-hover mt-4 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-4 text-base font-bold shadow-md transition-all"
+      >
+        <span id="btn-add-fingerprint-text"
+          >Adicionar Biometria via Gateway</span
+        >
+      </button>
+
+      <div id="fingerprint-result" class="mt-4 hidden">
+        <div
+          class="border-primary/30 bg-primary/5 flex flex-col items-center gap-3 rounded-xl border-2 p-6 text-center"
+        >
+          <svg
+            class="text-primary"
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+            <polyline points="22 4 12 14.01 9 11.01" />
+          </svg>
+          <p class="text-foreground text-lg font-bold">
+            Biometria registrada com sucesso!
+          </p>
+          <p class="text-muted-foreground mt-1 max-w-sm text-sm">
+            O Gateway enviou o comando para a fechadura.
+          </p>
+        </div>
+      </div>
+
+      <div
+        id="fingerprint-error"
+        class="mt-4 hidden rounded-xl border border-red-300/40 bg-red-50/10 p-4 text-sm text-red-400"
+      >
+        <span id="fingerprint-error-text"
+          >Falha ao comunicar com o Gateway.</span
+        >
+      </div>
+    </div>
+  </div>
+</div>

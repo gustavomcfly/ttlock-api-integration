@@ -124,15 +124,15 @@
         </p>
       </div>
 
-      <div class="mt-2 flex flex-col gap-4 sm:flex-row">
+      <div class="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <button
           id="btn-go-passcode"
-          class="bg-secondary text-secondary-foreground hover:bg-accent border-border flex flex-1 items-center justify-center gap-2 rounded-xl border px-4 py-4 font-bold transition-all"
+          class="bg-secondary text-secondary-foreground hover:bg-accent border-border flex flex-col items-center justify-center gap-2 rounded-xl border px-2 py-4 font-bold transition-all"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="18"
-            height="18"
+            width="20"
+            height="20"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -144,17 +144,17 @@
             <path d="M7 11V7a5 5 0 0 1 10 0v4" />
             <line x1="12" y1="16" x2="12" y2="16.01" />
           </svg>
-          Registrar Senha
+          <span class="text-sm">Senhas</span>
         </button>
 
         <button
           id="btn-go-rfid"
-          class="bg-secondary text-secondary-foreground hover:bg-accent border-border flex flex-1 items-center justify-center gap-2 rounded-xl border px-4 py-4 font-bold transition-all"
+          class="bg-secondary text-secondary-foreground hover:bg-accent border-border flex flex-col items-center justify-center gap-2 rounded-xl border px-2 py-4 font-bold transition-all"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="18"
-            height="18"
+            width="20"
+            height="20"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -165,7 +165,33 @@
             <rect width="20" height="14" x="2" y="5" rx="2" ry="2" />
             <line x1="2" y1="10" x2="22" y2="10" />
           </svg>
-          Registrar Cartões
+          <span class="text-sm">Cartões</span>
+        </button>
+
+        <button
+          id="btn-go-fingerprint"
+          class="bg-secondary text-secondary-foreground hover:bg-accent border-border flex flex-col items-center justify-center gap-2 rounded-xl border px-2 py-4 font-bold transition-all"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4" />
+            <path d="M15.29 14c.18 1 .44 2.15.82 3" />
+            <path d="M16 8a4 4 0 0 0-8 0c0 1.13.3 2.5 1 4" />
+            <path d="M17.58 6.64a6 6 0 0 0-11.16 0" />
+            <path d="M18.83 18.23a10 10 0 0 0-13.66 0" />
+            <path d="M2 12c0-5.52 4.48-10 10-10s10 4.48 10 10" />
+            <path d="M6 14.5c.2-.95.5-1.93.9-2.9" />
+          </svg>
+          <span class="text-sm">Biometria</span>
         </button>
       </div>
     </div>
