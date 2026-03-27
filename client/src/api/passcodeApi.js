@@ -30,4 +30,36 @@ export const passcodeApi = {
     });
     return response.json();
   },
+
+  async getPasscodeList(accessToken, lockId, pageNo = 1, pageSize = 50) {
+    const response = await fetch(`${API_BASE_URL}/list`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ accessToken, lockId, pageNo, pageSize }),
+    });
+    return response.json();
+  },
+
+  async deletePasscode(accessToken, lockId, keyboardPwdId) {
+    const response = await fetch(`${API_BASE_URL}/delete`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ accessToken, lockId, keyboardPwdId }),
+    });
+    return response.json();
+  },
+
+  async changePasscode(accessToken, lockId, keyboardPwdId, newKeyboardPwd) {
+    const response = await fetch(`${API_BASE_URL}/change`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        accessToken,
+        lockId,
+        keyboardPwdId,
+        newKeyboardPwd,
+      }),
+    });
+    return response.json();
+  },
 };

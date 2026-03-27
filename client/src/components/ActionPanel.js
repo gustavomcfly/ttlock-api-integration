@@ -162,7 +162,7 @@ export class ActionPanel {
         password,
       );
       if (data.errcode === 0) {
-        toast.success("Super senha alterada com sucesso!");
+        toast.success("Senha de administrador alterada com sucesso!");
         this.inputSuperPasscode.value = "";
       } else {
         toast.error(`Falha: ${data.errmsg || "Erro"}`);
