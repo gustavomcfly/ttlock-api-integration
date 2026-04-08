@@ -8,6 +8,7 @@ import lockRoutes from "./routes/lock.routes.js";
 import passcodeRoutes from "./routes/passcode.routes.js";
 import rfidRoutes from "./routes/rfid.routes.js";
 import fingerprintRoutes from "./routes/fingerprint.routes.js";
+import recordRoutes from "./routes/record.routes.js";
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.use("/api/lock", lockRoutes);
 app.use("/api/passcode", passcodeRoutes);
 app.use("/api/rfid", rfidRoutes);
 app.use("/api/fingerprint", fingerprintRoutes);
+app.use("/api/record", recordRoutes);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

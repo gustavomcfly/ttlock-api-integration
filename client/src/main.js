@@ -38,6 +38,7 @@ import { PasscodePanel } from "./components/PasscodePanel.js";
 import { RfidPanel } from "./components/RfidPanel.js";
 import { TestsPanel } from "./components/TestsPanel.js";
 import { FingerprintPanel } from "./components/FingerprintPanel.js";
+import { RecordPanel } from "./components/RecordPanel.js";
 
 // --- DOM ELEMENTS ---
 const dashboardElement = document.getElementById("dashboard");
@@ -85,6 +86,7 @@ function init() {
   let passcodePanel;
   let rfidPanel;
   let fingerprintPanel;
+  let recordPanel;
 
   try {
     actionPanel = new ActionPanel();
@@ -110,6 +112,11 @@ function init() {
     fingerprintPanel = new FingerprintPanel();
   } catch (e) {
     console.error("FingerprintPanel init error:", e);
+  }
+  try {
+    recordPanel = new RecordPanel();
+  } catch (e) {
+    console.error("RecordPanel init error:", e);
   }
 
   const deviceTable = new DeviceTable((lockId, lockName) => {
@@ -204,6 +211,10 @@ function init() {
     if (passcodePanel) passcodePanel.syncLock();
   });
 
+  document.addEventListener("navigate-lock", () => {
+    if (recordPanel) recordPanel.syncLock();
+  });
+
   // --- SIDEBAR ROUTING ---
   if (btnSidebarHome) {
     btnSidebarHome.addEventListener("click", (e) => {
@@ -293,7 +304,13 @@ function navigateToLockView(lockId, lockName) {
 
   try {
     document.getElementById("btn-refresh-details").click();
+
+    if (typeof recordPanel !== "undefined") {
+      recordPanel.syncLock();
+    }
   } catch (e) {}
+
+  document.dispatchEvent(new CustomEvent("navigate-lock"));
 }
 
 function navigateToLockViewFromSubView() {

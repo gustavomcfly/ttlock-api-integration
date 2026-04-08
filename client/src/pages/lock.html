@@ -1,7 +1,7 @@
 <div id="view-lock" class="hidden w-full transition-opacity duration-300">
   <button
     id="btn-back-home"
-    class="text-muted-foreground hover:text-primary cursor-pointer mb-6 flex items-center gap-2 font-medium transition-colors corsourpointer"
+    class="text-muted-foreground hover:text-primary corsourpointer mb-6 flex cursor-pointer items-center gap-2 font-medium transition-colors"
   >
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -21,7 +21,10 @@
 
   <header class="mb-8 flex items-end justify-between">
     <div>
-      <h2 id="lock-view-name" class="text-4xl font-bold text-primary tracking-tight">
+      <h2
+        id="lock-view-name"
+        class="text-primary text-4xl font-bold tracking-tight"
+      >
         Nome da Fechadura
       </h2>
       <p class="text-muted-foreground mt-1">
@@ -31,7 +34,7 @@
 
     <button
       id="btn-go-lock-settings"
-      class="bg-muted text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg p-2 transition-colors cursor-pointer"
+      class="bg-muted text-muted-foreground hover:text-foreground hover:bg-secondary cursor-pointer rounded-lg p-2 transition-colors"
       title="Configurações Avançadas"
     >
       <svg
@@ -59,7 +62,7 @@
   >
     <button
       id="btn-refresh-details"
-      class="bg-muted text-muted-foreground hover:bg-secondary hover:text-foreground absolute top-3 right-3 rounded-md p-1.5 transition-colors cursor-pointer"
+      class="bg-muted text-muted-foreground hover:bg-secondary hover:text-foreground absolute top-3 right-3 cursor-pointer rounded-md p-1.5 transition-colors"
       title="Atualizar Detalhes"
     >
       <svg
@@ -106,7 +109,7 @@
       </p>
       <button
         id="btn-remote-unlock"
-        class="bg-secondary text-secondary-foreground hover:bg-accent w-full rounded-xl px-4 py-3 font-bold shadow-md transition-all cursor-pointer"
+        class="bg-secondary text-secondary-foreground hover:bg-accent w-full cursor-pointer rounded-xl px-4 py-3 font-bold shadow-md transition-all"
       >
         Destrancar Agora
       </button>
@@ -127,7 +130,7 @@
       <div class="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <button
           id="btn-go-passcode"
-          class="bg-secondary text-secondary-foreground hover:bg-accent border-border flex flex-col items-center justify-center gap-2 rounded-xl border px-2 py-4 font-bold transition-all cursor-pointer"
+          class="bg-secondary text-secondary-foreground hover:bg-accent border-border flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border px-2 py-4 font-bold transition-all"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -149,7 +152,7 @@
 
         <button
           id="btn-go-rfid"
-          class="bg-secondary text-secondary-foreground hover:bg-accent border-border flex flex-col items-center justify-center gap-2 rounded-xl border px-2 py-4 font-bold transition-all cursor-pointer"
+          class="bg-secondary text-secondary-foreground hover:bg-accent border-border flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border px-2 py-4 font-bold transition-all"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -170,7 +173,7 @@
 
         <button
           id="btn-go-fingerprint"
-          class="bg-secondary text-secondary-foreground hover:bg-accent border-border flex flex-col items-center justify-center gap-2 rounded-xl border px-2 py-4 font-bold transition-all cursor-pointer"
+          class="bg-secondary text-secondary-foreground hover:bg-accent border-border flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border px-2 py-4 font-bold transition-all"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -193,6 +196,57 @@
           </svg>
           <span class="text-sm">Biometria</span>
         </button>
+      </div>
+    </div>
+  </section>
+
+  <section
+    class="bg-card border-border mt-8 overflow-hidden rounded-xl border shadow-sm"
+  >
+    <div
+      class="border-border bg-muted/10 flex flex-col items-start justify-between gap-4 border-b p-4 sm:flex-row sm:items-center sm:p-6"
+    >
+      <h3 class="text-xl font-semibold">Histórico de Aberturas</h3>
+      <div class="flex gap-2">
+        <button
+          id="btn-clear-records"
+          class="bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground cursor-pointer rounded-md border border-transparent px-4 py-1.5 text-sm font-medium transition-all"
+        >
+          Limpar Histórico
+        </button>
+        <button
+          id="btn-refresh-records"
+          class="bg-muted/50 hover:bg-muted border-border text-muted-foreground hover:text-foreground cursor-pointer rounded-md border px-5 py-1.5 text-sm font-medium transition-all"
+        >
+          Atualizar Lista
+        </button>
+      </div>
+    </div>
+    <div class="overflow-x-auto">
+      <table
+        id="record-table"
+        class="w-full border-collapse text-left"
+        style="display: none"
+      >
+        <thead>
+          <tr
+            class="bg-muted/30 text-muted-foreground border-border border-b text-xs tracking-wider uppercase"
+          >
+            <th class="px-6 py-4 text-center font-semibold">Data/Hora</th>
+            <th class="px-6 py-4 text-center font-semibold">
+              Usuário/Descrição
+            </th>
+            <th class="px-6 py-4 text-center font-semibold">Método</th>
+            <th class="px-6 py-4 text-center font-semibold">Status</th>
+          </tr>
+        </thead>
+        <tbody id="record-list-body" class="divide-border divide-y"></tbody>
+      </table>
+      <div
+        id="no-records"
+        class="text-muted-foreground p-10 text-center text-sm"
+      >
+        Nenhum registro encontrado.
       </div>
     </div>
   </section>
