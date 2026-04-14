@@ -21,6 +21,15 @@ router.post('/unlock', async (req, res) => {
     }
 });
 
+router.post('/lock', async (req, res) => {
+    try {
+        const data = await lockService.remoteLock(req.body.accessToken, req.body.lockId);
+        res.json(data);
+    } catch (error) {
+        res.status(500).json(error.response?.data || { error: "Failed to lock" });
+    }
+});
+
 router.post('/detail', async (req, res) => {
     try {
         const data = await lockService.getLockDetails(req.body.accessToken, req.body.lockId);

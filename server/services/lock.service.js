@@ -79,6 +79,17 @@ export const lockService = {
         return response.data;
     },
 
+    async remoteLock(accessToken, lockId) {
+        const params = new URLSearchParams({
+            clientId: process.env.TTLOCK_CLIENT_ID,
+            accessToken: accessToken,
+            lockId: lockId,
+            date: Date.now()
+        });
+        const response = await axios.post(`${BASE_URL}/v3/lock/lock`, params.toString());
+        return response.data;
+    },
+
     async deleteLock(accessToken, lockId) {
         const params = new URLSearchParams({
             clientId: process.env.TTLOCK_CLIENT_ID,

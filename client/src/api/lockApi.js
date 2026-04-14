@@ -19,6 +19,15 @@ export const lockApi = {
     return response.json();
   },
 
+  async remoteLock(accessToken, lockId) {
+    const response = await fetch(`${API_BASE_URL}/lock`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ accessToken, lockId }),
+    });
+    return response.json();
+  },
+
   async getLockDetails(accessToken, lockId) {
     const response = await fetch(`${API_BASE_URL}/detail`, {
       method: "POST",
