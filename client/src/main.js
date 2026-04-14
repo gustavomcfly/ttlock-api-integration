@@ -5,7 +5,8 @@ import homeHtml from "./pages/home.html?raw";
 import lockHtml from "./pages/lock.html?raw";
 import passcodeHtml from "./pages/passcode.html?raw";
 import rfidHtml from "./pages/rfid.html?raw";
-import testsHtml from "./pages/tests.html?raw";
+import cyclicTestHtml from "./pages/cyclicTest.html?raw";
+import qualityTestHtml from "./pages/qualityTest.html?raw";
 import reportsHtml from "./pages/reports.html?raw";
 import lockSettingsHtml from "./pages/lockSettings.html?raw";
 import fingerprintHtml from "./pages/fingerprint.html?raw";
@@ -22,7 +23,8 @@ document.getElementById("app").innerHTML = `
             ${passcodeHtml}
             ${rfidHtml}
             ${fingerprintHtml}
-            ${testsHtml}
+            ${cyclicTestHtml}
+            ${qualityTestHtml}
             ${reportsHtml}
             ${lockSettingsHtml}
         </main>
@@ -36,7 +38,7 @@ import { DeviceTable } from "./components/DeviceTable.js";
 import { ActionPanel } from "./components/ActionPanel.js";
 import { PasscodePanel } from "./components/PasscodePanel.js";
 import { RfidPanel } from "./components/RfidPanel.js";
-import { TestsPanel } from "./components/TestsPanel.js";
+import { CyclicTestPanel } from "./components/CyclicTestPanel.js";
 import { FingerprintPanel } from "./components/FingerprintPanel.js";
 import { RecordPanel } from "./components/RecordPanel.js";
 
@@ -56,6 +58,7 @@ const btnBackLockFromFingerprint = document.getElementById(
 // Sidebar Nav Buttons
 const btnSidebarHome = document.getElementById("btn-sidebar-home");
 const btnSidebarTests = document.getElementById("btn-sidebar-tests");
+const btnSidebarQuality = document.getElementById("btn-sidebar-quality");
 const btnSidebarReports = document.getElementById("btn-sidebar-reports");
 
 // Views
@@ -63,7 +66,8 @@ const viewHome = document.getElementById("view-home");
 const viewLock = document.getElementById("view-lock");
 const viewPasscode = document.getElementById("view-passcode");
 const viewRfid = document.getElementById("view-rfid");
-const viewTests = document.getElementById("view-tests");
+const viewCyclicTest = document.getElementById("view-cyclic-test");
+const viewQualityTest = document.getElementById("view-quality-test");
 const viewReports = document.getElementById("view-reports");
 const viewLockSettings = document.getElementById("view-lock-settings");
 
@@ -78,7 +82,7 @@ const btnBackLockFromSettings = document.getElementById(
 );
 const btnGoRfid = document.getElementById("btn-go-rfid");
 
-let testsPanel;
+let cyclicTestPanel;
 
 function init() {
   // --- INSTANTIATE COMPONENTS ---
@@ -104,9 +108,9 @@ function init() {
     console.error("RfidPanel init error:", e);
   }
   try {
-    testsPanel = new TestsPanel();
+    cyclicTestPanel = new CyclicTestPanel();
   } catch (e) {
-    console.error("TestsPanel init error:", e);
+    console.error("CyclicTestPanel init error:", e);
   }
   try {
     fingerprintPanel = new FingerprintPanel();
@@ -228,7 +232,15 @@ function init() {
     btnSidebarTests.addEventListener("click", (e) => {
       e.preventDefault();
       closeSidebar();
-      navigateToTestsView();
+      navigateToCyclicTestView();
+    });
+  }
+
+  if (btnSidebarQuality) {
+    btnSidebarQuality.addEventListener("click", (e) => {
+      e.preventDefault();
+      closeSidebar();
+      navigateToQualityTestView();
     });
   }
 
@@ -275,7 +287,8 @@ function hideAllViews() {
     viewPasscode,
     viewRfid,
     viewFingerprint,
-    viewTests,
+    viewCyclicTest,
+    viewQualityTest,
     viewReports,
     viewLockSettings,
   ];
@@ -329,13 +342,18 @@ function navigateToLockSettingsView() {
   updateSidebarActiveState("btn-sidebar-home");
 }
 
-function navigateToTestsView() {
-  if (testsPanel && typeof testsPanel.reset === "function") {
-    testsPanel.reset();
-  }
+function navigateToCyclicTestView() {
   hideAllViews();
-  if (viewTests) viewTests.classList.remove("hidden");
+  if (viewCyclicTest) viewCyclicTest.classList.remove("hidden");
   updateSidebarActiveState("btn-sidebar-tests");
+  if (cyclicTestPanel) cyclicTestPanel.syncLock();
+}
+
+function navigateToQualityTestView() {
+  hideAllViews();
+  if (viewQualityTest) viewQualityTest.classList.remove("hidden");
+  updateSidebarActiveState("btn-sidebar-quality");
+  if (cyclicTestPanel) cyclicTestPanel.deactivate();
 }
 
 function navigateToReportsView() {

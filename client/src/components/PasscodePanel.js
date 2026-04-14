@@ -208,7 +208,6 @@ export class PasscodePanel {
           lockId: appState.selectedLockId,
           passcode: customCode,
           name: passcodeName,
-          name: "Senha Cíclica",
           startDate: startDate,
           endDate: endDate,
           isAllDay: 2,
