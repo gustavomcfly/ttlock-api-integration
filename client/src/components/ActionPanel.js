@@ -12,7 +12,7 @@ export class ActionPanel {
     this.btnChangePasscode = document.getElementById("btn-change-passcode");
     this.btnConfigPassage = document.getElementById("btn-config-passage");
     this.btnDeleteLock = document.getElementById("btn-delete-lock");
-    this.btnGoPasscode = document.getElementById("btn-go-passcode"); // NEW
+    this.btnGoPasscode = document.getElementById("btn-go-passcode");
 
     // Inputs
     this.inputNewName = document.getElementById("input-new-name");

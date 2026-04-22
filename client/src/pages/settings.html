@@ -1,0 +1,169 @@
+<div
+  id="view-settings"
+  class="mx-auto hidden w-full max-w-5xl transition-opacity duration-300"
+>
+  <header class="mb-8">
+    <div class="mb-1 flex items-center gap-3">
+      <div class="bg-primary/10 text-primary rounded-lg p-2">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
+          />
+          <circle cx="12" cy="12" r="3" />
+        </svg>
+      </div>
+      <h2 class="text-primary text-3xl font-bold tracking-tight">
+        Configurações do Sistema
+      </h2>
+    </div>
+    <p class="text-muted-foreground mt-1 ml-1">
+      Defina seu perfil de testador e os parâmetros padrão para as automações.
+    </p>
+  </header>
+
+  <div class="flex flex-col gap-6">
+    <section
+      class="bg-card border-border overflow-hidden rounded-xl border shadow-sm"
+    >
+      <div class="border-border bg-muted/10 border-b p-4 sm:p-6">
+        <h3 class="text-xl font-semibold">Perfil do Testador</h3>
+        <p class="text-muted-foreground mt-1 text-sm">
+          Esses dados serão usados como padrão ao injetar credenciais na
+          fechadura.
+        </p>
+      </div>
+      <div class="grid grid-cols-1 gap-6 p-6 sm:grid-cols-2 sm:p-8">
+        <div class="flex flex-col gap-1.5">
+          <label
+            class="text-muted-foreground text-xs font-semibold tracking-wide uppercase"
+            >Nome Padrão</label
+          >
+          <input
+            type="text"
+            id="cfg-tester-name"
+            placeholder="Ex: QA - Gustavo"
+            class="border-border bg-background focus:ring-primary rounded-lg border px-3 py-2.5 text-sm transition-all focus:ring-2 focus:outline-none"
+          />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label
+            class="text-muted-foreground text-xs font-semibold tracking-wide uppercase"
+            >Senha Numérica Padrão</label
+          >
+          <input
+            type="text"
+            id="cfg-std-passcode"
+            placeholder="Ex: 123456"
+            class="border-border bg-background focus:ring-primary rounded-lg border px-3 py-2.5 text-sm transition-all focus:ring-2 focus:outline-none"
+          />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label
+            class="text-muted-foreground text-xs font-semibold tracking-wide uppercase"
+            >Número do Cartão RFID</label
+          >
+          <input
+            type="text"
+            id="cfg-std-card"
+            placeholder="Ex: 1234567890"
+            class="border-border bg-background focus:ring-primary rounded-lg border px-3 py-2.5 text-sm transition-all focus:ring-2 focus:outline-none"
+          />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label
+            class="text-muted-foreground text-xs font-semibold tracking-wide uppercase"
+            >Número da Biometria</label
+          >
+          <input
+            type="text"
+            id="cfg-std-fingerprint"
+            placeholder="Ex: 54293766864855"
+            class="border-border bg-background focus:ring-primary rounded-lg border px-3 py-2.5 text-sm transition-all focus:ring-2 focus:outline-none"
+          />
+        </div>
+      </div>
+    </section>
+
+    <section
+      class="bg-card border-border overflow-hidden rounded-xl border shadow-sm"
+    >
+      <div class="border-border bg-muted/10 border-b p-4 sm:p-6">
+        <h3 class="text-xl font-semibold">Parâmetros Padrão de Teste</h3>
+        <p class="text-muted-foreground mt-1 text-sm">
+          Configurações padrão para a rotina de Teste de Ciclagem.
+        </p>
+      </div>
+      <div class="grid grid-cols-1 gap-6 p-6 sm:grid-cols-3 sm:p-8">
+        <div class="flex flex-col gap-1.5">
+          <label
+            class="text-muted-foreground text-xs font-semibold tracking-wide uppercase"
+            >Qtd. de Ciclos Padrão</label
+          >
+          <input
+            type="number"
+            id="cfg-def-cycles"
+            class="border-border bg-background focus:ring-primary rounded-lg border px-3 py-2.5 text-sm transition-all focus:ring-2 focus:outline-none"
+          />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label
+            class="text-muted-foreground text-xs font-semibold tracking-wide uppercase"
+            >Tempo Aberta (Segundos)</label
+          >
+          <input
+            type="number"
+            id="cfg-def-unlock-time"
+            class="border-border bg-background focus:ring-primary rounded-lg border px-3 py-2.5 text-sm transition-all focus:ring-2 focus:outline-none"
+          />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label
+            class="text-muted-foreground text-xs font-semibold tracking-wide uppercase"
+            >Intervalo (Segundos)</label
+          >
+          <input
+            type="number"
+            id="cfg-def-interval"
+            class="border-border bg-background focus:ring-primary rounded-lg border px-3 py-2.5 text-sm transition-all focus:ring-2 focus:outline-none"
+          />
+        </div>
+      </div>
+    </section>
+
+    <div class="mt-2 flex justify-end">
+      <button
+        id="btn-save-settings"
+        class="bg-secondary text-secondary-foreground flex cursor-pointer items-center gap-2 rounded-xl px-8 py-3 text-base font-bold shadow-md transition-all hover:opacity-80"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"
+          ></path>
+          <polyline points="17 21 17 13 7 13 7 21"></polyline>
+          <polyline points="7 3 7 8 15 8"></polyline>
+        </svg>
+        Salvar Configurações
+      </button>
+    </div>
+  </div>
+</div>

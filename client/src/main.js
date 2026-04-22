@@ -10,6 +10,7 @@ import qualityTestHtml from "./pages/qualityTest.html?raw";
 import reportsHtml from "./pages/reports.html?raw";
 import lockSettingsHtml from "./pages/lockSettings.html?raw";
 import fingerprintHtml from "./pages/fingerprint.html?raw";
+import settingsHtml from "./pages/settings.html?raw";
 
 // --- INJECT HTML ---
 document.getElementById("app").innerHTML = `
@@ -27,6 +28,7 @@ document.getElementById("app").innerHTML = `
             ${qualityTestHtml}
             ${reportsHtml}
             ${lockSettingsHtml}
+            ${settingsHtml}
         </main>
     </div>
 `;
@@ -41,6 +43,7 @@ import { RfidPanel } from "./components/RfidPanel.js";
 import { CyclicTestPanel } from "./components/CyclicTestPanel.js";
 import { FingerprintPanel } from "./components/FingerprintPanel.js";
 import { RecordPanel } from "./components/RecordPanel.js";
+import { SettingsPanel } from "./components/SettingsPanel.js";
 
 // --- DOM ELEMENTS ---
 const dashboardElement = document.getElementById("dashboard");
@@ -54,6 +57,8 @@ const btnGoFingerprint = document.getElementById("btn-go-fingerprint");
 const btnBackLockFromFingerprint = document.getElementById(
   "btn-back-lock-fingerprint",
 );
+const viewSettings = document.getElementById("view-settings");
+const btnSidebarSettings = document.getElementById("btn-sidebar-settings");
 
 // Sidebar Nav Buttons
 const btnSidebarHome = document.getElementById("btn-sidebar-home");
@@ -91,6 +96,7 @@ function init() {
   let rfidPanel;
   let fingerprintPanel;
   let recordPanel;
+  let settingsPanel;
 
   try {
     actionPanel = new ActionPanel();
@@ -121,6 +127,11 @@ function init() {
     recordPanel = new RecordPanel();
   } catch (e) {
     console.error("RecordPanel init error:", e);
+  }
+  try {
+    settingsPanel = new SettingsPanel();
+  } catch (e) {
+    console.error("SettingsPanel init error:", e);
   }
 
   const deviceTable = new DeviceTable((lockId, lockName) => {
@@ -211,6 +222,14 @@ function init() {
     });
   }
 
+  if (btnSidebarSettings) {
+    btnSidebarSettings.addEventListener("click", (e) => {
+      e.preventDefault();
+      closeSidebar();
+      navigateToSettingsView();
+    });
+  }
+
   document.addEventListener("navigate-passcode", () => {
     if (passcodePanel) passcodePanel.syncLock();
   });
@@ -291,6 +310,7 @@ function hideAllViews() {
     viewQualityTest,
     viewReports,
     viewLockSettings,
+    viewSettings,
   ];
   views.forEach((view) => {
     if (view) view.classList.add("hidden");
@@ -360,6 +380,16 @@ function navigateToReportsView() {
   hideAllViews();
   if (viewReports) viewReports.classList.remove("hidden");
   updateSidebarActiveState("btn-sidebar-reports");
+}
+
+function navigateToSettingsView() {
+  hideAllViews();
+  if (viewSettings) viewSettings.classList.remove("hidden");
+  updateSidebarActiveState("btn-sidebar-settings");
+
+  if (typeof settingsPanel !== "undefined") {
+    settingsPanel.loadSettingsToUI();
+  }
 }
 
 // --- UI FUNCTIONS ---

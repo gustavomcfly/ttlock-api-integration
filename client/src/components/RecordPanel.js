@@ -128,7 +128,7 @@ export class RecordPanel {
         8: "Biometria",
         9: "Gateway (Remoto)",
         10: "Desbloqueio Automático",
-        11: "Chave Mecânica",
+        11: "TestLock",
         12: "TestLock",
       };
       return types[type] || `Outro (${type})`;
