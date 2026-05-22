@@ -17,14 +17,12 @@ router.post("/add", async (req, res) => {
     );
     res.json(data);
   } catch (error) {
-    res
-      .status(500)
-      .json(
-        error.response?.data || {
-          errcode: -1,
-          errmsg: "Failed to add RFID card",
-        },
-      );
+    res.status(500).json(
+      error.response?.data || {
+        errcode: -1,
+        errmsg: "Erro ao adicionar cartão RFID",
+      },
+    );
   }
 });
 
@@ -39,14 +37,12 @@ router.post("/list", async (req, res) => {
     );
     res.json(data);
   } catch (error) {
-    res
-      .status(500)
-      .json(
-        error.response?.data || {
-          errcode: -1,
-          errmsg: "Failed to get RFID cards",
-        },
-      );
+    res.status(500).json(
+      error.response?.data || {
+        errcode: -1,
+        errmsg: "Erro ao buscar cartões RFID",
+      },
+    );
   }
 });
 
@@ -56,14 +52,12 @@ router.post("/delete", async (req, res) => {
     const data = await rfidService.deleteCard(accessToken, lockId, cardId);
     res.json(data);
   } catch (error) {
-    res
-      .status(500)
-      .json(
-        error.response?.data || {
-          errcode: -1,
-          errmsg: "Failed to delete RFID card",
-        },
-      );
+    res.status(500).json(
+      error.response?.data || {
+        errcode: -1,
+        errmsg: "Erro ao excluir cartão RFID",
+      },
+    );
   }
 });
 
@@ -73,14 +67,12 @@ router.post("/clear", async (req, res) => {
     const data = await rfidService.clearCards(accessToken, lockId);
     res.json(data);
   } catch (error) {
-    res
-      .status(500)
-      .json(
-        error.response?.data || {
-          errcode: -1,
-          errmsg: "Failed to clear RFID cards",
-        },
-      );
+    res.status(500).json(
+      error.response?.data || {
+        errcode: -1,
+        errmsg: "Erro ao excluir cartões RFID",
+      },
+    );
   }
 });
 
@@ -96,14 +88,12 @@ router.post("/change-period", async (req, res) => {
     );
     res.json(data);
   } catch (error) {
-    res
-      .status(500)
-      .json(
-        error.response?.data || {
-          errcode: -1,
-          errmsg: "Failed to change RFID card period",
-        },
-      );
+    res.status(500).json(
+      error.response?.data || {
+        errcode: -1,
+        errmsg: "Erro ao alterar período de validade do cartão RFID",
+      },
+    );
   }
 });
 

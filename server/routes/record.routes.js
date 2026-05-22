@@ -17,7 +17,7 @@ router.post("/list", async (req, res) => {
     res.status(500).json(
       error.response?.data || {
         errcode: -1,
-        errmsg: "Failed to get unlock records",
+        errmsg: "Erro ao obter histórico de abertura",
       },
     );
   }
@@ -32,7 +32,7 @@ router.post("/clear", async (req, res) => {
     res.status(500).json(
       error.response?.data || {
         errcode: -1,
-        errmsg: "Failed to clear unlock records",
+        errmsg: "Erro ao limpar histórico de abertura",
       },
     );
   }

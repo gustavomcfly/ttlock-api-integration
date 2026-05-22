@@ -17,14 +17,12 @@ router.post("/add", async (req, res) => {
     );
     res.json(data);
   } catch (error) {
-    res
-      .status(500)
-      .json(
-        error.response?.data || {
-          errcode: -1,
-          errmsg: "Failed to add fingerprint",
-        },
-      );
+    res.status(500).json(
+      error.response?.data || {
+        errcode: -1,
+        errmsg: "Erro ao adicionar biometria",
+      },
+    );
   }
 });
 
@@ -39,14 +37,12 @@ router.post("/list", async (req, res) => {
     );
     res.json(data);
   } catch (error) {
-    res
-      .status(500)
-      .json(
-        error.response?.data || {
-          errcode: -1,
-          errmsg: "Failed to get fingerprints",
-        },
-      );
+    res.status(500).json(
+      error.response?.data || {
+        errcode: -1,
+        errmsg: "Erro ao encontrar biometrias",
+      },
+    );
   }
 });
 
@@ -60,14 +56,12 @@ router.post("/delete", async (req, res) => {
     );
     res.json(data);
   } catch (error) {
-    res
-      .status(500)
-      .json(
-        error.response?.data || {
-          errcode: -1,
-          errmsg: "Failed to delete fingerprint",
-        },
-      );
+    res.status(500).json(
+      error.response?.data || {
+        errcode: -1,
+        errmsg: "Erro ao excluir biometria",
+      },
+    );
   }
 });
 
@@ -80,14 +74,12 @@ router.post("/clear", async (req, res) => {
     );
     res.json(data);
   } catch (error) {
-    res
-      .status(500)
-      .json(
-        error.response?.data || {
-          errcode: -1,
-          errmsg: "Failed to clear fingerprints",
-        },
-      );
+    res.status(500).json(
+      error.response?.data || {
+        errcode: -1,
+        errmsg: "Erro ao excluir biometrias",
+      },
+    );
   }
 });
 
@@ -103,14 +95,12 @@ router.post("/change-period", async (req, res) => {
     );
     res.json(data);
   } catch (error) {
-    res
-      .status(500)
-      .json(
-        error.response?.data || {
-          errcode: -1,
-          errmsg: "Failed to change fingerprint period",
-        },
-      );
+    res.status(500).json(
+      error.response?.data || {
+        errcode: -1,
+        errmsg: "Erro ao editar período de validade da biometria",
+      },
+    );
   }
 });
 
