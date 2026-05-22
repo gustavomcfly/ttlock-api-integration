@@ -1,108 +1,239 @@
-<div id="view-quality-test" class="mx-auto hidden w-full max-w-5xl transition-opacity duration-300">
-
+<div
+  id="view-quality-test"
+  class="mx-auto hidden w-full px-6 transition-opacity duration-300"
+>
   <header class="mb-8">
     <div class="mb-1 flex items-center gap-3">
       <div class="bg-primary/10 text-primary rounded-lg p-2">
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"
+          />
           <path d="m9 12 2 2 4-4" />
         </svg>
       </div>
-      <h2 class="text-primary text-3xl font-bold tracking-tight">Teste de Qualidade</h2>
+      <h2 class="text-primary text-3xl font-bold tracking-tight">
+        Auditoria de Qualidade
+      </h2>
     </div>
     <p class="text-muted-foreground mt-1 ml-1">
-      Verificação individual de componentes, bateria e integridade do hardware.
+      Execute um roteiro completo de testes para validar todos os componentes da
+      fechadura.
     </p>
   </header>
 
-  <!-- Coming soon card -->
-  <div class="bg-card border-border rounded-2xl border p-10 text-center shadow-sm">
-    <div class="bg-primary/10 text-primary mb-6 inline-flex items-center justify-center rounded-full p-5">
-      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none"
-        stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-      </svg>
+  <div class="flex flex-col gap-6">
+    <div
+      class="bg-card border-border w-full rounded-2xl border p-6 shadow-sm sm:p-8"
+    >
+      <div
+        class="border-border mb-6 flex flex-col justify-between gap-4 border-b pb-4 sm:flex-row sm:items-center"
+      >
+        <h3 class="text-xl font-semibold">Configuração da Auditoria</h3>
+        <select
+          id="select-quality-lock"
+          class="border-border bg-background focus:ring-secondary text-foreground w-full cursor-pointer truncate rounded-lg border px-3 py-2 text-sm font-medium transition-all focus:ring-2 focus:outline-none sm:w-auto"
+        >
+          <option value="" class="text-foreground font-medium">
+            Selecione uma fechadura online...
+          </option>
+        </select>
+      </div>
+
+      <div class="mb-8 grid grid-cols-1 gap-8 md:grid-cols-2">
+        <div>
+          <h4
+            class="text-muted-foreground mb-3 text-sm font-bold tracking-wide uppercase"
+          >
+            Critérios Avaliados
+          </h4>
+          <div
+            class="bg-muted/10 border-border flex flex-col gap-2 rounded-xl border p-4"
+          >
+            <label class="flex cursor-pointer items-center gap-2 text-sm"
+              ><input
+                type="checkbox"
+                value="get_info"
+                class="qt-criteria-checkbox"
+                checked
+              />
+              Ler Status & Parâmetros</label
+            >
+            <label class="flex cursor-pointer items-center gap-2 text-sm"
+              ><input
+                type="checkbox"
+                value="remote_unlock"
+                class="qt-criteria-checkbox"
+                checked
+              />
+              Abertura Remota (Gateway)</label
+            >
+            <label class="flex cursor-pointer items-center gap-2 text-sm"
+              ><input
+                type="checkbox"
+                value="add_passcode"
+                class="qt-criteria-checkbox"
+                checked
+              />
+              Sincronizar Senha Numérica</label
+            >
+            <label class="flex cursor-pointer items-center gap-2 text-sm"
+              ><input
+                type="checkbox"
+                value="add_rfid"
+                class="qt-criteria-checkbox"
+                checked
+              />
+              Sincronizar Cartão RFID</label
+            >
+            <label class="flex cursor-pointer items-center gap-2 text-sm"
+              ><input
+                type="checkbox"
+                value="add_fingerprint"
+                class="qt-criteria-checkbox"
+                checked
+              />
+              Sincronizar Biometria</label
+            >
+            <label class="flex cursor-pointer items-center gap-2 text-sm"
+              ><input
+                type="checkbox"
+                value="rename_lock"
+                class="qt-criteria-checkbox"
+                checked
+              />
+              Atualizar Nome Interno</label
+            >
+            <label class="flex cursor-pointer items-center gap-2 text-sm"
+              ><input
+                type="checkbox"
+                value="passage_mode"
+                class="qt-criteria-checkbox"
+                checked
+              />
+              Testar Modo Passagem</label
+            >
+            <label class="flex cursor-pointer items-center gap-2 text-sm"
+              ><input
+                type="checkbox"
+                value="get_records"
+                class="qt-criteria-checkbox"
+                checked
+              />
+              Puxar Histórico Datalog</label
+            >
+            <label class="flex cursor-pointer items-center gap-2 text-sm"
+              ><input
+                type="checkbox"
+                value="check_update"
+                class="qt-criteria-checkbox"
+                checked
+              />
+              Verificar Atualização de Firmware</label
+            >
+          </div>
+        </div>
+
+        <div>
+          <h4
+            class="text-muted-foreground mb-3 text-sm font-bold tracking-wide uppercase"
+          >
+            Parâmetros Padrão Injetados
+          </h4>
+          <div
+            class="bg-muted/10 border-border flex flex-col gap-3 rounded-xl border p-4"
+          >
+            <div class="border-border/50 flex justify-between border-b pb-2">
+              <span class="text-muted-foreground text-xs">Testador:</span
+              ><span
+                id="qt-param-tester"
+                class="text-primary text-sm font-semibold"
+                >--</span
+              >
+            </div>
+            <div class="border-border/50 flex justify-between border-b pb-2">
+              <span class="text-muted-foreground text-xs">Senha Padrão:</span
+              ><span
+                id="qt-param-passcode"
+                class="text-foreground font-mono text-sm"
+                >--</span
+              >
+            </div>
+            <div class="border-border/50 flex justify-between border-b pb-2">
+              <span class="text-muted-foreground text-xs">Cartão Padrão:</span
+              ><span
+                id="qt-param-card"
+                class="text-foreground font-mono text-sm"
+                >--</span
+              >
+            </div>
+            <div class="flex justify-between">
+              <span class="text-muted-foreground text-xs"
+                >Biometria Padrão:</span
+              ><span
+                id="qt-param-fingerprint"
+                class="text-foreground font-mono text-sm"
+                >--</span
+              >
+            </div>
+          </div>
+          <p class="text-muted-foreground mt-3 text-xs italic">
+            * Altere estes dados na página "Configurações".
+          </p>
+        </div>
+      </div>
+
+      <button
+        id="btn-start-quality-test"
+        class="bg-secondary text-secondary-foreground hover:bg-secondary-hover w-full cursor-pointer rounded-xl px-4 py-4 text-base font-bold shadow-md transition-all disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        Iniciar Auditoria de Qualidade
+      </button>
     </div>
-    <h3 class="mb-2 text-2xl font-bold">Em Desenvolvimento</h3>
-    <p class="text-muted-foreground mx-auto mb-8 max-w-md text-sm leading-relaxed">
-      O painel de Teste de Qualidade está sendo desenvolvido. Abaixo estão as funcionalidades
-      previstas para esta modalidade.
-    </p>
 
-    <div class="mx-auto grid max-w-2xl grid-cols-1 gap-4 text-left sm:grid-cols-2">
-
-      <div class="bg-muted/40 border-border rounded-xl border p-4">
-        <div class="mb-2 flex items-center gap-2">
-          <div class="bg-primary/10 text-primary rounded-md p-1.5">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
-              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-            </svg>
-          </div>
-          <span class="text-sm font-semibold">Integridade do Mecanismo</span>
-        </div>
-        <p class="text-muted-foreground text-xs">
-          Verificação do ciclo de travamento e destravamento com medição de tempo de resposta e detecção de anomalias.
-        </p>
+    <div class="bg-card border-border w-full rounded-2xl border shadow-sm">
+      <div
+        class="border-border flex items-center justify-between border-b px-5 py-4"
+      >
+        <h3 class="font-semibold">Lista de Testes</h3>
+        <span class="text-muted-foreground text-xs"
+          >Selecione para ver detalhes</span
+        >
       </div>
-
-      <div class="bg-muted/40 border-border rounded-xl border p-4">
-        <div class="mb-2 flex items-center gap-2">
-          <div class="bg-primary/10 text-primary rounded-md p-1.5">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
-              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
-            </svg>
-          </div>
-          <span class="text-sm font-semibold">Auditoria de Bateria</span>
-        </div>
-        <p class="text-muted-foreground text-xs">
-          Leitura detalhada do nível de carga, curva de descarga ao longo do tempo e estimativa de vida útil.
-        </p>
+      <div class="overflow-x-auto p-3">
+        <table class="w-full border-collapse text-left text-sm">
+          <thead>
+            <tr
+              class="bg-muted/30 text-muted-foreground border-border border-b text-xs tracking-wider uppercase"
+            >
+              <th class="px-4 py-3 text-center font-semibold">ID do Teste</th>
+              <th class="px-4 py-3 text-center font-semibold">Progresso</th>
+              <th class="px-4 py-3 text-center font-semibold">Resultado</th>
+              <th class="px-4 py-3 text-right font-semibold">Ação</th>
+            </tr>
+          </thead>
+          <tbody id="quality-test-list-body" class="divide-border divide-y">
+            <tr>
+              <td
+                colspan="4"
+                class="text-muted-foreground py-10 text-center text-sm"
+              >
+                Nenhuma auditoria realizada.
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-
-      <div class="bg-muted/40 border-border rounded-xl border p-4">
-        <div class="mb-2 flex items-center gap-2">
-          <div class="bg-primary/10 text-primary rounded-md p-1.5">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M5 12.55a11 11 0 0 1 14.08 0" />
-              <path d="M1.42 9a16 16 0 0 1 21.16 0" />
-              <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
-              <line x1="12" y1="20" x2="12.01" y2="20" />
-            </svg>
-          </div>
-          <span class="text-sm font-semibold">Qualidade de Conexão</span>
-        </div>
-        <p class="text-muted-foreground text-xs">
-          Medição de latência de resposta via Gateway Wi-Fi, taxa de sucesso e estabilidade de conexão.
-        </p>
-      </div>
-
-      <div class="bg-muted/40 border-border rounded-xl border p-4">
-        <div class="mb-2 flex items-center gap-2">
-          <div class="bg-primary/10 text-primary rounded-md p-1.5">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-              <polyline points="14 2 14 8 20 8" />
-              <line x1="16" y1="13" x2="8" y2="13" />
-              <line x1="16" y1="17" x2="8" y2="17" />
-              <polyline points="10 9 9 9 8 9" />
-            </svg>
-          </div>
-          <span class="text-sm font-semibold">Relatório Técnico</span>
-        </div>
-        <p class="text-muted-foreground text-xs">
-          Geração de relatório completo em PDF com todos os resultados, métricas e recomendações.
-        </p>
-      </div>
-
     </div>
   </div>
-
 </div>
