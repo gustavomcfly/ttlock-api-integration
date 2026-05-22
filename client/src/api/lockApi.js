@@ -64,6 +64,15 @@ export const lockApi = {
     return response.json();
   },
 
+  async checkUpdate(accessToken, lockId) {
+    const response = await fetch(`${API_BASE_URL}/check-update`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ accessToken, lockId }),
+    });
+    return response.json();
+  },
+
   async deleteLock(accessToken, lockId) {
     const response = await fetch(`${API_BASE_URL}/delete`, {
       method: "POST",
