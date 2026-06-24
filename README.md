@@ -4,64 +4,43 @@
   <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node.js" />
   <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript" />
   <img src="https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white" alt="Express" />
-  <img src="https://img.shields.io/badge/Status-Em_Desenvolvimento-success?style=for-the-badge" alt="Status" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS" />
 </p>
 
-> **TestLock - Pado: Integração das APIs da TTLock** > Este projeto é um sistema de controle e automação para testes de fechaduras digitais que utilizam o firmware TTLock (Sciener). Ele permite a gestão de dispositivos, comandos remotos e geração de relatórios técnicos através das APIs abertas da plataforma.
+Sistema de controle e automação para testes de fechaduras digitais baseadas no firmware TTLock (Sciener). Permite a gestão completa dos dispositivos, execução de comandos remotos e rotinas de testes de estresse em hardware através de Gateways Wi-Fi.
 
 ---
 
-## 📑 Índice
-- [Recursos Principais](#-recursos-principais)
-- [Arquitetura do Sistema](#-arquitetura-do-sistema)
-- [Pré-requisitos](#-pré-requisitos)
-- [Instalação e Execução](#-instalação-e-execução)
-- [Estrutura do Projeto](#-estrutura-do-projeto)
-- [Segurança](#-segurança)
+## 🚀 Funcionalidades
+
+* 🔐 **Gestão Completa de Acessos:** Criação, edição e exclusão de Senhas (permanentes, temporárias, cíclicas), Cartões RFID e Biometrias diretamente pelo painel.
+* ⚡ **Auditoria de Qualidade (QA):** Roteiro automatizado que testa etapa por etapa as funcionalidades da fechadura (bateria, abertura remota, injeção de credenciais, atualização de firmware).
+* 🔄 **Teste de Ciclagem:** Automação de testes de estresse mecânico e de bateria, realizando comandos de abrir/fechar em loop contínuo com filas de execução.
+* 🛡️ **Proxy Server de Segurança:** Backend dedicado em Node.js para ocultar o `Client Secret`, realizar bypass de CORS e orquestrar os scripts de teste.
+* ⚙️ **Perfis de Teste:** Armazenamento local de parâmetros padrão (cargas de teste, tempos de delay e dados do testador) para agilizar o uso diário.
 
 ---
 
-## 🚀 Recursos Principais
+## 🛠️ Tecnologias
 
-* 🔐 **Autenticação Segura:** Fluxo de login em duas etapas isolando as credenciais de usuário (MD5 local) das credenciais de desenvolvedor (Client ID/Secret).
-* 📡 **Gestão de Dispositivos:** Listagem em tempo real de todas as fechaduras vinculadas à conta, exibindo status de bateria (nível de carga elétrica) e IDs únicos.
-* ⚡ **Operações Remotas:** Seleção interativa e capacidade de enviar comandos de destrancamento (Remote Unlock) de forma instantânea através de Gateways Wi-Fi.
-* 🛡️ **Proxy Server Integrado:** Backend dedicado em Node.js para contornar bloqueios de CORS e manter o *Client Secret* e fluxos de token ocultos do navegador.
+* **Frontend:** Vanilla JS (ES Modules), Vite, Tailwind CSS V4. Arquitetura leve baseada em injeção de templates HTML e manipulação direta de estado.
+* **Backend:** Node.js, Express, Axios. Padrão arquitetural BFF (Backend-For-Frontend) dividindo lógica de negócios em Serviços e Rotas.
 
 ---
 
-## 🏗️ Arquitetura do Sistema
+## ⚙️ Como Executar
 
-A aplicação foi dividida em duas camadas principais (Client e Server) para garantir segurança e escalabilidade:
+**1. Pré-requisitos:**
+* Node.js (v18+) instalado.
+* Conta de desenvolvedor na [TTLock Open Platform](https://open.ttlock.com/).
+* Fechadura TTLock pareada e conectada a um Gateway Wi-Fi.
 
-1. **Frontend (Client):** Interface modular em Vanilla JS (ES Modules), gerenciamento de estado de sessão e renderização dinâmica no DOM.
-2. **Backend Proxy (Server):** Node.js com Express. Intercepta os comandos do frontend, formata as requisições no padrão exigido pela TTLock (`application/x-www-form-urlencoded`) e se comunica com o endpoint global `https://api.sciener.com`.
+**2. Instalação:**
+Clone o repositório e instale todas as dependências da raiz, client e server de uma só vez:
 
-**Principais Dependências:**
-`express` | `cors` | `axios` | `blueimp-md5` | `dotenv`
-
----
-
-## ⚙️ Pré-requisitos
-
-Antes de começar, certifique-se de ter o seguinte em sua máquina:
-* [Node.js](https://nodejs.org/) (v18 ou superior recomendado).
-* Uma conta de desenvolvedor aprovada na [TTLock Open Platform](https://open.ttlock.com/).
-* Pelo menos uma fechadura TTLock pareada à sua conta de testes e conectada a um Gateway Wi-Fi (necessário para comandos remotos).
-
----
-
-## 🛠️ Instalação e Execução
-
-**1. Clone o repositório:**
 ```bash
 git clone [https://github.com/gustavomcfly/ttlock-api-integration.git](https://github.com/gustavomcfly/ttlock-api-integration.git)
 cd ttlock-api-integration
-```
-
-**2. Instale as dependências:**
-Na raiz do projeto, execute o script configurado para instalar todas as bibliotecas necessárias de uma só vez:
-```bash
 npm run install:all
 ```
 
@@ -78,23 +57,20 @@ npm run dev
 
 ```text
 📦 ttlock-api-integration
-├── 📂 client               # Frontend da aplicação
-│   ├── 📂 src              # Código-fonte
-│   │   ├── 📂 api          # Client HTTP (apiClient.js)
-│   │   ├── 📂 components   # Componentes visuais (DeviceTable.js)
-│   │   ├── 📂 utils        # Helpers e gerenciamento de sessão
-│   │   ├── 📜 main.js      # Ponto de entrada e lógica principal
-│   │   └── 📜 style.css    # Estilos globais
-│   ├── 📜 index.html       # Estrutura base da interface web
-│   └── 📜 package.json     # Dependências específicas do frontend
-├── 📂 server               # Backend Proxy Server (Node.js)
-│   ├── 📂 routes           # Endpoints da API local (api.routes.js)
-│   ├── 📂 services         # Integração direta via Axios (ttlock.service.js)
-│   ├── 📜 .env             # Variáveis de ambiente (não versionado)
-│   ├── 📜 server.js        # Inicialização do Express Proxy
-│   └── 📜 package.json     # Dependências específicas do backend
-├── 📜 .gitignore           # Arquivos e pastas ignorados pelo Git (ex: node_modules)
-└── 📜 package.json         # Configurações globais e scripts da raiz
+├── 📂 client                 # Interface web
+│   ├── 📂 src
+│   │   ├── 📂 api            # Wrappers para chamadas HTTP
+│   │   ├── 📂 components     # Classes controladoras da UI (Painéis)
+│   │   ├── 📂 pages          # Templates em HTML puro
+│   │   ├── 📂 state          # Gerenciadores de estado (Testes, Sessão, Configs)
+│   │   └── 📜 main.js        # Roteamento e orquestração do frontend
+│   └── 📜 vite.config.js
+├── 📂 server                 # API Proxy e Orquestrador de Testes
+│   ├── 📂 routes             # Endpoints expostos para o frontend
+│   ├── 📂 services           # Lógica de negócios e comunicação com a TTLock
+│   ├── 📜 .env               # Credenciais de desenvolvedor
+│   └── 📜 server.js          # Inicialização do Express
+└── 📜 package.json           # Scripts de automação (concurrently)
 ```
 
 ---
