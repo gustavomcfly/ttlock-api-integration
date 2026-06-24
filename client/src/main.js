@@ -15,22 +15,24 @@ import settingsHtml from "./pages/settings.html?raw";
 
 document.getElementById("app").innerHTML = `
     ${loginHtml}
-    <div id="dashboard" style="display: none;" class="flex flex-col min-h-screen relative">
+    <div id="dashboard" style="display: none;" class="flex h-screen w-full overflow-hidden bg-background">
         ${sidebarHtml}
-        ${topbarHtml}
-        <main class="container mx-auto max-w-5xl p-4 sm:p-6 mt-2 flex-1 relative">
-            ${homeHtml}
-            ${lockHtml}
-            ${passcodeHtml}
-            ${rfidHtml}
-            ${fingerprintHtml}
-            ${cyclicTestHtml}
-            ${qualityTestHtml}
-            ${qualityTestProgressHtml}
-            ${reportsHtml}
-            ${lockSettingsHtml}
-            ${settingsHtml}
-        </main>
+        <div class="flex flex-1 flex-col overflow-hidden min-w-0">
+            ${topbarHtml}
+            <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 w-full">
+                ${homeHtml}
+                ${lockHtml}
+                ${passcodeHtml}
+                ${rfidHtml}
+                ${fingerprintHtml}
+                ${cyclicTestHtml}
+                ${qualityTestHtml}
+                ${qualityTestProgressHtml}
+                ${reportsHtml}
+                ${lockSettingsHtml}
+                ${settingsHtml}
+            </main>
+        </div>
     </div>
 `;
 
@@ -138,6 +140,41 @@ function init() {
   if (btnCloseSidebar) btnCloseSidebar.addEventListener("click", closeSidebar);
   if (sidebarOverlay) sidebarOverlay.addEventListener("click", closeSidebar);
 
+  // --- LÓGICA DE FOLD DA SIDEBAR ---
+  const btnToggleSidebar = document.getElementById("btn-toggle-sidebar");
+  const sidebarLogo = document.getElementById("sidebar-logo");
+  const sidebarTexts = document.querySelectorAll(".sidebar-text");
+  const toggleIcon = document.getElementById("sidebar-toggle-icon");
+
+  let isSidebarCollapsed = false;
+
+  if (btnToggleSidebar) {
+    btnToggleSidebar.addEventListener("click", () => {
+      isSidebarCollapsed = !isSidebarCollapsed;
+
+      if (isSidebarCollapsed) {
+        sidebar.classList.remove("w-80");
+        sidebar.classList.add("w-[80px]");
+
+        sidebarLogo.classList.add("scale-0", "opacity-0", "w-0");
+        sidebarTexts.forEach((t) =>
+          t.classList.add("scale-0", "opacity-0", "w-0"),
+        );
+        toggleIcon.classList.add("rotate-180");
+      } else {
+        sidebar.classList.remove("w-[80px]");
+        sidebar.classList.add("w-80");
+
+        sidebarLogo.classList.remove("scale-0", "opacity-0", "w-0");
+        sidebarTexts.forEach((t) =>
+          t.classList.remove("scale-0", "opacity-0", "w-0"),
+        );
+        toggleIcon.classList.remove("rotate-180");
+      }
+    });
+  }
+
+  // --- NAVEGAÇÃO ---
   document.getElementById("btn-topbar-home")?.addEventListener("click", (e) => {
     e.preventDefault();
     navigateToHomeView();
@@ -251,12 +288,24 @@ function init() {
 function updateSidebarActiveState(activeId) {
   const links = document.querySelectorAll(".sidebar-link");
   links.forEach((link) => {
+    // Removemos todas as cores de estado ativo/inativo
+    link.classList.remove(
+      "bg-primary/10",
+      "text-primary",
+      "text-muted-foreground",
+      "hover:bg-muted",
+      "hover:text-foreground",
+    );
+
+    // Injetamos a cor correta dependendo do link clicado
     if (link.id === activeId) {
-      link.className =
-        "sidebar-link px-4 py-3 rounded-lg bg-primary/10 text-primary font-semibold transition-colors";
+      link.classList.add("bg-primary/10", "text-primary");
     } else {
-      link.className =
-        "sidebar-link px-4 py-3 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors";
+      link.classList.add(
+        "text-muted-foreground",
+        "hover:bg-muted",
+        "hover:text-foreground",
+      );
     }
   });
 }

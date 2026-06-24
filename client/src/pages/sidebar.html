@@ -1,16 +1,45 @@
 <div
   id="sidebar-overlay"
-  class="fixed inset-0 z-40 hidden bg-black/50 opacity-0 transition-opacity"
+  class="fixed inset-0 z-40 hidden bg-black/50 opacity-0 transition-opacity lg:hidden"
 ></div>
 <aside
   id="sidebar"
-  class="bg-card border-border fixed top-0 left-0 z-50 flex h-full w-100 -translate-x-full transform flex-col border-r transition-transform duration-300 ease-in-out"
+  class="bg-card border-border fixed inset-y-0 left-0 z-50 flex w-80 -translate-x-full flex-col border-r transition-all duration-300 ease-in-out lg:static lg:translate-x-0"
 >
-  <div class="border-border flex items-center justify-between border-b p-6">
-    <h2 class="text-xl font-black tracking-tight">Pado Menu</h2>
+  <div
+    class="border-border flex h-[77px] items-center justify-between overflow-hidden border-b p-6"
+  >
+    <h2
+      id="sidebar-logo"
+      class="text-primary origin-left text-xl font-black tracking-tight whitespace-nowrap transition-all duration-300"
+    >
+      Pado Menu
+    </h2>
+
+    <button
+      id="btn-toggle-sidebar"
+      class="text-muted-foreground hover:text-primary hidden h-6 w-6 shrink-0 cursor-pointer items-center justify-center transition-colors lg:flex"
+    >
+      <svg
+        id="sidebar-toggle-icon"
+        class="transition-transform duration-300"
+        xmlns="http://www.w3.org/2000/svg"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M15 18l-6-6 6-6" />
+      </svg>
+    </button>
+
     <button
       id="btn-close-sidebar"
-      class="text-muted-foreground hover:text-primary cursor-pointer transition-colors"
+      class="text-muted-foreground hover:text-primary shrink-0 cursor-pointer transition-colors lg:hidden"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -29,45 +58,178 @@
     </button>
   </div>
 
-  <nav class="flex flex-1 flex-col gap-2 p-4">
+  <nav class="flex flex-1 flex-col gap-2 overflow-y-auto p-4">
     <a
       href="#"
       id="btn-sidebar-home"
-      class="sidebar-link text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg px-4 py-3 transition-colors"
-      >Home</a
+      class="sidebar-link flex items-center gap-4 overflow-hidden rounded-lg px-4 py-3 transition-colors"
     >
+      <div class="flex h-6 w-6 shrink-0 items-center justify-center">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+          <polyline points="2 12 12 17 22 12"></polyline>
+          <polyline points="2 17 12 22 22 17"></polyline>
+        </svg>
+      </div>
+      <span
+        class="sidebar-text origin-left font-medium whitespace-nowrap transition-all duration-300"
+        >Meus Dispositivos</span
+      >
+    </a>
+
     <a
       href="#"
       id="btn-sidebar-tests"
-      class="sidebar-link text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg px-4 py-3 transition-colors"
-      >Ciclagem</a
+      class="sidebar-link flex items-center gap-4 overflow-hidden rounded-lg px-4 py-3 transition-colors"
     >
+      <div class="flex h-6 w-6 shrink-0 items-center justify-center">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-10.02l5.67-5.67" />
+        </svg>
+      </div>
+      <span
+        class="sidebar-text origin-left font-medium whitespace-nowrap transition-all duration-300"
+        >Teste de Ciclagem</span
+      >
+    </a>
+
     <a
       href="#"
       id="btn-sidebar-quality"
-      class="sidebar-link text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg px-4 py-3 transition-colors"
-      >Qualidade</a
+      class="sidebar-link flex items-center gap-4 overflow-hidden rounded-lg px-4 py-3 transition-colors"
     >
+      <div class="flex h-6 w-6 shrink-0 items-center justify-center">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"
+          />
+          <path d="m9 12 2 2 4-4" />
+        </svg>
+      </div>
+      <span
+        class="sidebar-text origin-left font-medium whitespace-nowrap transition-all duration-300"
+        >Auditoria de Qualidade</span
+      >
+    </a>
+
     <a
       href="#"
       id="btn-sidebar-reports"
-      class="sidebar-link text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg px-4 py-3 transition-colors"
-      >Relatórios</a
+      class="sidebar-link flex items-center gap-4 overflow-hidden rounded-lg px-4 py-3 transition-colors"
     >
+      <div class="flex h-6 w-6 shrink-0 items-center justify-center">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+          />
+          <polyline points="14 2 14 8 20 8" />
+          <line x1="16" y1="13" x2="8" y2="13" />
+          <line x1="16" y1="17" x2="8" y2="17" />
+          <polyline points="10 9 9 9 8 9" />
+        </svg>
+      </div>
+      <span
+        class="sidebar-text origin-left font-medium whitespace-nowrap transition-all duration-300"
+        >Relatórios de Testes</span
+      >
+    </a>
+
     <a
       href="#"
       id="btn-sidebar-settings"
-      class="sidebar-link text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg px-4 py-3 transition-colors"
-      >Configurações</a
+      class="sidebar-link flex items-center gap-4 overflow-hidden rounded-lg px-4 py-3 transition-colors"
     >
+      <div class="flex h-6 w-6 shrink-0 items-center justify-center">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
+          />
+          <circle cx="12" cy="12" r="3" />
+        </svg>
+      </div>
+      <span
+        class="sidebar-text origin-left font-medium whitespace-nowrap transition-all duration-300"
+        >Configurações do Sistema</span
+      >
+    </a>
   </nav>
 
-  <div class="border-border border-t p-4">
+  <div class="border-border overflow-hidden border-t p-4">
     <button
       id="btn-logout"
-      class="bg-destructive/10 text-destructive hover:bg-destructive/20 w-full cursor-pointer rounded-lg px-4 py-2 font-semibold transition-colors"
+      class="bg-destructive/10 text-destructive hover:bg-destructive/20 flex w-full cursor-pointer items-center gap-4 overflow-hidden rounded-lg px-4 py-3 transition-colors"
     >
-      Sair da Conta
+      <div class="flex h-6 w-6 shrink-0 items-center justify-center">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+      </div>
+      <span
+        class="sidebar-text origin-left font-semibold whitespace-nowrap transition-all duration-300"
+        >Sair da Conta</span
+      >
     </button>
   </div>
 </aside>

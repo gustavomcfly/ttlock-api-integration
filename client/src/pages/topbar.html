@@ -1,10 +1,10 @@
 <nav
-  class="bg-card border-border sticky top-0 z-50 flex items-center justify-between border-b px-6 py-3.5 shadow-sm"
+  class="bg-card border-border sticky top-0 z-40 flex items-center justify-between border-b px-6 py-6 shadow-sm"
 >
   <div class="flex items-center gap-4">
     <button
       id="btn-open-sidebar"
-      class="hover:bg-muted hover:text-primary -ml-2 cursor-pointer rounded-md p-2 transition-colors"
+      class="hover:bg-muted hover:text-primary -ml-2 cursor-pointer rounded-md p-2 transition-colors lg:hidden"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -18,7 +18,9 @@
         stroke-linejoin="round"
       >
         <line x1="3" y1="12" x2="21" y2="12"></line>
+
         <line x1="3" y1="6" x2="21" y2="6"></line>
+
         <line x1="3" y1="18" x2="21" y2="18"></line>
       </svg>
     </button>
@@ -30,6 +32,7 @@
       Home
     </button>
   </div>
+
   <span
     id="connection-status"
     class="rounded-full bg-yellow-100 px-3 py-1 text-xs font-semibold tracking-wider text-yellow-800 uppercase"
