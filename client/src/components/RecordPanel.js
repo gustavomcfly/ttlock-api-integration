@@ -8,20 +8,16 @@ export class RecordPanel {
     this.table = document.getElementById("record-table");
     this.tbody = document.getElementById("record-list-body");
     this.emptyText = document.getElementById("no-records");
-
     this.btnRefreshList = document.getElementById("btn-refresh-records");
     this.btnClearList = document.getElementById("btn-clear-records");
-
     this.bindEvents();
   }
 
   bindEvents() {
-    if (this.btnRefreshList) {
+    if (this.btnRefreshList)
       this.btnRefreshList.addEventListener("click", () => this.fetchRecords());
-    }
-    if (this.btnClearList) {
+    if (this.btnClearList)
       this.btnClearList.addEventListener("click", () => this.clearRecords());
-    }
   }
 
   syncLock() {
@@ -30,18 +26,14 @@ export class RecordPanel {
 
   async fetchRecords() {
     if (!appState.selectedLockId) return;
-
     if (this.btnRefreshList) this.btnRefreshList.innerText = "Carregando...";
-
     try {
-      // Fetch the top 50 records
       const data = await recordApi.getRecords(
         session.getToken(),
         appState.selectedLockId,
         1,
         50,
       );
-      console.log("🔍 TTLock API Response (Records):", data);
 
       if (data.errcode && data.errcode !== 0) {
         toast.error(
@@ -50,40 +42,31 @@ export class RecordPanel {
         this.renderRecords([]);
         return;
       }
-
       let list = [];
-      if (Array.isArray(data.list)) {
-        list = data.list;
-      } else if (data.data && Array.isArray(data.data.list)) {
+      if (Array.isArray(data.list)) list = data.list;
+      else if (data.data && Array.isArray(data.data.list))
         list = data.data.list;
-      }
-
       this.renderRecords(list);
     } catch (err) {
-      console.error("Fetch Records Error:", err);
       toast.error("Falha ao buscar histórico de aberturas.");
       this.renderRecords([]);
     } finally {
-      if (this.btnRefreshList)
-        this.btnRefreshList.innerText = "Atualizar Lista";
+      if (this.btnRefreshList) this.btnRefreshList.innerText = "Atualizar";
     }
   }
 
   async clearRecords() {
     if (!appState.selectedLockId) return;
-
     if (
       !confirm(
         "Atenção: Esta ação limpará todo o histórico de aberturas desta fechadura.\n\nDeseja continuar?",
       )
     )
       return;
-
     if (this.btnClearList) {
       this.btnClearList.disabled = true;
       this.btnClearList.innerText = "Limpando...";
     }
-
     try {
       const data = await recordApi.clearRecords(
         session.getToken(),
@@ -109,17 +92,15 @@ export class RecordPanel {
 
   renderRecords(list) {
     this.tbody.innerHTML = "";
-
     if (list.length === 0) {
-      this.emptyText.style.display = "block";
-      this.table.style.display = "none";
+      this.emptyText.classList.remove("hidden");
+      this.table.classList.add("hidden");
       return;
     }
 
-    this.emptyText.style.display = "none";
-    this.table.style.display = "table";
+    this.emptyText.classList.add("hidden");
+    this.table.classList.remove("hidden");
 
-    // Map the recordTypes returned by TTLock
     const getMethodName = (type) => {
       const types = {
         1: "App (Bluetooth)",
@@ -136,9 +117,9 @@ export class RecordPanel {
 
     list.forEach((item) => {
       const tr = document.createElement("tr");
-      tr.className = "hover:bg-muted/30 transition-colors group";
+      tr.className =
+        "flex flex-col md:table-row p-4 md:p-0 hover:bg-muted/30 transition-colors group border-b border-border last:border-0 md:border-b-0";
 
-      // The time comes as a timestamp
       const dateObj = new Date(item.lockDate || item.serverDate);
       const dateStr = dateObj.toLocaleString("pt-BR", {
         day: "2-digit",
@@ -150,21 +131,28 @@ export class RecordPanel {
       });
 
       const methodName = getMethodName(item.recordType);
-
-      // Prefer the username, fallback to the keyboard passcode used, fallback to unknown
       const userName = item.username || item.keyboardPwd || "Desconhecido";
-
       const successBadge =
         item.success !== 0
           ? '<span class="px-2.5 py-1.5 rounded-full text-xs font-bold bg-green-500/10 text-green-500 border border-green-500/20">Sucesso</span>'
           : '<span class="px-2.5 py-1.5 rounded-full text-xs font-bold bg-red-500/10 text-red-500 border border-red-500/20">Falha</span>';
 
       tr.innerHTML = `
-        <td class="px-6 py-4 text-center whitespace-nowrap text-sm text-muted-foreground">${dateStr}</td>
-        <td class="px-6 py-4 text-center whitespace-nowrap font-medium group-hover:text-primary transition-colors">${userName}</td>
-        <td class="px-6 py-4 text-center whitespace-nowrap text-muted-foreground text-sm">${methodName}</td>
-        <td class="px-6 py-4 text-center whitespace-nowrap">
-            ${successBadge}
+        <td class="flex justify-between items-center md:table-cell py-1.5 md:py-4 md:px-6 md:text-center">
+            <span class="md:hidden text-xs font-semibold text-muted-foreground uppercase tracking-wider">Data/Hora</span>
+            <span class="text-sm text-muted-foreground text-right md:text-center">${dateStr}</span>
+        </td>
+        <td class="flex justify-between items-center md:table-cell py-1.5 md:py-4 md:px-6 md:text-center">
+            <span class="md:hidden text-xs font-semibold text-muted-foreground uppercase tracking-wider">Usuário/Descrição</span>
+            <span class="font-medium group-hover:text-primary transition-colors text-right md:text-center">${userName}</span>
+        </td>
+        <td class="flex justify-between items-center md:table-cell py-1.5 md:py-4 md:px-6 md:text-center">
+            <span class="md:hidden text-xs font-semibold text-muted-foreground uppercase tracking-wider">Método</span>
+            <span class="text-muted-foreground text-sm text-right md:text-center">${methodName}</span>
+        </td>
+        <td class="flex justify-between items-center md:table-cell py-1.5 md:py-4 md:px-6 md:text-center">
+            <span class="md:hidden text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</span>
+            <div class="text-right md:flex md:justify-center">${successBadge}</div>
         </td>
       `;
       this.tbody.appendChild(tr);
