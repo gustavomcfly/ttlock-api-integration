@@ -211,21 +211,19 @@ export class RfidPanel {
 
   renderCards(list) {
     this.tbody.innerHTML = "";
-
     if (list.length === 0) {
-      this.emptyText.style.display = "block";
-      this.table.style.display = "none";
+      this.emptyText.classList.remove("hidden");
+      this.table.classList.add("hidden");
       return;
     }
-
-    this.emptyText.style.display = "none";
-    this.table.style.display = "table";
+    this.emptyText.classList.add("hidden");
+    this.table.classList.remove("hidden");
 
     list.forEach((item) => {
       const tr = document.createElement("tr");
-      tr.className = "hover:bg-muted/30 transition-colors group";
+      tr.className =
+        "flex flex-col md:table-row p-4 md:p-0 hover:bg-muted/30 transition-colors group border-b border-border last:border-0 md:border-none";
 
-      // Date Formatting
       const startDateStr = item.startDate
         ? new Date(item.startDate).toLocaleDateString()
         : "";
@@ -244,19 +242,31 @@ export class RfidPanel {
       const statusText = isActive ? "Válida" : "Inativa";
 
       tr.innerHTML = `
-        <td class="px-6 py-4 text-center whitespace-nowrap font-medium group-hover:text-primary transition-colors">${item.cardName || "Sem Nome"}</td>
-        <td class="px-6 py-4 text-center whitespace-nowrap font-mono font-bold tracking-widest">${item.cardNumber}</td>
-        <td class="px-6 py-4 text-center whitespace-nowrap text-muted-foreground text-sm">${validade}</td>
-        <td class="px-6 py-4 text-center whitespace-nowrap">
-            <span class="px-2.5 py-1.5 rounded-full text-xs font-bold ${statusClass}">${statusText}</span>
+        <td class="flex justify-between items-center md:table-cell py-1.5 md:py-4 md:px-6 md:text-center align-middle">
+            <span class="md:hidden text-xs font-semibold text-muted-foreground uppercase tracking-wider">Nome</span>
+            <span class="font-medium group-hover:text-primary transition-colors text-right">${item.cardName || "Sem Nome"}</span>
         </td>
-        <td class="px-6 py-4 whitespace-nowrap text-center">
-            <div class="flex items-center justify-center gap-2">
-              <button class="btn-edit inline-flex items-center justify-center gap-1 bg-primary/10 text-primary hover:bg-primary/50 hover:text-primary-foreground px-3 py-1.5 rounded-md text-sm font-semibold transition-all cursor-pointer" data-id="${item.cardId}">
+        <td class="flex justify-between items-center md:table-cell py-1.5 md:py-4 md:px-6 md:text-center align-middle">
+            <span class="md:hidden text-xs font-semibold text-muted-foreground uppercase tracking-wider">Número</span>
+            <span class="font-mono font-bold tracking-widest text-right">${item.cardNumber}</span>
+        </td>
+        <td class="flex justify-between items-center md:table-cell py-1.5 md:py-4 md:px-6 md:text-center align-middle">
+            <span class="md:hidden text-xs font-semibold text-muted-foreground uppercase tracking-wider">Validade</span>
+            <span class="text-muted-foreground text-sm text-right">${validade}</span>
+        </td>
+        <td class="flex justify-between items-center md:table-cell py-1.5 md:py-4 md:px-6 md:text-center align-middle">
+            <span class="md:hidden text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</span>
+            <div class="text-right md:flex md:justify-center">
+              <span class="px-2.5 py-1.5 rounded-full text-xs font-bold ${statusClass}">${statusText}</span>
+            </div>
+        </td>
+        <td class="flex justify-center items-center md:table-cell pt-3 md:py-4 md:px-6 md:text-center align-middle">
+            <div class="flex items-center justify-center gap-2 w-full md:w-auto md:inline-flex">
+              <button class="btn-edit flex-1 md:flex-none inline-flex items-center justify-center gap-1 bg-primary/10 text-primary hover:bg-primary/50 hover:text-primary-foreground px-3 py-2 md:py-1.5 rounded-md text-sm font-semibold transition-all cursor-pointer" data-id="${item.cardId}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
                 Editar
               </button>
-              <button class="btn-delete inline-flex items-center justify-center gap-1 bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground px-3 py-1.5 rounded-md text-sm font-semibold transition-all cursor-pointer" data-id="${item.cardId}">
+              <button class="btn-delete flex-1 md:flex-none inline-flex items-center justify-center gap-1 bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground px-3 py-2 md:py-1.5 rounded-md text-sm font-semibold transition-all cursor-pointer" data-id="${item.cardId}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
                 Excluir
               </button>

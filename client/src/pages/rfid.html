@@ -184,18 +184,17 @@
       <h3 class="text-xl font-semibold">Cartões Registrados</h3>
       <button
         id="btn-refresh-rfids"
-        class="bg-muted/50 hover:bg-muted border-border text-muted-foreground hover:text-foreground cursor-pointer rounded-md border px-5 py-1.5 text-sm font-medium transition-all"
+        class="bg-muted/50 hover:bg-muted border-border text-muted-foreground hover:text-foreground w-full cursor-pointer rounded-md border px-5 py-2 text-sm font-medium transition-all sm:w-auto sm:py-1.5"
       >
         Atualizar Lista
       </button>
     </div>
-    <div class="overflow-x-auto">
+    <div class="overflow-hidden md:overflow-x-auto">
       <table
         id="rfid-table"
-        class="w-full border-collapse text-left"
-        style="display: none"
+        class="block hidden w-full border-collapse text-left md:table"
       >
-        <thead>
+        <thead class="hidden md:table-header-group">
           <tr
             class="bg-muted/30 text-muted-foreground border-border border-b text-xs tracking-wider uppercase"
           >
@@ -208,9 +207,15 @@
             <th class="px-6 py-4 text-center font-semibold">Ações</th>
           </tr>
         </thead>
-        <tbody id="rfid-list-body" class="divide-border divide-y"></tbody>
+        <tbody
+          id="rfid-list-body"
+          class="divide-border block divide-y md:table-row-group"
+        ></tbody>
       </table>
-      <div id="no-rfids" class="text-muted-foreground p-10 text-center text-sm">
+      <div
+        id="no-rfids"
+        class="text-muted-foreground hidden p-10 text-center text-sm"
+      >
         Nenhum cartão encontrado.
       </div>
     </div>

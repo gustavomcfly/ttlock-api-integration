@@ -36,43 +36,48 @@
       <h3 class="text-xl font-semibold">Lista de Fechaduras</h3>
 
       <div
-        class="bg-muted/50 border-border/50 flex items-center rounded-lg border p-1"
+        class="bg-muted/50 border-border/50 flex w-full items-center rounded-lg border p-1 sm:w-auto"
       >
         <button
           id="tab-online"
-          class="active-tab bg-background text-foreground cursor-pointer rounded-md px-5 py-1.5 text-sm font-bold shadow-sm transition-all"
+          class="active-tab bg-background text-foreground w-1/2 cursor-pointer rounded-md px-5 py-1.5 text-sm font-bold shadow-sm transition-all sm:w-auto"
         >
           Online
         </button>
         <button
           id="tab-offline"
-          class="text-muted-foreground hover:text-foreground cursor-pointer rounded-md px-5 py-1.5 text-sm font-medium transition-all"
+          class="text-muted-foreground hover:text-foreground w-1/2 cursor-pointer rounded-md px-5 py-1.5 text-sm font-medium transition-all sm:w-auto"
         >
           Offline
         </button>
       </div>
     </div>
-    <div class="overflow-x-auto">
+
+    <div class="w-full overflow-hidden md:overflow-x-auto">
       <table
         id="device-table"
-        class="w-full border-collapse text-left"
-        style="display: none"
+        class="block hidden w-full border-collapse text-left md:table"
       >
-        <thead>
+        <thead class="hidden md:table-header-group">
           <tr
             class="bg-muted/30 text-muted-foreground border-border border-b text-xs tracking-wider uppercase"
           >
-            <th class="px-6 text-center font-semibold">Nome da Fechadura</th>
+            <th class="px-6 py-4 text-center font-semibold">
+              Nome da Fechadura
+            </th>
             <th class="px-6 py-4 text-center font-semibold">ID da Fechadura</th>
             <th class="px-6 py-4 text-center font-semibold">Bateria</th>
             <th class="px-6 py-4 text-center font-semibold">Ação</th>
           </tr>
         </thead>
-        <tbody id="device-list-body" class="divide-border divide-y"></tbody>
+        <tbody
+          id="device-list-body"
+          class="divide-border block divide-y md:table-row-group"
+        ></tbody>
       </table>
       <div
         id="no-devices"
-        class="text-muted-foreground p-10 text-center text-sm"
+        class="text-muted-foreground hidden p-10 text-center text-sm"
       >
         Nenhum dispositivo carregado.
       </div>
