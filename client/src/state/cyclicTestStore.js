@@ -1,11 +1,31 @@
+const STORAGE_KEY = "ttlock_cyclic_tests_backup";
 const _tests = new Map();
 let _counter = 0;
+
+try {
+  const savedData = localStorage.getItem(STORAGE_KEY);
+  if (savedData) {
+    const parsed = JSON.parse(savedData);
+    parsed.forEach(test => {
+      test._cancel = false; 
+      test._isLooping = false;
+      _tests.set(test.id, test);
+    });
+  }
+} catch (e) {
+  console.error("Erro ao puxar backup dos testes:", e);
+}
+
+setInterval(() => {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(_tests.values())));
+}, 1000);
 
 export const cyclicTestStore = {
   create(config) {
     const id = `ctest_${Date.now()}_${++_counter}`;
     const test = {
       id,
+      dbId: null, 
       lockId: config.lockId,
       lockName: config.lockName,
       totalCycles: config.totalCycles,

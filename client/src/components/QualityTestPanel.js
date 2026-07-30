@@ -87,6 +87,7 @@ export class QualityTestPanel {
     });
   }
 
+
   loadSettings() {
     if (this.lblTester)
       this.lblTester.innerText = settingsState.testerName || "Não Definido";
@@ -224,7 +225,7 @@ export class QualityTestPanel {
             <td class="px-4 py-3 text-center font-mono text-xs text-primary">${test.testId}</td>
             <td class="px-4 py-3 text-center text-sm font-semibold">${completed} / ${total} <span class="text-muted-foreground ml-1">(${progress}%)</span></td>
             <td class="px-4 py-3 text-center">${statusBadge}</td>
-            <td class="px-4 py-3 text-right">
+            <td class="px-4 py-3 text-center">
                 <button class="btn-view-test inline-flex items-center justify-center gap-1 ${btnClass} px-3 py-1.5 rounded-md text-sm font-semibold transition-all cursor-pointer" data-id="${test.testId}">${btnText}</button>
             </td>
          `;
