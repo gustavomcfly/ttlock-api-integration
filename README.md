@@ -11,74 +11,89 @@ Sistema de controle e automação para testes de fechaduras digitais baseadas no
 
 ---
 
-## 🚀 Funcionalidades
+## 🚀 Tecnologias Utilizadas
 
-* 🔐 **Gestão Completa de Acessos:** Criação, edição e exclusão de Senhas (permanentes, temporárias, cíclicas), Cartões RFID e Biometrias diretamente pelo painel.
-* ⚡ **Auditoria de Qualidade (QA):** Roteiro automatizado que testa etapa por etapa as funcionalidades da fechadura (bateria, abertura remota, injeção de credenciais, atualização de firmware).
-* 🔄 **Teste de Ciclagem:** Automação de testes de estresse mecânico e de bateria, realizando comandos de abrir/fechar em loop contínuo com filas de execução.
-* 🛡️ **Proxy Server de Segurança:** Backend dedicado em Node.js para ocultar o `Client Secret`, realizar bypass de CORS e orquestrar os scripts de teste.
-* ⚙️ **Perfis de Teste:** Armazenamento local de parâmetros padrão (cargas de teste, tempos de delay e dados do testador) para agilizar o uso diário.
+A arquitetura foi modernizada para suportar processamento em background e armazenamento persistente:
+
+- **Frontend:** JavaScript (Vanilla/ES6+), HTML5, CSS3, construído e otimizado com [Vite](https://vitejs.dev/).
+- **Backend:** [Node.js](https://nodejs.org/) com [Express](https://expressjs.com/) (Proxy da API TTLock e Motor de Testes).
+- **Banco de Dados:** [PostgreSQL](https://www.postgresql.org/) para armazenamento seguro de logs, testes e configurações.
+- **ORM:** [Prisma](https://www.prisma.io/) para modelagem do banco e consultas tipadas.
+- **Integração:** TTLock Open API.
 
 ---
 
-## 🛠️ Tecnologias
+## ⚙️ Principais Funcionalidades
 
-* **Frontend:** Vanilla JS (ES Modules), Vite, Tailwind CSS V4. Arquitetura leve baseada em injeção de templates HTML e manipulação direta de estado.
-* **Backend:** Node.js, Express, Axios. Padrão arquitetural BFF (Backend-For-Frontend) dividindo lógica de negócios em Serviços e Rotas.
+- **Gestão de Fechaduras:** Listagem, status de bateria e comandos remotos de abrir/travar.
+- **Motor de Ciclagem (Background):** Testes de estresse de abrir/fechar rodando nativamente no backend 24/7, sem depender do navegador aberto.
+- **Auditoria de Qualidade (QA):** Criação e acompanhamento de roteiros de testes detalhados com logs de execução etapa por etapa.
+- **Geração de Relatórios:** Histórico de testes em banco de dados para análise de falhas.
 
 ---
 
 ## ⚙️ Como Executar
 
-**1. Pré-requisitos:**
-* Node.js (v18+) instalado.
-* Conta de desenvolvedor na [TTLock Open Platform](https://open.ttlock.com/).
-* Fechadura TTLock pareada e conectada a um Gateway Wi-Fi.
+## 🛠️ Como rodar o projeto (Instalação e Setup)
 
-**2. Instalação:**
-Clone o repositório e instale todas as dependências da raiz, client e server de uma só vez:
+Se você acabou de clonar o projeto em um **computador novo**, siga exatamente os passos abaixo para configurar o ambiente:
+
+### 1. Pré-requisitos
+
+Certifique-se de ter instalado em sua máquina:
+
+- [Node.js](https://nodejs.org/) (Versão 18+ recomendada)
+- [PostgreSQL](https://www.postgresql.org/) rodando localmente (ou uma URL de banco na nuvem)
+- Git
+
+### 2. Instalação das Dependências
+
+Abra o terminal na raiz do projeto e instale todas as dependências simultaneamente (raiz, frontend e backend) usando o script automatizado:
 
 ```bash
-git clone [https://github.com/gustavomcfly/ttlock-api-integration.git](https://github.com/gustavomcfly/ttlock-api-integration.git)
-cd ttlock-api-integration
 npm run install:all
 ```
 
-**3. Inicie a aplicação:**
-Inicie o projeto com o comando abaixo:
+### 3. Configuração do Banco de Dados (Prisma)
+
+Ainda no terminal, entre na pasta do servidor, gere o cliente do Prisma e crie as tabelas no seu banco de dados:
+
+```bash
+cd server
+npx prisma generate
+npx prisma db push
+cd ..
+```
+
+### 4. Executando o Projeto
+
+Com tudo configurado, volte para a raiz do projeto e inicie os servidores (Frontend e Backend subirão juntos através do _concurrently_):
+
 ```bash
 npm run dev
 ```
-*Acesse a aplicação no seu navegador (geralmente em `http://localhost:5173`).*
+
+- **Frontend (Vite):** Geralmente acessível em `http://localhost:5173`
+- **Backend (Node.js):** Rodando em `http://localhost:3001`
 
 ---
 
 ## 📁 Estrutura do Projeto
 
 ```text
-📦 ttlock-api-integration
-├── 📂 client                 # Interface web
-│   ├── 📂 src
-│   │   ├── 📂 api            # Wrappers para chamadas HTTP
-│   │   ├── 📂 components     # Classes controladoras da UI (Painéis)
-│   │   ├── 📂 pages          # Templates em HTML puro
-│   │   ├── 📂 state          # Gerenciadores de estado (Testes, Sessão, Configs)
-│   │   └── 📜 main.js        # Roteamento e orquestração do frontend
-│   └── 📜 vite.config.js
-├── 📂 server                 # API Proxy e Orquestrador de Testes
-│   ├── 📂 routes             # Endpoints expostos para o frontend
-│   ├── 📂 services           # Lógica de negócios e comunicação com a TTLock
-│   ├── 📜 .env               # Credenciais de desenvolvedor
-│   └── 📜 server.js          # Inicialização do Express
-└── 📜 package.json           # Scripts de automação (concurrently)
+/
+├── client/                 # Aplicação Frontend
+│   ├── src/                # Códigos fonte (Componentes, API, Estado)
+│   ├── index.html          # Ponto de entrada do Vite
+│   └── vite.config.js      # Configurações do empacotador
+├── server/                 # Aplicação Backend
+│   ├── prisma/             # Schema do banco de dados (schema.prisma)
+│   ├── db-routes/          # Rotas de comunicação com o PostgreSQL (Testes/Qualidade)
+│   ├── routes/             # Rotas de Proxy para a API da TTLock
+│   ├── services/           # Regras de negócio e comunicação direta (LockService, etc)
+│   ├── cyclicEngine.js     # Motor autônomo para o Teste de Ciclagem (Background)
+│   └── server.js           # Ponto de entrada do Express
+└── package.json            # Scripts globais do projeto (npm run dev, npm run install:all)
 ```
 
----
-
-## 🔒 Segurança
-
-* **Hash Local:** As senhas dos usuários são criptografadas em MD5 no lado do cliente antes de qualquer transmissão, respeitando o fluxo legado da API TTLock (OAuth2 password grant).
-* **Isolamento de Credenciais:** Nunca versione seu `Client ID` e `Client Secret` no GitHub. Utilize a interface da aplicação para injetar essas informações de forma dinâmica e segura em memória durante os testes.
-
----
-*Desenvolvido para propósitos de pesquisa e desenvolvimento de integrações IoT e automação de controle de acessos.*
+_Desenvolvido para propósitos de pesquisa e desenvolvimento de integrações IoT e automação de controle de acessos._
