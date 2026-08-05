@@ -10,8 +10,7 @@ import rfidRoutes from "./routes/rfid.routes.js";
 import fingerprintRoutes from "./routes/fingerprint.routes.js";
 import recordRoutes from "./routes/record.routes.js";
 import qualityRoutes from "./routes/quality.routes.js";
-import cyclicTestsDbRoutes from "./db-routes/cyclicTestsDb.js";
-
+import cyclicTestsDbRoutes from "./db-routes/cyclicTestsDB.js";
 
 const app = express();
 app.use(cors());
@@ -25,7 +24,7 @@ app.use("/api/rfid", rfidRoutes);
 app.use("/api/fingerprint", fingerprintRoutes);
 app.use("/api/record", recordRoutes);
 app.use("/api/quality", qualityRoutes);
-app.use('/db/cyclic-tests', cyclicTestsDbRoutes);
+app.use("/db/cyclic-tests", cyclicTestsDbRoutes);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

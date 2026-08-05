@@ -34,13 +34,7 @@ A arquitetura foi modernizada para suportar processamento em background e armaze
 
 ## ⚙️ Como Executar
 
-## 🛠️ Como rodar o projeto (Instalação e Setup)
-
-Se você acabou de clonar o projeto em um **computador novo**, siga exatamente os passos abaixo para configurar o ambiente:
-
 ### 1. Pré-requisitos
-
-Certifique-se de ter instalado em sua máquina:
 
 - [Node.js](https://nodejs.org/) (Versão 18+ recomendada)
 - [PostgreSQL](https://www.postgresql.org/) rodando localmente (ou uma URL de banco na nuvem)
@@ -56,7 +50,7 @@ npm run install:all
 
 ### 3. Configuração do Banco de Dados (Prisma)
 
-Ainda no terminal, entre na pasta do servidor, gere o cliente do Prisma e crie as tabelas no seu banco de dados:
+Entre na pasta do servidor, gere o cliente do Prisma e crie as tabelas no seu banco de dados:
 
 ```bash
 cd server
