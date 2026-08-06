@@ -59,6 +59,9 @@ model CyclicTest {
   delayBetweenCycles Int              @default(5)
   status             String           // running, paused, completed, failed, stopped
   totalFailures      Int              @default(0)
+  maxConsecutiveFailures Int          @default(3)
+  lowBatteryThreshold    Int          @default(20)
+  battery            Int?
   batteryStart       Int?
   batteryEnd         Int?
   startedAt          DateTime         @default(now())

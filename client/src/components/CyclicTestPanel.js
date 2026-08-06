@@ -1,8 +1,13 @@
 import { lockApi } from "../api/lockApi.js";
+import { cyclicTestApi } from "../api/cyclicTestApi.js";
 import { session } from "../utils/session.js";
 import { toast } from "../utils/toast.js";
 import { cyclicTestStore } from "../state/cyclicTestStore.js";
 
+// O teste de ciclagem roda inteiramente no backend (server/cyclicEngine.js), persistido
+// no Postgres via Prisma. Este painel é um cliente "burro": inicia/pausa/retoma/para o
+// teste por HTTP e faz polling do status — por isso o teste continua mesmo se a aba for
+// fechada ou o navegador for encerrado.
 export class CyclicTestPanel {
   constructor() {
     this._selectedId = null;
@@ -11,6 +16,8 @@ export class CyclicTestPanel {
     this._refreshInterval = null;
 
     this._lockQueues = new Map();
+    // ids que já vimos nesta sessão (para manter testes concluídos visíveis na lista)
+    this._knownIds = new Set();
 
     this._lockSelect = document.getElementById("cyclic-lock-select");
     this._inputTotalCycles = document.getElementById("cyclic-total-cycles");
@@ -34,9 +41,9 @@ export class CyclicTestPanel {
 
   async syncLock() {
     await this._fetchLocks();
+    await this._pollBackend();
     this._render();
     this._startRefresh();
-    this._resumeActiveTests();
   }
 
   deactivate() {
@@ -45,13 +52,75 @@ export class CyclicTestPanel {
 
   _startRefresh() {
     this._stopRefresh();
-    this._refreshInterval = setInterval(() => this._render(), 1000);
+    this._refreshInterval = setInterval(() => this._pollBackend(), 1500);
   }
 
   _stopRefresh() {
     if (this._refreshInterval) {
       clearInterval(this._refreshInterval);
       this._refreshInterval = null;
+    }
+  }
+
+  // ---------------------------------------------------------
+  // Sincronização com o backend: busca testes ativos, detecta
+  // transições (ex: running -> completed) e mantém a UI ao vivo.
+  // ---------------------------------------------------------
+  async _pollBackend() {
+    let activeRows = [];
+    try {
+      const data = await cyclicTestApi.listActive();
+      if (data.success) activeRows = data.list;
+    } catch (e) {
+      // Backend fora do ar momentaneamente: mantém último estado conhecido.
+      this._render();
+      return;
+    }
+
+    const activeIds = new Set(activeRows.map((r) => r.id));
+
+    for (const row of activeRows) {
+      cyclicTestStore.upsertFromServer(row);
+      this._knownIds.add(row.id);
+    }
+
+    // Testes que conhecíamos e estavam ativos, mas não aparecem mais na lista de ativos
+    // -> terminaram (completed/failed/stopped). Busca o estado final e avança a fila.
+    const finishedNow = [];
+    for (const id of this._knownIds) {
+      if (activeIds.has(id)) continue;
+      const cached = cyclicTestStore.get(id);
+      if (cached && ["running", "paused"].includes(cached.status)) {
+        finishedNow.push(id);
+      }
+    }
+
+    for (const id of finishedNow) {
+      try {
+        const data = await cyclicTestApi.get(id);
+        if (data.success) {
+          const test = cyclicTestStore.upsertFromServer(data.test);
+          this._onTestFinished(test);
+        }
+      } catch (_) {}
+    }
+
+    this._render();
+  }
+
+  _onTestFinished(test) {
+    if (test.status === "completed") {
+      toast.success(`[${test.lockName}] Teste concluído! ${test.totalCycles} ciclos.`);
+    } else if (test.status === "failed") {
+      toast.error(`[${test.lockName}] Teste encerrado por falhas consecutivas.`);
+    }
+
+    const next = this._dequeue(String(test.lockId));
+    if (next) {
+      setTimeout(() => {
+        toast.info(`[${next.lockName}] Iniciando próximo teste da fila...`);
+        this._launchTest(next);
+      }, 1500);
     }
   }
 
@@ -85,15 +154,6 @@ export class CyclicTestPanel {
     return cyclicTestStore
       .getAll()
       .some((t) => String(t.lockId) === String(lockId) && ["running", "paused"].includes(t.status));
-  }
-
-  _resumeActiveTests() {
-    // Só religa testes que estão "running" e que não estão com o motor ligado ainda
-    const activeTests = cyclicTestStore.getAll().filter(t => t.status === "running" && !t._isLooping);
-    activeTests.forEach(test => {
-      this._addLog(test, "SYSTEM", "Página recarregada. Retomando rotina...", "info");
-      this._runTest(test);
-    });
   }
 
   _enqueue(lockId, config) {
@@ -137,220 +197,106 @@ export class CyclicTestPanel {
       return;
     }
 
-    this._launchTest(config);
-  }
-
-  _launchTest(config) {
-    const test = cyclicTestStore.create(config);
-    this._selectedId = test.id;
-    this._render();
-    toast.success(`Teste iniciado: "${config.lockName}" · ${config.totalCycles} ciclos`);
-    
-    // ---------------------------------------------------------
-    // NOVO: AVISA O BACKEND QUE O TESTE COMEÇOU
-    // ---------------------------------------------------------
-    fetch('/db/cyclic-tests/start', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        lockId: config.lockId,
-        totalCycles: config.totalCycles,
-        delayBetweenCycles: config.delayBetweenCycles
-      })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) test.dbId = data.testId; // Salva o ID oficial do banco
-    })
-    .catch(err => console.error("Erro ao comunicar com BD:", err));
-
-    this._runTest(test);
+    await this._launchTest(config);
   }
 
   // ---------------------------------------------------------
-  // NOVO: AVISA O BACKEND QUE O TESTE TERMINOU/PAROU
+  // Inicia o teste no BACKEND. Depois disso o navegador não faz
+  // mais nada além de perguntar "como está indo?" periodicamente.
   // ---------------------------------------------------------
-  _syncDbTestStop(test) {
-    if (!test.dbId) return;
-    fetch(`/db/cyclic-tests/${test.dbId}/stop`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        status: test.status,
-        batteryEnd: test.battery
-      })
-    }).catch(() => {});
-  }
-
-  async _runTest(test) {
-    if (test._isLooping) return; 
-    test._isLooping = true; 
-
-    while (test.completedCycles < test.totalCycles) {
-      if (test._cancel || test.status === "failed" || test.status === "stopped") break;
-
-      test.currentAction = "Enviando desbloqueio...";
-      this._addLog(test, "UNLOCK", "Solicitando desbloqueio", "info");
-
-      let unlockOk = false;
-      try {
-        const r = await lockApi.remoteUnlock(session.getToken(), test.lockId);
-        if (r.errcode === 0) {
-          test.completedCycles += 0.5;
-          test.consecutiveFailures = 0;
-          unlockOk = true;
-          this._addLog(test, "UNLOCK", `Desbloqueio OK · ${test.completedCycles.toFixed(1)} ciclos`, "success");
-        } else {
-          throw new Error(r.errmsg || `errcode ${r.errcode}`);
-        }
-      } catch (e) {
-        test.totalFailures++;
-        test.consecutiveFailures++;
-        this._addLog(test, "UNLOCK", `Falha: ${e.message}`, "error");
-        if (test.consecutiveFailures >= test.maxConsecutiveFailures) {
-          test.status = "failed";
-          test.currentAction = `Parado: ${test.consecutiveFailures} falhas consecutivas.`;
-          this._addLog(test, "SYSTEM", `Limite de falhas atingido (${test.maxConsecutiveFailures}).`, "error");
-          toast.error(`[${test.lockName}] Teste encerrado por falhas consecutivas.`);
-          break;
-        }
-        await this._sleep(test.delayBetweenCycles * 1000, test);
-        continue;
-      }
-
-      if (!unlockOk || test._cancel || test.status === "failed") break;
-
-      if (test.delayBetweenCycles > 0) {
-        test.currentAction = `Aguardando ${test.delayBetweenCycles}s...`;
-        await this._sleep(test.delayBetweenCycles * 1000, test);
-      }
-
-      if (test._cancel || test.status === "failed" || test.status === "stopped") break;
-
-      test.currentAction = "Enviando travamento...";
-      this._addLog(test, "LOCK", "Solicitando travamento", "info");
-
-      try {
-        const r = await lockApi.remoteLock(session.getToken(), test.lockId);
-        if (r.errcode === 0) {
-          test.completedCycles += 0.5;
-          test.consecutiveFailures = 0;
-          this._addLog(test, "LOCK", `Travamento OK · ciclo ${test.completedCycles.toFixed(1)} concluído`, "success");
-        } else {
-          throw new Error(r.errmsg || `errcode ${r.errcode}`);
-        }
-      } catch (e) {
-        test.totalFailures++;
-        test.consecutiveFailures++;
-        this._addLog(test, "LOCK", `Falha: ${e.message}`, "error");
-        if (test.consecutiveFailures >= test.maxConsecutiveFailures) {
-          test.status = "failed";
-          test.currentAction = `Parado: ${test.consecutiveFailures} falhas consecutivas.`;
-          this._addLog(test, "SYSTEM", `Limite de falhas atingido (${test.maxConsecutiveFailures}).`, "error");
-          toast.error(`[${test.lockName}] Teste encerrado por falhas consecutivas.`);
-          break;
-        }
-      }
-
-      if (test._cancel || test.status === "failed" || test.status === "stopped") break;
-
-      const fullCycles = Math.floor(test.completedCycles);
-      if (fullCycles > 0 && fullCycles % 5 === 0 && test.completedCycles % 1 === 0) {
-        try {
-          const details = await lockApi.getLockDetails(session.getToken(), test.lockId);
-          if (details.electricQuantity !== undefined) {
-            test.battery = details.electricQuantity;
-            this._addLog(test, "BATTERY", `Bateria: ${test.battery}%`, "info");
-            if (test.lowBatteryThreshold > 0 && test.battery <= test.lowBatteryThreshold) {
-              toast.error(`[${test.lockName}] Bateria baixa: ${test.battery}% (limite: ${test.lowBatteryThreshold}%)`);
-              this._addLog(test, "BATTERY", `ALERTA: ${test.battery}% ≤ ${test.lowBatteryThreshold}%`, "warning");
-            }
-          }
-        } catch (_) {}
-      }
-
-      if (test.completedCycles < test.totalCycles && test.delayBetweenCycles > 0) {
-        test.currentAction = `Ciclo ${test.completedCycles.toFixed(1)} completo — aguardando ${test.delayBetweenCycles}s...`;
-        await this._sleep(test.delayBetweenCycles * 1000, test);
-      }
+  async _launchTest(config) {
+    const token = session.getToken();
+    if (!token) {
+      toast.error("Sessão expirada. Faça login novamente para iniciar o teste.");
+      return;
     }
 
-    test._isLooping = false; // Avisa que o motor desligou ao sair do laço
+    try {
+      const data = await cyclicTestApi.start(config, token);
+      if (!data.success) {
+        toast.error(data.message || "Falha ao iniciar o teste no servidor.");
+        return;
+      }
 
-    // ---------------------------------------------------------
-    // FINALIZAÇÃO SINCRONIZADA COM O BANCO
-    // ---------------------------------------------------------
-    if (test.status === "failed") {
-      test.completedAt = Date.now();
-      this._syncDbTestStop(test);
-    } else if (test._cancel || test.status === "stopped") {
-      test.status = "stopped";
-      test.completedAt = Date.now();
-      test.currentAction = "Teste interrompido manualmente.";
-      this._addLog(test, "SYSTEM", "Interrompido pelo usuário.", "info");
-      this._syncDbTestStop(test);
-    } else if (test.completedCycles >= test.totalCycles) {
-      test.status = "completed";
-      test.completedAt = Date.now();
-      test.currentAction = `Concluído! ${test.totalCycles} ciclos realizados.`;
-      this._addLog(test, "SYSTEM", `Concluído. Total de falhas: ${test.totalFailures}.`, "success");
-      toast.success(`[${test.lockName}] Teste concluído! ${test.totalCycles} ciclos.`);
-      this._syncDbTestStop(test);
-    }
+      toast.success(`Teste iniciado no servidor: "${config.lockName}" · ${config.totalCycles} ciclos`);
+      this._knownIds.add(data.testId);
+      this._selectedId = data.testId;
 
-    const next = this._dequeue(String(test.lockId));
-    if (next) {
-      setTimeout(() => {
-        toast.info(`[${next.lockName}] Iniciando próximo teste da fila...`);
-        this._launchTest(next);
-      }, 1500);
+      // Popula o cache local imediatamente com o que sabemos, até o próximo poll confirmar.
+      cyclicTestStore.upsertFromServer(
+        data.test
+          ? { ...data.test, logs: [] }
+          : {
+              id: data.testId,
+              lockId: parseInt(config.lockId),
+              totalCycles: config.totalCycles,
+              completedCycles: 0,
+              delayBetweenCycles: config.delayBetweenCycles,
+              maxConsecutiveFailures: config.maxConsecutiveFailures,
+              lowBatteryThreshold: config.lowBatteryThreshold,
+              status: "running",
+              totalFailures: 0,
+              battery: null,
+              startedAt: new Date().toISOString(),
+              completedAt: null,
+              logs: [],
+            },
+        config.lockName
+      );
+      this._render();
+      await this._pollBackend();
+    } catch (err) {
+      console.error("Erro ao comunicar com o backend:", err);
+      toast.error("Não foi possível iniciar o teste (backend indisponível).");
     }
   }
 
-  async _sleep(ms, test) {
-    const step = 100;
-    let remaining = ms;
-    while (remaining > 0) {
-      if (!test || test._cancel || test.status === "failed" || test.status === "stopped") return;
-      if (test.status !== "paused") remaining -= step;
-      await new Promise((r) => setTimeout(r, step));
-    }
-  }
-
-  pauseTest(id) {
+  async pauseTest(id) {
     const test = cyclicTestStore.get(id);
     if (!test || test.status !== "running") return;
-    test.status = "paused";
-    test.currentAction = "Pausado.";
-    this._addLog(test, "SYSTEM", "Teste pausado.", "info");
-    this._render();
+    try {
+      const data = await cyclicTestApi.pause(id);
+      if (!data.success) return toast.error(data.message || "Não foi possível pausar.");
+      toast.info("Teste pausado.");
+    } catch (_) {
+      toast.error("Falha ao comunicar com o servidor.");
+    }
+    await this._pollBackend();
   }
 
-  resumeTest(id) {
+  async resumeTest(id) {
     const test = cyclicTestStore.get(id);
     if (!test || test.status !== "paused") return;
-    test.status = "running";
-    test.currentAction = "Retomando...";
-    this._addLog(test, "SYSTEM", "Teste retomado.", "info");
-    this._render();
+    try {
+      const data = await cyclicTestApi.resume(id);
+      if (!data.success) return toast.error(data.message || "Não foi possível retomar.");
+      toast.info("Teste retomado.");
+    } catch (_) {
+      toast.error("Falha ao comunicar com o servidor.");
+    }
+    await this._pollBackend();
   }
 
-  stopTest(id) {
+  async stopTest(id) {
     const test = cyclicTestStore.get(id);
     if (!test || ["completed", "failed", "stopped"].includes(test.status)) return;
-    test._cancel = true;
-    test.status = "stopped";
-    this._render();
+    try {
+      await cyclicTestApi.stop(id, { status: "stopped", batteryEnd: test.battery });
+    } catch (_) {
+      toast.error("Falha ao comunicar com o servidor.");
+    }
+    await this._pollBackend();
   }
 
-  deleteTest(id) {
+  async deleteTest(id) {
     const test = cyclicTestStore.get(id);
     if (!test) return;
     if (!["completed", "failed", "stopped"].includes(test.status)) {
-      test._cancel = true;
-      test.status = "stopped";
-      this._syncDbTestStop(test); // Avisa o banco caso seja abortado via botão remover
+      try {
+        await cyclicTestApi.stop(id, { status: "stopped", batteryEnd: test.battery });
+      } catch (_) {}
     }
+    this._knownIds.delete(id);
     cyclicTestStore.delete(id);
     if (this._selectedId === id) this._selectedId = null;
     if (this._editingId === id) this._editingId = null;
@@ -363,11 +309,19 @@ export class CyclicTestPanel {
     this._render();
   }
 
-  editTest(id, updates) {
-    cyclicTestStore.update(id, updates);
+  async editTest(id, updates) {
+    try {
+      const data = await cyclicTestApi.edit(id, updates);
+      if (!data.success) {
+        toast.error(data.message || "Não foi possível salvar as alterações.");
+        return;
+      }
+      toast.success("Parâmetros atualizados.");
+    } catch (_) {
+      toast.error("Falha ao comunicar com o servidor.");
+    }
     this._editingId = null;
-    toast.success("Parâmetros atualizados.");
-    this._render();
+    await this._pollBackend();
   }
 
   _render() {
@@ -569,26 +523,6 @@ export class CyclicTestPanel {
       };
       this.editTest(test.id, updates);
     });
-  }
-
-  // ---------------------------------------------------------
-  // NOVO: AVISA O BANCO SOBRE CADA EVENTO ENVIADO AO LOG
-  // ---------------------------------------------------------
-  _addLog(test, type, message, level = "info") {
-    test.log.push({ time: Date.now(), type, message, level });
-    if (test.log.length > 150) test.log.shift();
-
-    if (test.dbId) {
-      fetch(`/db/cyclic-tests/${test.dbId}/log`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type, level, message,
-          currentCycle: test.completedCycles,
-          isFailure: level === 'error' || level === 'warning'
-        })
-      }).catch(() => {}); // Ignora silenciosamente erros de rede
-    }
   }
 
   _calcETA(test) {
