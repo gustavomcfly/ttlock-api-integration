@@ -21,6 +21,13 @@ export const cyclicTestApi = {
     return parse(res);
   },
 
+  // Histórico completo do usuário logado (inclui testes já finalizados) — usado para
+  // repopular a tela ao recarregar a página, já que /active só retorna testes em andamento.
+  async listByUser(userId) {
+    const res = await fetch(`${BASE_URL}/user/${userId}`);
+    return parse(res);
+  },
+
   async start(config, token) {
     const res = await fetch(`${BASE_URL}/start`, {
       method: "POST",
@@ -28,6 +35,7 @@ export const cyclicTestApi = {
       body: JSON.stringify({
         lockId: config.lockId,
         lockAlias: config.lockName,
+        userId: config.userId,
         totalCycles: config.totalCycles,
         delayBetweenCycles: config.delayBetweenCycles,
         maxConsecutiveFailures: config.maxConsecutiveFailures,

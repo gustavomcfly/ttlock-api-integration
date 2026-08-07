@@ -13,6 +13,7 @@ router.get('/active', async (req, res) => {
       orderBy: { startedAt: 'desc' },
       include: {
         lock: true,
+        user: true,
         logs: { orderBy: { timestamp: 'desc' }, take: 50 },
       },
     });
@@ -209,6 +210,64 @@ router.post('/:id/stop', async (req, res) => {
   }
 });
 
+// Histórico de testes de um usuário específico (todas as fechaduras) — base para relatórios.
+router.get('/user/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const tests = await prisma.cyclicTest.findMany({
+      where: { userId },
+      orderBy: { startedAt: 'desc' },
+      include: {
+        lock: true,
+        logs: { orderBy: { timestamp: 'desc' }, take: 50 },
+        _count: { select: { logs: true } },
+      },
+    });
+    res.status(200).json({ success: true, list: tests });
+  } catch (error) {
+    console.error('[DB] Erro ao buscar testes do usuário:', error);
+    res.status(500).json({ success: false });
+  }
+});
+
+// Relatório agregado, filtrável por usuário e/ou fechadura.
+// Ex: /db/cyclic-tests/reports/summary?userId=...&lockId=...
+router.get('/reports/summary', async (req, res) => {
+  try {
+    const { userId, lockId } = req.query;
+    const where = {};
+    if (userId) where.userId = userId;
+    if (lockId) where.lockId = parseInt(lockId);
+
+    const [totalTests, byStatus, agg] = await Promise.all([
+      prisma.cyclicTest.count({ where }),
+      prisma.cyclicTest.groupBy({ by: ['status'], where, _count: { _all: true } }),
+      prisma.cyclicTest.aggregate({
+        where,
+        _sum: { totalFailures: true, completedCycles: true },
+      }),
+    ]);
+
+    const byStatusMap = byStatus.reduce((acc, row) => {
+      acc[row.status] = row._count._all;
+      return acc;
+    }, {});
+
+    res.status(200).json({
+      success: true,
+      report: {
+        totalTests,
+        byStatus: byStatusMap,
+        totalCyclesRun: agg._sum.completedCycles || 0,
+        totalFailures: agg._sum.totalFailures || 0,
+      },
+    });
+  } catch (error) {
+    console.error('[DB] Erro ao gerar relatório:', error);
+    res.status(500).json({ success: false });
+  }
+});
+
 router.get('/lock/:lockId', async (req, res) => {
   try {
     const { lockId } = req.params;
@@ -221,6 +280,7 @@ router.get('/lock/:lockId', async (req, res) => {
           orderBy: { timestamp: 'desc' },
           take: 50,
         },
+        user: true,
         _count: { select: { logs: true } },
       },
     });
@@ -242,6 +302,8 @@ router.get('/:id', async (req, res) => {
         logs: {
           orderBy: { timestamp: 'desc' },
         },
+        user: true,
+        lock: true,
       },
     });
 

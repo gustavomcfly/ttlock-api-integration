@@ -16,17 +16,21 @@ export class ApiConnectionCard {
   }
 
   async authenticate() {
-    if (!appState.credentials.username) {
+    if (!appState.username) {
       toast.error("Sessão expirada. Por favor faça logout e login novamente.");
       return;
     }
 
     this.btnAuthenticate.innerText = "Conectando...";
     try {
-      const data = await authApi.login(appState.credentials);
+      const data = await authApi.login({
+        username: appState.username,
+        password: appState.password,
+      });
 
       if (data.access_token) {
         session.save(data.access_token);
+        session.saveUser(data.localUserId, appState.username);
         this.setConnectedUI();
         this.onConnectSuccess();
         toast.error("Autentificação bem sucedida!");

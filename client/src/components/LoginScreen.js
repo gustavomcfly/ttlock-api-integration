@@ -58,6 +58,7 @@ export class LoginScreen {
 
       if (data.access_token) {
         session.save(data.access_token);
+        session.saveUser(data.localUserId, username);
         appState.setCredentials(username, credentials.password);
         this.hide();
         toast.success("Autenticação bem sucedida!");

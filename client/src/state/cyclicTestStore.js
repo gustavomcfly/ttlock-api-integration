@@ -20,6 +20,7 @@ function fromServer(row, lockNameFallback) {
     dbId: row.id,
     lockId: row.lockId,
     lockName: row.lock?.lockAlias || existing?.lockName || lockNameFallback || `Lock ${row.lockId}`,
+    startedBy: row.user?.username || row.user?.name || existing?.startedBy || null,
     totalCycles: row.totalCycles,
     completedCycles: row.completedCycles,
     delayBetweenCycles: row.delayBetweenCycles,

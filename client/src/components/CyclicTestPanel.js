@@ -41,9 +41,29 @@ export class CyclicTestPanel {
 
   async syncLock() {
     await this._fetchLocks();
+    await this._loadUserHistory();
     await this._pollBackend();
     this._render();
     this._startRefresh();
+  }
+
+  // Testes finalizados não vêm em /active (que só traz running/paused), então sem isso
+  // eles "desapareceriam" a cada reload mesmo estando salvos no banco. Carrega o
+  // histórico do usuário logado uma vez ao entrar na tela.
+  async _loadUserHistory() {
+    const userId = session.getUserId();
+    if (!userId) return; // sessão antiga, sem userId local — faça login novamente
+    try {
+      const data = await cyclicTestApi.listByUser(userId);
+      if (data.success) {
+        for (const row of data.list) {
+          cyclicTestStore.upsertFromServer(row);
+          this._knownIds.add(row.id);
+        }
+      }
+    } catch (_) {
+      // Backend indisponível: segue só com o que /active trouxer.
+    }
   }
 
   deactivate() {
@@ -183,6 +203,7 @@ export class CyclicTestPanel {
     const config = {
       lockId,
       lockName: lockObj.lockAlias || `Lock ${lockId}`,
+      userId: session.getUserId(),
       totalCycles,
       delayBetweenCycles: Math.max(0, parseFloat(this._inputDelayCycles?.value) || 5),
       maxConsecutiveFailures: Math.max(1, parseInt(this._inputMaxFailures?.value) || 3),
@@ -304,9 +325,22 @@ export class CyclicTestPanel {
   }
 
   selectTest(id) {
-    this._selectedId = id === this._selectedId ? null : id;
+    const wasSelected = id === this._selectedId;
+    this._selectedId = wasSelected ? null : id;
     this._editingId = null;
     this._render();
+
+    if (!wasSelected) {
+      cyclicTestApi
+        .get(id)
+        .then((data) => {
+          if (data.success) {
+            cyclicTestStore.upsertFromServer(data.test);
+            if (this._selectedId === id) this._render();
+          }
+        })
+        .catch(() => {});
+    }
   }
 
   async editTest(id, updates) {
@@ -370,6 +404,7 @@ export class CyclicTestPanel {
                   ${test.battery !== null ? ` · 🔋 ${test.battery}%` : ""}
                   ${test.totalFailures > 0 ? ` · <span class="text-destructive">${test.totalFailures} falha(s)</span>` : ""}
                   ${qLen > 0 && !isDone ? ` · <span class="text-yellow-500">${qLen} na fila</span>` : ""}
+                  ${test.startedBy ? ` · <span class="italic">por ${test.startedBy}</span>` : ""}
                 </p>
               </div>
             </div>
@@ -427,7 +462,7 @@ export class CyclicTestPanel {
             ${this._statusDot(test.status)}
             <div>
               <h3 class="font-semibold">${test.lockName}</h3>
-              <p class="text-muted-foreground text-xs font-mono">ID ${test.lockId}</p>
+              <p class="text-muted-foreground text-xs font-mono">ID ${test.lockId}${test.startedBy ? ` · por ${test.startedBy}` : ""}</p>
             </div>
           </div>
           <div class="flex flex-wrap items-center gap-2">
