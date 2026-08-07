@@ -23,7 +23,9 @@ export class CyclicTestPanel {
     this._inputTotalCycles = document.getElementById("cyclic-total-cycles");
     this._inputDelayCycles = document.getElementById("cyclic-delay-cycles");
     this._inputMaxFailures = document.getElementById("cyclic-max-failures");
-    this._inputBatteryThreshold = document.getElementById("cyclic-battery-threshold");
+    this._inputBatteryThreshold = document.getElementById(
+      "cyclic-battery-threshold",
+    );
     this._btnStart = document.getElementById("btn-start-cyclic-test");
     this._btnRefreshLocks = document.getElementById("btn-cyclic-refresh-locks");
 
@@ -130,9 +132,13 @@ export class CyclicTestPanel {
 
   _onTestFinished(test) {
     if (test.status === "completed") {
-      toast.success(`[${test.lockName}] Teste concluído! ${test.totalCycles} ciclos.`);
+      toast.success(
+        `[${test.lockName}] Teste concluído! ${test.totalCycles} ciclos.`,
+      );
     } else if (test.status === "failed") {
-      toast.error(`[${test.lockName}] Teste encerrado por falhas consecutivas.`);
+      toast.error(
+        `[${test.lockName}] Teste encerrado por falhas consecutivas.`,
+      );
     }
 
     const next = this._dequeue(String(test.lockId));
@@ -154,7 +160,8 @@ export class CyclicTestPanel {
       this._renderLockSelect();
     } catch (e) {
       if (this._lockSelect) {
-        this._lockSelect.innerHTML = '<option value="">Erro ao carregar fechaduras</option>';
+        this._lockSelect.innerHTML =
+          '<option value="">Erro ao carregar fechaduras</option>';
       }
     }
   }
@@ -162,18 +169,26 @@ export class CyclicTestPanel {
   _renderLockSelect() {
     if (!this._lockSelect) return;
     if (this._locks.length === 0) {
-      this._lockSelect.innerHTML = '<option value="">Nenhuma fechadura online encontrada</option>';
+      this._lockSelect.innerHTML =
+        '<option value="">Nenhuma fechadura online encontrada</option>';
       return;
     }
     this._lockSelect.innerHTML = this._locks
-      .map((l) => `<option value="${l.lockId}">${l.lockAlias || "Lock " + l.lockId} · 🔋 ${l.electricQuantity ?? "--"}%</option>`)
+      .map(
+        (l) =>
+          `<option value="${l.lockId}">${l.lockAlias || "Lock " + l.lockId} · 🔋 ${l.electricQuantity ?? "--"}%</option>`,
+      )
       .join("");
   }
 
   _hasActiveLockTest(lockId) {
     return cyclicTestStore
       .getAll()
-      .some((t) => String(t.lockId) === String(lockId) && ["running", "paused"].includes(t.status));
+      .some(
+        (t) =>
+          String(t.lockId) === String(lockId) &&
+          ["running", "paused"].includes(t.status),
+      );
   }
 
   _enqueue(lockId, config) {
@@ -193,27 +208,42 @@ export class CyclicTestPanel {
 
   async _handleStart() {
     const lockId = this._lockSelect?.value;
-    const lockObj = this._locks.find((l) => String(l.lockId) === String(lockId));
+    const lockObj = this._locks.find(
+      (l) => String(l.lockId) === String(lockId),
+    );
 
-    if (!lockId || !lockObj) return toast.error("Selecione uma fechadura online.");
+    if (!lockId || !lockObj)
+      return toast.error("Selecione uma fechadura online.");
 
     const totalCycles = parseInt(this._inputTotalCycles?.value);
-    if (!totalCycles || totalCycles < 1) return toast.error("Número de ciclos inválido.");
+    if (!totalCycles || totalCycles < 1)
+      return toast.error("Número de ciclos inválido.");
 
     const config = {
       lockId,
       lockName: lockObj.lockAlias || `Lock ${lockId}`,
       userId: session.getUserId(),
       totalCycles,
-      delayBetweenCycles: Math.max(0, parseFloat(this._inputDelayCycles?.value) || 5),
-      maxConsecutiveFailures: Math.max(1, parseInt(this._inputMaxFailures?.value) || 3),
-      lowBatteryThreshold: Math.max(0, parseInt(this._inputBatteryThreshold?.value) || 20),
+      delayBetweenCycles: Math.max(
+        0,
+        parseFloat(this._inputDelayCycles?.value) || 5,
+      ),
+      maxConsecutiveFailures: Math.max(
+        1,
+        parseInt(this._inputMaxFailures?.value) || 3,
+      ),
+      lowBatteryThreshold: Math.max(
+        0,
+        parseInt(this._inputBatteryThreshold?.value) || 20,
+      ),
     };
 
     if (this._hasActiveLockTest(lockId)) {
       this._enqueue(lockId, config);
       const qLen = this._queueLengthFor(lockId);
-      toast.info(`"${config.lockName}" já tem um teste em execução. Adicionado à fila (posição ${qLen}).`);
+      toast.info(
+        `"${config.lockName}" já tem um teste em execução. Adicionado à fila (posição ${qLen}).`,
+      );
       this._render();
       return;
     }
@@ -228,7 +258,9 @@ export class CyclicTestPanel {
   async _launchTest(config) {
     const token = session.getToken();
     if (!token) {
-      toast.error("Sessão expirada. Faça login novamente para iniciar o teste.");
+      toast.error(
+        "Sessão expirada. Faça login novamente para iniciar o teste.",
+      );
       return;
     }
 
@@ -239,7 +271,9 @@ export class CyclicTestPanel {
         return;
       }
 
-      toast.success(`Teste iniciado no servidor: "${config.lockName}" · ${config.totalCycles} ciclos`);
+      toast.success(
+        `Teste iniciado no servidor: "${config.lockName}" · ${config.totalCycles} ciclos`,
+      );
       this._knownIds.add(data.testId);
       this._selectedId = data.testId;
 
@@ -262,7 +296,7 @@ export class CyclicTestPanel {
               completedAt: null,
               logs: [],
             },
-        config.lockName
+        config.lockName,
       );
       this._render();
       await this._pollBackend();
@@ -277,7 +311,8 @@ export class CyclicTestPanel {
     if (!test || test.status !== "running") return;
     try {
       const data = await cyclicTestApi.pause(id);
-      if (!data.success) return toast.error(data.message || "Não foi possível pausar.");
+      if (!data.success)
+        return toast.error(data.message || "Não foi possível pausar.");
       toast.info("Teste pausado.");
     } catch (_) {
       toast.error("Falha ao comunicar com o servidor.");
@@ -290,7 +325,8 @@ export class CyclicTestPanel {
     if (!test || test.status !== "paused") return;
     try {
       const data = await cyclicTestApi.resume(id);
-      if (!data.success) return toast.error(data.message || "Não foi possível retomar.");
+      if (!data.success)
+        return toast.error(data.message || "Não foi possível retomar.");
       toast.info("Teste retomado.");
     } catch (_) {
       toast.error("Falha ao comunicar com o servidor.");
@@ -300,9 +336,13 @@ export class CyclicTestPanel {
 
   async stopTest(id) {
     const test = cyclicTestStore.get(id);
-    if (!test || ["completed", "failed", "stopped"].includes(test.status)) return;
+    if (!test || ["completed", "failed", "stopped"].includes(test.status))
+      return;
     try {
-      await cyclicTestApi.stop(id, { status: "stopped", batteryEnd: test.battery });
+      await cyclicTestApi.stop(id, {
+        status: "stopped",
+        batteryEnd: test.battery,
+      });
     } catch (_) {
       toast.error("Falha ao comunicar com o servidor.");
     }
@@ -314,7 +354,10 @@ export class CyclicTestPanel {
     if (!test) return;
     if (!["completed", "failed", "stopped"].includes(test.status)) {
       try {
-        await cyclicTestApi.stop(id, { status: "stopped", batteryEnd: test.battery });
+        await cyclicTestApi.stop(id, {
+          status: "stopped",
+          batteryEnd: test.battery,
+        });
       } catch (_) {}
     }
     this._knownIds.delete(id);
@@ -358,6 +401,36 @@ export class CyclicTestPanel {
     await this._pollBackend();
   }
 
+  async deleteTest(id) {
+    const test = cyclicTestStore.get(id);
+    if (!test) return;
+    if (!["completed", "failed", "stopped"].includes(test.status)) {
+      try {
+        await cyclicTestApi.stop(id, {
+          status: "stopped",
+          batteryEnd: test.battery,
+        });
+      } catch (_) {}
+    }
+    try {
+      const data = await cyclicTestApi.remove(id);
+      if (!data.success) {
+        toast.error(
+          data.message || "Não foi possível remover o teste no servidor.",
+        );
+        return;
+      }
+    } catch (_) {
+      toast.error("Falha ao comunicar com o servidor.");
+      return;
+    }
+    this._knownIds.delete(id);
+    cyclicTestStore.delete(id);
+    if (this._selectedId === id) this._selectedId = null;
+    if (this._editingId === id) this._editingId = null;
+    this._render();
+  }
+
   _render() {
     this._renderList();
     if (this._selectedId && cyclicTestStore.get(this._selectedId)) {
@@ -375,7 +448,9 @@ export class CyclicTestPanel {
   _renderList() {
     if (!this._listContainer) return;
     const tests = cyclicTestStore.getAll();
-    const activeCount = tests.filter((t) => ["running", "paused"].includes(t.status)).length;
+    const activeCount = tests.filter((t) =>
+      ["running", "paused"].includes(t.status),
+    ).length;
     if (this._countBadge) this._countBadge.textContent = activeCount;
 
     if (tests.length === 0) {
@@ -385,14 +460,19 @@ export class CyclicTestPanel {
 
     this._listContainer.innerHTML = tests
       .map((test) => {
-        const pct = Math.min(100, (test.completedCycles / test.totalCycles) * 100);
+        const pct = Math.min(
+          100,
+          (test.completedCycles / test.totalCycles) * 100,
+        );
         const isSelected = test.id === this._selectedId;
         const qLen = this._queueLengthFor(String(test.lockId));
         const isDone = ["completed", "failed", "stopped"].includes(test.status);
 
         return `
         <div class="mb-2 last:mb-0 cursor-pointer rounded-xl border px-4 py-3 transition-all ${
-          isSelected ? "border-primary bg-primary/5" : "border-border bg-background hover:border-primary/40 hover:bg-card"
+          isSelected
+            ? "border-primary bg-primary/5"
+            : "border-border bg-background hover:border-primary/40 hover:bg-card"
         }" data-action="select" data-id="${test.id}">
           <div class="flex items-center justify-between gap-3 mb-2">
             <div class="min-w-0 flex-1 flex items-center gap-2">
@@ -432,7 +512,9 @@ export class CyclicTestPanel {
           const test = cyclicTestStore.get(id);
           const name = test?.lockName || "este teste";
           const running = test && ["running", "paused"].includes(test.status);
-          const msg = running ? `Parar e remover o teste de "${name}"?` : `Remover o teste de "${name}"?`;
+          const msg = running
+            ? `Parar e remover o teste de "${name}"?`
+            : `Remover o teste de "${name}"?`;
           if (confirm(msg)) this.deleteTest(id);
         }
       });
@@ -450,7 +532,9 @@ export class CyclicTestPanel {
     const eta = this._calcETA(test);
     const isDone = ["completed", "failed", "stopped"].includes(test.status);
 
-    const elapsed = test.startedAt ? (test.completedAt ? test.completedAt : Date.now()) - test.startedAt : 0;
+    const elapsed = test.startedAt
+      ? (test.completedAt ? test.completedAt : Date.now()) - test.startedAt
+      : 0;
     const recentLogs = [...test.log].reverse().slice(0, 30);
     const isActive = ["running", "paused"].includes(test.status);
     const qLen = this._queueLengthFor(String(test.lockId));
@@ -513,10 +597,20 @@ export class CyclicTestPanel {
     this._detailContainer.querySelectorAll("[data-ctrl]").forEach((btn) => {
       btn.addEventListener("click", () => {
         switch (btn.dataset.ctrl) {
-          case "pause": this.pauseTest(id); break;
-          case "resume": this.resumeTest(id); break;
-          case "stop": if (confirm(`Parar o teste de "${test.lockName}"?`)) this.stopTest(id); break;
-          case "edit": this._editingId = id; this._render(); break;
+          case "pause":
+            this.pauseTest(id);
+            break;
+          case "resume":
+            this.resumeTest(id);
+            break;
+          case "stop":
+            if (confirm(`Parar o teste de "${test.lockName}"?`))
+              this.stopTest(id);
+            break;
+          case "edit":
+            this._editingId = id;
+            this._render();
+            break;
         }
       });
     });
@@ -545,23 +639,47 @@ export class CyclicTestPanel {
         </div>
       </div>`;
 
-    const cancelFn = () => { this._editingId = null; this._render(); };
-    document.getElementById("btn-edit-cancel")?.addEventListener("click", cancelFn);
-    document.getElementById("btn-edit-cancel2")?.addEventListener("click", cancelFn);
+    const cancelFn = () => {
+      this._editingId = null;
+      this._render();
+    };
+    document
+      .getElementById("btn-edit-cancel")
+      ?.addEventListener("click", cancelFn);
+    document
+      .getElementById("btn-edit-cancel2")
+      ?.addEventListener("click", cancelFn);
     document.getElementById("btn-edit-save")?.addEventListener("click", () => {
-      const newTotal = parseInt(document.getElementById("edit-total-cycles").value);
+      const newTotal = parseInt(
+        document.getElementById("edit-total-cycles").value,
+      );
       const updates = {
         totalCycles: Math.max(minCycles, newTotal || minCycles),
-        delayBetweenCycles: Math.max(0, parseFloat(document.getElementById("edit-delay-cycles").value) || 0),
-        maxConsecutiveFailures: Math.max(1, parseInt(document.getElementById("edit-max-failures").value) || 1),
-        lowBatteryThreshold: Math.max(0, parseInt(document.getElementById("edit-battery-threshold").value) || 0),
+        delayBetweenCycles: Math.max(
+          0,
+          parseFloat(document.getElementById("edit-delay-cycles").value) || 0,
+        ),
+        maxConsecutiveFailures: Math.max(
+          1,
+          parseInt(document.getElementById("edit-max-failures").value) || 1,
+        ),
+        lowBatteryThreshold: Math.max(
+          0,
+          parseInt(document.getElementById("edit-battery-threshold").value) ||
+            0,
+        ),
       };
       this.editTest(test.id, updates);
     });
   }
 
   _calcETA(test) {
-    if (test.status !== "running" || test.completedCycles <= 0 || !test.startedAt) return null;
+    if (
+      test.status !== "running" ||
+      test.completedCycles <= 0 ||
+      !test.startedAt
+    )
+      return null;
     const elapsed = Date.now() - test.startedAt;
     const rate = test.completedCycles / elapsed;
     const remaining = test.totalCycles - test.completedCycles;
@@ -579,26 +697,60 @@ export class CyclicTestPanel {
   }
 
   _formatTime(ts) {
-    return new Date(ts).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    return new Date(ts).toLocaleTimeString("pt-BR", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
   }
 
   _statusDot(status) {
-    const map = { running: "bg-green-500 shadow-[0_0_6px_2px_rgba(34,197,94,0.4)]", paused: "bg-yellow-500", completed: "bg-blue-500", failed: "bg-destructive", stopped: "bg-muted-foreground" };
+    const map = {
+      running: "bg-green-500 shadow-[0_0_6px_2px_rgba(34,197,94,0.4)]",
+      paused: "bg-yellow-500",
+      completed: "bg-blue-500",
+      failed: "bg-destructive",
+      stopped: "bg-muted-foreground",
+    };
     return `<span class="inline-block h-2 w-2 shrink-0 rounded-full ${map[status] || map.stopped}"></span>`;
   }
 
   _statusBadge(status) {
-    const styles = { running: "bg-green-500/10 text-green-600 border-green-500/20", paused: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20", completed: "bg-blue-500/10 text-blue-600 border-blue-500/20", failed: "bg-destructive/10 text-destructive border-destructive/20", stopped: "bg-muted text-muted-foreground border-border" };
-    const labels = { running: "Em execução", paused: "Pausado", completed: "Concluído", failed: "Falhou", stopped: "Parado" };
+    const styles = {
+      running: "bg-green-500/10 text-green-600 border-green-500/20",
+      paused: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20",
+      completed: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+      failed: "bg-destructive/10 text-destructive border-destructive/20",
+      stopped: "bg-muted text-muted-foreground border-border",
+    };
+    const labels = {
+      running: "Em execução",
+      paused: "Pausado",
+      completed: "Concluído",
+      failed: "Falhou",
+      stopped: "Parado",
+    };
     return `<span class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold ${styles[status] || styles.stopped}">${labels[status] || status}</span>`;
   }
 
   _logTypeBadge(type) {
-    const styles = { UNLOCK: "bg-green-500/10 text-green-700", LOCK: "bg-blue-500/10 text-blue-700", BATTERY: "bg-yellow-500/10 text-yellow-700", SYSTEM: "bg-muted text-muted-foreground" };
+    const styles = {
+      UNLOCK: "bg-green-500/10 text-green-700",
+      LOCK: "bg-blue-500/10 text-blue-700",
+      BATTERY: "bg-yellow-500/10 text-yellow-700",
+      SYSTEM: "bg-muted text-muted-foreground",
+    };
     return `<span class="rounded px-1.5 py-0.5 font-mono text-xs font-semibold ${styles[type] || styles.SYSTEM}">${type}</span>`;
   }
 
   _logLevelClass(level) {
-    return ({ success: "text-green-600", error: "text-destructive", warning: "text-yellow-600", info: "text-muted-foreground" }[level] || "text-muted-foreground");
+    return (
+      {
+        success: "text-green-600",
+        error: "text-destructive",
+        warning: "text-yellow-600",
+        info: "text-muted-foreground",
+      }[level] || "text-muted-foreground"
+    );
   }
 }

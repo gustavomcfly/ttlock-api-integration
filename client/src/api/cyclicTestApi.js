@@ -73,4 +73,11 @@ export const cyclicTestApi = {
     });
     return parse(res);
   },
+
+  // Remove definitivamente o teste no backend/Postgres — sem isso, ele reaparece
+  // no histórico ao recarregar a página.
+  async remove(id) {
+    const res = await fetch(`${BASE_URL}/${id}`, { method: "DELETE" });
+    return parse(res);
+  },
 };
