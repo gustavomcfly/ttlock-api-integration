@@ -49,6 +49,21 @@ export class CyclicTestPanel {
     this._startRefresh();
   }
 
+  _hasAnythingToWatch() {
+    const hasActiveTest = cyclicTestStore
+      .getAll()
+      .some((t) => ["running", "paused"].includes(t.status));
+    const hasQueued = Array.from(this._lockQueues.values()).some(
+      (q) => q.length > 0,
+    );
+    return hasActiveTest || hasQueued;
+  }
+
+  _startRefreshIfNeeded() {
+    if (this._hasAnythingToWatch()) this._startRefresh();
+    else this._stopRefresh();
+  }
+
   // Testes finalizados não vêm em /active (que só traz running/paused), então sem isso
   // eles "desapareceriam" a cada reload mesmo estando salvos no banco. Carrega o
   // histórico do usuário logado uma vez ao entrar na tela.
@@ -128,6 +143,7 @@ export class CyclicTestPanel {
     }
 
     this._render();
+    this._startRefreshIfNeeded();
   }
 
   _onTestFinished(test) {
