@@ -1,4 +1,5 @@
-const API_BASE_URL = "http://localhost:3001/api/fingerprint";
+import { API_BASE } from "../config.js";
+const API_BASE_URL = `${API_BASE}/fingerprint`;
 
 export const fingerprintApi = {
   async addFingerprint(payload) {

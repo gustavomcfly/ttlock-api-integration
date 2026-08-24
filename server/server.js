@@ -13,7 +13,6 @@ import qualityRoutes from "./routes/quality.routes.js";
 import cyclicTestsDbRoutes from "./db-routes/cyclicTestsDB.js";
 import prisma from "./prismaClient.js";
 
-
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -26,7 +25,7 @@ app.use("/api/rfid", rfidRoutes);
 app.use("/api/fingerprint", fingerprintRoutes);
 app.use("/api/record", recordRoutes);
 app.use("/api/quality", qualityRoutes);
-app.use('/db/cyclic-tests', cyclicTestsDbRoutes);
+app.use("/db/cyclic-tests", cyclicTestsDbRoutes);
 
 const PORT = process.env.PORT || 3001;
 
@@ -36,33 +35,39 @@ const PORT = process.env.PORT || 3001;
 // marcamos esses registros como "stopped" logo na inicialização.
 async function reconcileOrphanedTests() {
   const orphaned = await prisma.cyclicTest.findMany({
-    where: { status: { in: ['running', 'paused'] } },
+    where: { status: { in: ["running", "paused"] } },
   });
 
   for (const test of orphaned) {
     await prisma.cyclicTest.update({
       where: { id: test.id },
-      data: { status: 'stopped', completedAt: new Date() },
+      data: { status: "stopped", completedAt: new Date() },
     });
     await prisma.cyclicTestLog.create({
       data: {
         testId: test.id,
-        type: 'SYSTEM',
-        level: 'warning',
-        message: 'Servidor reiniciado; teste marcado como interrompido.',
+        type: "SYSTEM",
+        level: "warning",
+        message: "Servidor reiniciado; teste marcado como interrompido.",
       },
     });
   }
 
   if (orphaned.length > 0) {
-    console.log(`⚠️  ${orphaned.length} teste(s) órfão(s) marcado(s) como interrompido(s) na inicialização.`);
+    console.log(
+      `⚠️  ${orphaned.length} teste(s) órfão(s) marcado(s) como interrompido(s) na inicialização.`,
+    );
   }
 }
 
 reconcileOrphanedTests()
-  .catch((err) => console.error('[Startup] Erro ao reconciliar testes órfãos:', err))
+  .catch((err) =>
+    console.error("[Startup] Erro ao reconciliar testes órfãos:", err),
+  )
   .finally(() => {
     app.listen(PORT, () => {
-      console.log(`🚀 Proxy Server running at http://localhost:${PORT}`);
+      console.log(`Servidor rodando na porta ${PORT}`);
     });
   });
+
+export default app;

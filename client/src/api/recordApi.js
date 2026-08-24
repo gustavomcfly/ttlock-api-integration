@@ -1,4 +1,5 @@
-const API_BASE_URL = "http://localhost:3001/api/record";
+import { API_BASE } from "../config.js";
+const API_BASE_URL = `${API_BASE}/record`;
 
 export const recordApi = {
   async getRecords(accessToken, lockId, pageNo = 1, pageSize = 50) {

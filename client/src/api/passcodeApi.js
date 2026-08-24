@@ -1,4 +1,5 @@
-const API_BASE_URL = "http://localhost:3001/api/passcode";
+import { API_BASE } from "../config.js";
+const API_BASE_URL = `${API_BASE}/passcode`;
 
 export const passcodeApi = {
   async generateRandomPasscode(
