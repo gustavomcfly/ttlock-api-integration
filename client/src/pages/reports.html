@@ -1,6 +1,7 @@
 <div id="view-reports" class="hidden w-full transition-opacity duration-300">
-  <header class="mb-6">
-    <div class="mb-1 flex items-center gap-3">
+  <!-- Cabeçalho + Filtros -->
+  <div class="mb-5 flex flex-wrap items-end justify-between gap-4">
+    <div class="flex items-center gap-3">
       <div class="bg-primary/10 text-primary rounded-lg p-2">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -26,22 +27,13 @@
           Relatórios de Testes
         </h2>
         <p class="text-muted-foreground mt-0.5 text-sm">
-          Histórico salvo de auditorias de qualidade e testes de ciclagem.
+          Histórico salvo de auditorias de qualidade e testes de ciclagem ·
+          <span id="reports-count" class="text-primary font-bold">0</span>
+          relatório(s)
         </p>
       </div>
     </div>
-  </header>
 
-  <!-- Filtros + Contador -->
-  <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-    <div class="flex items-center gap-2">
-      <span class="text-muted-foreground text-sm">Total:</span>
-      <span
-        id="reports-count"
-        class="bg-primary/10 text-primary rounded-full px-2.5 py-0.5 text-xs font-bold"
-        >0</span
-      >
-    </div>
     <div class="flex items-center gap-2">
       <select
         id="reports-filter-type"
@@ -65,55 +57,40 @@
     </div>
   </div>
 
-  <!-- Layout: lista à esquerda, detalhe à direita -->
-  <div class="flex flex-col gap-4 lg:flex-row lg:items-start">
-    <!-- Lista de relatórios -->
-    <div class="w-full lg:w-96 lg:shrink-0">
-      <div class="bg-card border-border rounded-2xl border shadow-sm">
-        <div class="border-border border-b px-4 py-3">
-          <h3 class="text-sm font-semibold">Relatórios Salvos</h3>
-        </div>
-        <div
-          id="reports-list-container"
-          class="flex max-h-[70vh] flex-col gap-2 overflow-y-auto p-3"
-        ></div>
+  <!-- Grid de Cards (tela cheia) -->
+  <div id="reports-grid-container" class="w-full"></div>
 
-        <!-- Empty state dentro do card -->
-        <div
-          id="reports-empty-state"
-          class="flex hidden flex-col items-center justify-center px-6 py-12 text-center"
-        >
-          <div class="bg-muted mb-4 rounded-full p-4">
-            <svg
-              class="text-muted-foreground"
-              xmlns="http://www.w3.org/2000/svg"
-              width="28"
-              height="28"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path
-                d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
-              />
-              <polyline points="14 2 14 8 20 8" />
-              <circle cx="10" cy="13" r="2" />
-              <path d="m14 17-3.5-3.5" />
-            </svg>
-          </div>
-          <h3 class="mb-1 font-bold">Nenhum relatório ainda</h3>
-          <p class="text-muted-foreground max-w-xs text-sm">
-            Conclua um teste de ciclagem ou qualidade e salve o relatório para
-            vê-lo aqui.
-          </p>
-        </div>
-      </div>
+  <!-- Empty State -->
+  <div
+    id="reports-empty-state"
+    class="flex hidden flex-col items-center justify-center py-24 text-center"
+  >
+    <div class="bg-muted mb-5 rounded-2xl p-6">
+      <svg
+        class="text-muted-foreground"
+        xmlns="http://www.w3.org/2000/svg"
+        width="40"
+        height="40"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+        <circle cx="10" cy="13" r="2" />
+        <path d="m14 17-3.5-3.5" />
+      </svg>
     </div>
-
-    <!-- Detalhe do relatório selecionado -->
-    <div id="reports-detail-container" class="hidden min-w-0 flex-1"></div>
+    <h3 class="mb-1 text-lg font-bold">Nenhum relatório ainda</h3>
+    <p class="text-muted-foreground max-w-xs text-sm">
+      Conclua um teste de ciclagem ou qualidade e salve o relatório para vê-lo
+      aqui.
+    </p>
   </div>
+
+  <!-- Detalhe do relatório selecionado (abaixo do grid) -->
+  <div id="reports-detail-container" class="mt-6 hidden w-full"></div>
 </div>
