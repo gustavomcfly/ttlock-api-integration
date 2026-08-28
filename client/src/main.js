@@ -48,6 +48,7 @@ import { RecordPanel } from "./components/RecordPanel.js";
 import { SettingsPanel } from "./components/SettingsPanel.js";
 import { CyclicTestPanel } from "./components/CyclicTestPanel.js";
 import { QualityTestPanel } from "./components/QualityTestPanel.js";
+import { ReportsPanel } from "./components/ReportsPanel.js";
 
 const dashboardElement = document.getElementById("dashboard");
 const btnLogout = document.getElementById("btn-logout");
@@ -80,6 +81,7 @@ let recordPanel;
 let cyclicPanel;
 let qualityPanel;
 let settingsPanel;
+let reportsPanel;
 
 function init() {
   try {
@@ -120,6 +122,11 @@ function init() {
   }
   try {
     qualityPanel = new QualityTestPanel();
+  } catch (e) {
+    console.error(e);
+  }
+  try {
+    reportsPanel = new ReportsPanel();
   } catch (e) {
     console.error(e);
   }
@@ -256,6 +263,7 @@ function init() {
       hideAllViews();
       if (viewReports) viewReports.classList.remove("hidden");
       updateSidebarActiveState("btn-sidebar-reports");
+      document.dispatchEvent(new CustomEvent("navigate-reports"));
     });
   }
 
