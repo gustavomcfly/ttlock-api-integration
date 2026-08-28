@@ -9,6 +9,7 @@ import rfidRoutes from "./routes/rfid.routes.js";
 import fingerprintRoutes from "./routes/fingerprint.routes.js";
 import recordRoutes from "./routes/record.routes.js";
 import qualityRoutes from "./routes/quality.routes.js";
+import reportRoutes from "./routes/report.routes.js";       // ← NOVO
 import cyclicTestsDbRoutes from "./db-routes/cyclicTestsDB.js";
 import prisma from "./prismaClient.js";
 
@@ -23,14 +24,16 @@ app.use("/api/rfid", rfidRoutes);
 app.use("/api/fingerprint", fingerprintRoutes);
 app.use("/api/record", recordRoutes);
 app.use("/api/quality", qualityRoutes);
+app.use("/api/reports", reportRoutes);                      // ← NOVO
 app.use("/db/cyclic-tests", cyclicTestsDbRoutes);
 
-// ✅ Só executa localmente — nunca quando importado pela Netlify Function
+// Só executa localmente — nunca quando importado pela Netlify Function
 if (process.env.NODE_ENV !== "production") {
   async function reconcileOrphanedTests() {
     const orphaned = await prisma.cyclicTest.findMany({
       where: { status: { in: ["running", "paused"] } },
     });
+
     for (const test of orphaned) {
       await prisma.cyclicTest.update({
         where: { id: test.id },
@@ -45,18 +48,21 @@ if (process.env.NODE_ENV !== "production") {
         },
       });
     }
+
     if (orphaned.length > 0) {
       console.log(
-        `⚠️  ${orphaned.length} teste(s) órfão(s) marcado(s) como interrompido(s).`,
+        `⚠️  ${orphaned.length} teste(s) órfão(s) marcado(s) como interrompido(s) na inicialização.`
       );
     }
   }
 
   const PORT = process.env.PORT || 3001;
   reconcileOrphanedTests()
-    .catch((err) => console.error("[Startup] Erro ao reconciliar:", err))
+    .catch((err) => console.error("[Startup] Erro ao reconciliar testes órfãos:", err))
     .finally(() => {
-      app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
+      app.listen(PORT, () => {
+        console.log(`Servidor rodando na porta ${PORT}`);
+      });
     });
 }
 

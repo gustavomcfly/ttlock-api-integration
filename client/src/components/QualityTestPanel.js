@@ -4,6 +4,7 @@ import { session } from "../utils/session.js";
 import { appState } from "../state/appState.js";
 import { settingsState } from "../state/settingsState.js";
 import { toast } from "../utils/toast.js";
+import { reportApi } from "../api/reportApi.js";
 
 export class QualityTestPanel {
   constructor() {
@@ -50,6 +51,8 @@ export class QualityTestPanel {
         }
         this.fetchTestList();
       });
+      const btnSave = document.getElementById("btn-save-quality-report");
+      if (btnSave) btnSave.classList.add("hidden");
     }
 
     document.addEventListener("settings-updated", () => this.loadSettings());
@@ -86,7 +89,6 @@ export class QualityTestPanel {
       this.startListPolling();
     });
   }
-
 
   loadSettings() {
     if (this.lblTester)
@@ -208,6 +210,11 @@ export class QualityTestPanel {
         }
       } else {
         statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">Erro</span>`;
+      }
+      const btnSave = document.getElementById("btn-save-quality-report");
+      if (btnSave) {
+        btnSave.classList.remove("hidden");
+        btnSave.onclick = () => this.saveReport();
       }
 
       const isSelected = test.testId === this.currentTestId;
@@ -332,6 +339,25 @@ export class QualityTestPanel {
         }
       }
     } catch (e) {}
+  }
+
+  async saveReport() {
+    if (!this.currentTestId) return;
+    try {
+      const res = await qualityApi.getStatus(this.currentTestId);
+      if (res.errcode !== 0 || !res.data) {
+        return toast.error("Não foi possível obter os dados do teste.");
+      }
+      const testerName = settingsState.testerName || null;
+      const data = await reportApi.saveQuality(res.data, testerName);
+      if (data.success) {
+        toast.success("Relatório salvo com sucesso!");
+      } else {
+        toast.error(data.message || "Erro ao salvar relatório.");
+      }
+    } catch {
+      toast.error("Falha ao comunicar com o servidor.");
+    }
   }
 
   renderSteps(testData) {

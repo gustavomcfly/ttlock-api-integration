@@ -15,19 +15,17 @@ model User {
   username      String         @unique
   name          String?
   createdAt     DateTime       @default(now())
-  
-  // Relacionamentos
+
   cyclicTests   CyclicTest[]
   qualityAudits QualityAudit[]
 }
 
 model Lock {
-  lockId        Int            @id // ID oficial vindo da API da TTLock
+  lockId        Int            @id
   lockAlias     String
   lockMac       String?
   createdAt     DateTime       @default(now())
-  
-  // Relacionamentos
+
   cyclicTests   CyclicTest[]
   qualityAudits QualityAudit[]
 }
@@ -37,7 +35,7 @@ model Lock {
 // ------------------------------------------------------
 
 model Settings {
-  id                 Int      @id @default(1) // Usamos sempre 1 para ter apenas uma linha de config global
+  id                 Int      @id @default(1)
   defaultDelay       Int      @default(5)
   maxFailures        Int      @default(3)
   lowBatteryAlert    Int      @default(20)
@@ -47,57 +45,54 @@ model Settings {
 }
 
 // ------------------------------------------------------
-// 3. Teste de Ciclagem (Estresse Automático)
+// 3. Teste de Ciclagem
 // ------------------------------------------------------
 
 model CyclicTest {
-  id                 String           @id @default(uuid())
-  lockId             Int
-  userId             String?
-  totalCycles        Int
-  completedCycles    Float            @default(0)
-  delayBetweenCycles Int              @default(5)
-  status             String           // running, paused, completed, failed, stopped
-  totalFailures      Int              @default(0)
-  maxConsecutiveFailures Int          @default(3)
-  lowBatteryThreshold    Int          @default(20)
-  battery            Int?
-  batteryStart       Int?
-  batteryEnd         Int?
-  startedAt          DateTime         @default(now())
-  completedAt        DateTime?
+  id                     String          @id @default(uuid())
+  lockId                 Int
+  userId                 String?
+  totalCycles            Int
+  completedCycles        Float           @default(0)
+  delayBetweenCycles     Int             @default(5)
+  status                 String
+  totalFailures          Int             @default(0)
+  maxConsecutiveFailures Int             @default(3)
+  lowBatteryThreshold    Int             @default(20)
+  battery                Int?
+  batteryStart           Int?
+  batteryEnd             Int?
+  startedAt              DateTime        @default(now())
+  completedAt            DateTime?
 
-  // Chaves Estrangeiras
-  lock               Lock             @relation(fields: [lockId], references: [lockId])
-  user               User?            @relation(fields: [userId], references: [id])
-  logs               CyclicTestLog[]
+  lock                   Lock            @relation(fields: [lockId], references: [lockId])
+  user                   User?           @relation(fields: [userId], references: [id])
+  logs                   CyclicTestLog[]
 }
 
 model CyclicTestLog {
   id        String     @id @default(uuid())
   testId    String
-  type      String     // UNLOCK, LOCK, BATTERY, SYSTEM
-  level     String     // info, success, warning, error
+  type      String
+  level     String
   message   String
   timestamp DateTime   @default(now())
 
-  // Cascade: Se o teste for apagado, os logs também serão
   test      CyclicTest @relation(fields: [testId], references: [id], onDelete: Cascade)
 }
 
 // ------------------------------------------------------
-// 4. Auditoria de Qualidade (QA)
+// 4. Auditoria de Qualidade
 // ------------------------------------------------------
 
 model QualityAudit {
   id          String             @id @default(uuid())
   lockId      Int
   userId      String?
-  status      String             // executando, aprovado, reprovado
+  status      String
   startedAt   DateTime           @default(now())
   completedAt DateTime?
 
-  // Chaves Estrangeiras
   lock        Lock               @relation(fields: [lockId], references: [lockId])
   user        User?              @relation(fields: [userId], references: [id])
   steps       QualityAuditStep[]
@@ -107,10 +102,27 @@ model QualityAuditStep {
   id        String       @id @default(uuid())
   auditId   String
   stepName  String
-  status    String       // sucesso, falha, ignorado
+  status    String
   details   String?
   timestamp DateTime     @default(now())
 
-  // Cascade: Se a auditoria for apagada, as etapas também serão
   audit     QualityAudit @relation(fields: [auditId], references: [id], onDelete: Cascade)
+}
+
+// ------------------------------------------------------
+// 5. Relatórios Salvos
+// ------------------------------------------------------
+
+model Report {
+  id          String    @id @default(uuid())
+  type        String    // "cyclic" | "quality"
+  title       String
+  lockId      Int
+  lockAlias   String
+  status      String
+  testerName  String?
+  startedAt   DateTime
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  payload     Json      // snapshot completo do teste
 }

@@ -3,6 +3,8 @@ import { cyclicTestApi } from "../api/cyclicTestApi.js";
 import { session } from "../utils/session.js";
 import { toast } from "../utils/toast.js";
 import { cyclicTestStore } from "../state/cyclicTestStore.js";
+import { reportApi } from "../api/reportApi.js";
+import { settingsState } from "../state/settingsState.js";
 
 // O teste de ciclagem roda inteiramente no backend (server/cyclicEngine.js), persistido
 // no Postgres via Prisma. Este painel é um cliente "burro": inicia/pausa/retoma/para o
@@ -447,6 +449,24 @@ export class CyclicTestPanel {
     this._render();
   }
 
+  async saveReport(id) {
+    const test = cyclicTestStore.get(id);
+    if (!test) return;
+    try {
+      const data = await reportApi.saveCyclic(
+        id,
+        settingsState.testerName || null,
+      );
+      if (data.success) {
+        toast.success("Relatório salvo com sucesso!");
+      } else {
+        toast.error(data.message || "Erro ao salvar relatório.");
+      }
+    } catch {
+      toast.error("Falha ao comunicar com o servidor.");
+    }
+  }
+
   _render() {
     this._renderList();
     if (this._selectedId && cyclicTestStore.get(this._selectedId)) {
@@ -569,6 +589,7 @@ export class CyclicTestPanel {
             ${test.status === "running" ? `<button data-ctrl="pause" class="bg-muted text-muted-foreground hover:bg-secondary hover:text-secondary-foreground flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>Pausar</button>` : ""}
             ${test.status === "paused" ? `<button data-ctrl="resume" class="bg-primary text-primary-foreground hover:bg-primary-hover flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>Retomar</button>` : ""}
             ${isActive ? `<button data-ctrl="stop" class="bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>Parar</button>` : ""}
+            ${isDone ? `<button data-ctrl="save-report" class="bg-secondary text-secondary-foreground hover:opacity-90 flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Salvar Relatório</button>` : ""}
             <button data-ctrl="edit" class="bg-muted text-muted-foreground hover:bg-secondary hover:text-secondary-foreground flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Editar</button>
           </div>
         </div>
@@ -627,6 +648,9 @@ export class CyclicTestPanel {
             this._editingId = id;
             this._render();
             break;
+          case "save-report":
+            this.saveReport(id);
+            break;
         }
       });
     });
@@ -643,6 +667,8 @@ export class CyclicTestPanel {
           <div><h3 class="font-semibold">Editar Parâmetros</h3><p class="text-muted-foreground text-xs">${test.lockName} · ${test.completedCycles.toFixed(1)} ciclos já realizados</p></div>
           <button id="btn-edit-cancel" class="text-muted-foreground hover:text-foreground cursor-pointer text-sm transition-colors">Cancelar</button>
         </div>
+      
+
         <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
           <div class="flex flex-col gap-1.5"><label class="text-muted-foreground text-xs font-semibold uppercase tracking-wide">Total de ciclos</label><input type="number" id="edit-total-cycles" value="${test.totalCycles}" min="${minCycles}" max="99999" class="border-border bg-background focus:border-primary rounded-lg border px-3 py-2 text-sm focus:outline-none"/><span class="text-muted-foreground text-xs">Mín: ${minCycles}</span></div>
           <div class="flex flex-col gap-1.5"><label class="text-muted-foreground text-xs font-semibold uppercase tracking-wide">Intervalo (s)</label><input type="number" id="edit-delay-cycles" value="${test.delayBetweenCycles}" min="0" max="3600" class="border-border bg-background focus:border-primary rounded-lg border px-3 py-2 text-sm focus:outline-none"/></div>
