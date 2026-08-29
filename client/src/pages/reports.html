@@ -1,7 +1,6 @@
 <div id="view-reports" class="hidden w-full transition-opacity duration-300">
-  <!-- Cabeçalho + Filtros -->
-  <div class="mb-5 flex flex-wrap items-end justify-between gap-4">
-    <div class="flex items-center gap-3">
+  <header class="mb-8">
+    <div class="mb-1 flex items-center gap-3">
       <div class="bg-primary/10 text-primary rounded-lg p-2">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -22,75 +21,86 @@
           <line x1="16" y1="17" x2="8" y2="17" />
         </svg>
       </div>
-      <div>
-        <h2 class="text-primary text-3xl font-bold tracking-tight">
-          Relatórios de Testes
-        </h2>
-        <p class="text-muted-foreground mt-0.5 text-sm">
-          Histórico salvo de auditorias de qualidade e testes de ciclagem ·
-          <span id="reports-count" class="text-primary font-bold">0</span>
-          relatório(s)
-        </p>
+      <h2 class="text-primary text-3xl font-bold tracking-tight">
+        Relatórios de Testes
+      </h2>
+    </div>
+    <p class="text-muted-foreground mt-1 ml-1">
+      Histórico salvo de auditorias de qualidade e testes de ciclagem ·
+      <span id="reports-count" class="text-primary font-bold">0</span>
+      relatório(s)
+    </p>
+  </header>
+
+  <div class="flex flex-col gap-6">
+    <!-- Bloco: Lista de Relatórios -->
+    <div class="bg-card border-border w-full rounded-2xl border shadow-sm">
+      <div
+        class="border-border flex flex-col justify-between gap-4 border-b px-5 py-4 sm:flex-row sm:items-center"
+      >
+        <h3 class="font-semibold">Lista de Relatórios</h3>
+        <div class="flex items-center gap-2">
+          <select
+            id="reports-filter-type"
+            class="border-border bg-background focus:border-primary rounded-lg border px-3 py-1.5 text-sm focus:outline-none"
+          >
+            <option value="">Todos os tipos</option>
+            <option value="cyclic">Ciclagem</option>
+            <option value="quality">Qualidade</option>
+          </select>
+          <select
+            id="reports-filter-status"
+            class="border-border bg-background focus:border-primary rounded-lg border px-3 py-1.5 text-sm focus:outline-none"
+          >
+            <option value="">Todos os status</option>
+            <option value="completed">Concluído</option>
+            <option value="aprovado">Aprovado</option>
+            <option value="reprovado">Reprovado</option>
+            <option value="failed">Falhou</option>
+            <option value="stopped">Interrompido</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="p-5">
+        <!-- Grid de Cards -->
+        <div id="reports-grid-container" class="w-full"></div>
+
+        <!-- Empty State -->
+        <div
+          id="reports-empty-state"
+          class="hidden flex-col items-center justify-center py-16 text-center"
+        >
+          <div class="bg-muted mb-5 rounded-2xl p-6">
+            <svg
+              class="text-muted-foreground"
+              xmlns="http://www.w3.org/2000/svg"
+              width="40"
+              height="40"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+              />
+              <polyline points="14 2 14 8 20 8" />
+              <circle cx="10" cy="13" r="2" />
+              <path d="m14 17-3.5-3.5" />
+            </svg>
+          </div>
+          <h3 class="mb-1 text-lg font-bold">Nenhum relatório ainda</h3>
+          <p class="text-muted-foreground max-w-xs text-sm">
+            Conclua um teste de ciclagem ou qualidade e salve o relatório para
+            vê-lo aqui.
+          </p>
+        </div>
       </div>
     </div>
 
-    <div class="flex items-center gap-2">
-      <select
-        id="reports-filter-type"
-        class="border-border bg-background focus:border-primary rounded-lg border px-3 py-1.5 text-sm focus:outline-none"
-      >
-        <option value="">Todos os tipos</option>
-        <option value="cyclic">Ciclagem</option>
-        <option value="quality">Qualidade</option>
-      </select>
-      <select
-        id="reports-filter-status"
-        class="border-border bg-background focus:border-primary rounded-lg border px-3 py-1.5 text-sm focus:outline-none"
-      >
-        <option value="">Todos os status</option>
-        <option value="completed">Concluído</option>
-        <option value="aprovado">Aprovado</option>
-        <option value="reprovado">Reprovado</option>
-        <option value="failed">Falhou</option>
-        <option value="stopped">Interrompido</option>
-      </select>
-    </div>
+    <div id="reports-detail-container" class="hidden w-full"></div>
   </div>
-
-  <!-- Grid de Cards (tela cheia) -->
-  <div id="reports-grid-container" class="w-full"></div>
-
-  <!-- Empty State -->
-  <div
-    id="reports-empty-state"
-    class="flex hidden flex-col items-center justify-center py-24 text-center"
-  >
-    <div class="bg-muted mb-5 rounded-2xl p-6">
-      <svg
-        class="text-muted-foreground"
-        xmlns="http://www.w3.org/2000/svg"
-        width="40"
-        height="40"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-        <polyline points="14 2 14 8 20 8" />
-        <circle cx="10" cy="13" r="2" />
-        <path d="m14 17-3.5-3.5" />
-      </svg>
-    </div>
-    <h3 class="mb-1 text-lg font-bold">Nenhum relatório ainda</h3>
-    <p class="text-muted-foreground max-w-xs text-sm">
-      Conclua um teste de ciclagem ou qualidade e salve o relatório para vê-lo
-      aqui.
-    </p>
-  </div>
-
-  <!-- Detalhe do relatório selecionado (abaixo do grid) -->
-  <div id="reports-detail-container" class="mt-6 hidden w-full"></div>
 </div>
