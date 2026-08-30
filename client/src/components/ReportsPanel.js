@@ -119,7 +119,7 @@ export class ReportsPanel {
       <div
         data-id="${r.id}"
         class="report-card relative bg-card rounded-2xl border cursor-pointer transition-all duration-200 overflow-hidden group
-          ${borderAccent} ${isSelected ? "bg-primary/5" : "hover:bg-card"}"
+          ${borderAccent} ${isSelected ? "bg-muted" : "hover:bg-card"}"
       >
         <!-- Faixa de tipo no topo -->
         <div class="h-1 w-full ${isCyclic ? "bg-blue-500" : "bg-purple-500"}"></div>

@@ -36,6 +36,10 @@ export class CyclicTestPanel {
     this._countBadge = document.getElementById("cyclic-tests-count");
 
     this._bindFormEvents();
+    this._applyDefaultsFromSettings();
+    document.addEventListener("settings-updated", () =>
+      this._applyDefaultsFromSettings(),
+    );
   }
 
   _bindFormEvents() {
@@ -43,7 +47,17 @@ export class CyclicTestPanel {
     this._btnRefreshLocks?.addEventListener("click", () => this._fetchLocks());
   }
 
+    _applyDefaultsFromSettings() {
+    if (this._inputTotalCycles && settingsState.defaultCycles !== undefined) {
+      this._inputTotalCycles.value = settingsState.defaultCycles;
+    }
+    if (this._inputDelayCycles && settingsState.defaultInterval !== undefined) {
+      this._inputDelayCycles.value = settingsState.defaultInterval;
+    }
+  }
+
   async syncLock() {
+    this._applyDefaultsFromSettings();
     await this._fetchLocks();
     await this._loadUserHistory();
     await this._pollBackend();
@@ -111,6 +125,7 @@ export class CyclicTestPanel {
       const data = await cyclicTestApi.listActive();
       if (data.success) activeRows = data.list;
     } catch (e) {
+
       // Backend fora do ar momentaneamente: mantém último estado conhecido.
       this._render();
       return;
@@ -123,8 +138,6 @@ export class CyclicTestPanel {
       this._knownIds.add(row.id);
     }
 
-    // Testes que conhecíamos e estavam ativos, mas não aparecem mais na lista de ativos
-    // -> terminaram (completed/failed/stopped). Busca o estado final e avança a fila.
     const finishedNow = [];
     for (const id of this._knownIds) {
       if (activeIds.has(id)) continue;
