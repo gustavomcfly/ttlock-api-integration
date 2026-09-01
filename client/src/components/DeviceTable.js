@@ -45,14 +45,39 @@ export class DeviceTable {
     const token = session.getToken();
     if (this.btnFetchLocks) this.btnFetchLocks.innerText = "Carregando...";
 
+    // 1. Mostra a animação de "Buscando dispositivos..."
+    if (this.container) {
+      this.emptyText?.classList.add("hidden");
+      this.container.classList.remove("hidden");
+      this.container.className = "flex justify-center items-center py-16"; // Centraliza o loading
+      this.container.innerHTML = `
+        <div class="flex flex-col items-center gap-4 text-muted-foreground">
+          <svg class="animate-spin h-10 w-10 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <p class="font-medium animate-pulse tracking-wide">Buscando dispositivos...</p>
+        </div>
+      `;
+    }
+
     try {
       const data = await lockApi.fetchLocks(token);
       this.allLocks = data.list || [];
+
+      // 2. Renderiza os cards (O método render() vai redefinir a classe para grid automaticamente)
       this.render();
       toast.info(`${this.allLocks.length} fechaduras carregadas.`);
     } catch (err) {
       toast.error("Falha ao tentar encontrar dispositivos.");
       console.error(err);
+
+      if (this.container) {
+        this.container.innerHTML = `
+          <div class="text-center text-destructive py-8 font-semibold">
+            Erro ao carregar dispositivos. Verifique a conexão com a API.
+          </div>`;
+      }
     } finally {
       if (this.btnFetchLocks)
         this.btnFetchLocks.innerText = "Encontrar Dispositivos";
