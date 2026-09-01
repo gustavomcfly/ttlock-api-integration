@@ -2,11 +2,11 @@ import { lockApi } from "../api/lockApi.js";
 import { session } from "../utils/session.js";
 import { appState } from "../state/appState.js";
 import { toast } from "../utils/toast.js";
+import { getLockDetails, getImageUrl } from "../utils/lockModelHelper.js";
 
 export class DeviceTable {
   constructor(onLockSelected) {
-    this.container = document.getElementById("device-table");
-    this.tbody = document.getElementById("device-list-body");
+    this.container = document.getElementById("device-table"); // Will now act as the grid container
     this.btnFetchLocks = document.getElementById("btn-fetch-locks");
     this.emptyText = document.getElementById("no-devices");
 
@@ -32,7 +32,9 @@ export class DeviceTable {
       );
     }
 
-    this.tbody.addEventListener("click", (e) => this.handleSelection(e));
+    if (this.container) {
+      this.container.addEventListener("click", (e) => this.handleSelection(e));
+    }
   }
 
   enable() {
@@ -77,7 +79,8 @@ export class DeviceTable {
   }
 
   render() {
-    this.tbody.innerHTML = "";
+    if (!this.container) return;
+    this.container.innerHTML = "";
 
     if (this.allLocks.length === 0) {
       this.emptyText.innerText = "Não há fechaduras vinculadas a esta conta.";
@@ -103,55 +106,69 @@ export class DeviceTable {
     this.emptyText.classList.add("hidden");
     this.container.classList.remove("hidden");
 
-    filteredLocks.forEach((lock) => {
-      const tr = document.createElement("tr");
-      const lockName = lock.lockAlias || "Sem Nome";
+    // Switch container to CSS Grid instead of a block/table layout
+    this.container.className =
+      "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4";
 
-      tr.className =
-        "block md:table-row hover:bg-muted/30 transition-colors group border-b border-border last:border-0 md:border-b-0 p-4 md:p-0";
+    const cardsHtml = filteredLocks
+      .map((lock) => {
+        const lockAlias = lock.lockAlias || "Sem Nome";
+        const { model, img } = getLockDetails(lock.lockName);
+        const imageUrl = getImageUrl(img);
 
-      tr.innerHTML = `
-        <td class="block md:table-cell p-2 md:py-4 md:px-6 align-middle">
-            <div class="flex justify-between items-center md:block md:text-center">
-                <span class="md:hidden text-xs font-semibold text-muted-foreground uppercase tracking-wider">Fechadura</span>
-                <span class="font-medium group-hover:text-primary transition-colors text-right md:text-left">${lockName}</span>
+        const isOnline = lock.hasGateway === 1;
+        // Using standard green for online, muted for offline
+        const statusColor = isOnline
+          ? "bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.6)]"
+          : "bg-muted-foreground";
+        const statusText = isOnline ? "Online" : "Offline";
+
+        return `
+        <div class="bg-card border border-border rounded-2xl shadow-sm hover:border-primary/50 hover:shadow-[0_0_15px_rgba(236,72,153,0.1)] transition-all duration-300 overflow-hidden flex flex-col cursor-pointer select-btn group" data-id="${lock.lockId}" data-name="${lockAlias}">
+          
+          <!-- Image Header -->
+          <div class="bg-muted/20 p-6 flex justify-center items-center h-48 relative transition-colors group-hover:bg-muted/40">
+            <!-- Status Badge -->
+            <div class="absolute top-3 right-3 flex items-center gap-1.5 bg-background/80 backdrop-blur-md border border-border px-2.5 py-1 rounded-full text-xs font-semibold shadow-sm text-foreground">
+               <span class="w-2 h-2 rounded-full ${statusColor}"></span>
+               ${statusText}
             </div>
-        </td>
-        <td class="block md:table-cell p-2 md:py-4 md:px-6 align-middle">
-            <div class="flex justify-between items-center md:block md:text-center">
-                <span class="md:hidden text-xs font-semibold text-muted-foreground uppercase tracking-wider">ID</span>
-                <span class="text-muted-foreground text-right md:text-center">${lock.lockId}</span>
+            
+            <img src="${imageUrl}" alt="${model}" class="max-h-full object-contain drop-shadow-xl transition-transform duration-300 group-hover:scale-105" />
+          </div>
+
+          <!-- Lock Info -->
+          <div class="p-5 flex flex-col flex-grow border-t border-border">
+            <h3 class="text-lg font-bold text-foreground truncate group-hover:text-primary transition-colors" title="${lockAlias}">${lockAlias}</h3>
+            <p class="text-sm text-muted-foreground font-medium mb-4">${model}</p>
+            
+            <div class="flex items-center justify-between mt-auto pt-4 border-t border-border/50">
+              <!-- Battery -->
+              <div class="flex items-center gap-1.5 text-sm text-foreground font-mono">
+                <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                ${lock.electricQuantity ? lock.electricQuantity + "%" : "--%"}
+              </div>
+              <!-- Lock Number / MAC -->
+              <div class="text-xs text-muted-foreground font-mono truncate max-w-[120px]" title="${lock.lockName}">
+                ${lock.lockName}
+              </div>
             </div>
-        </td>
-        <td class="block md:table-cell p-2 md:py-4 md:px-6 align-middle">
-            <div class="flex justify-between items-center md:flex md:justify-center md:text-center">
-                <span class="md:hidden text-xs font-semibold text-muted-foreground uppercase tracking-wider">Bateria</span>
-                <div class="text-right md:text-center">
-                  <span class="px-2.5 py-1.5 rounded-full text-xs font-bold bg-green-500/10 text-green-500 border border-green-500/20 inline-block">
-                      ${lock.electricQuantity || 0}%
-                  </span>
-                </div>
-            </div>
-        </td>
-        <td class="block md:table-cell p-2 md:py-4 md:px-6 align-middle">
-            <div class="flex justify-center items-center md:block mt-3 md:mt-0 md:text-center">
-                <button class="select-btn w-full md:w-auto inline-flex items-center justify-center gap-2 bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground px-4 py-3 md:py-2 rounded-lg text-sm font-semibold transition-all cursor-pointer" data-id="${lock.lockId}" data-name="${lockName}">
-                    Selecionar
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-                </button>
-            </div>
-        </td>
+          </div>
+          
+        </div>
       `;
-      this.tbody.appendChild(tr);
-    });
+      })
+      .join("");
+
+    this.container.innerHTML = cardsHtml;
   }
 
   handleSelection(event) {
-    const button = event.target.closest(".select-btn");
+    const card = event.target.closest(".select-btn");
 
-    if (button) {
-      const id = button.getAttribute("data-id");
-      const name = button.getAttribute("data-name");
+    if (card) {
+      const id = card.getAttribute("data-id");
+      const name = card.getAttribute("data-name");
 
       appState.setLock(id, name);
 
