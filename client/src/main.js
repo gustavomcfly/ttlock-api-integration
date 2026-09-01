@@ -12,6 +12,7 @@ import qualityTestProgressHtml from "./pages/qualityTestProgress.html?raw";
 import reportsHtml from "./pages/reports.html?raw";
 import lockSettingsHtml from "./pages/lockSettings.html?raw";
 import settingsHtml from "./pages/settings.html?raw";
+import { initTheme } from "./utils/theme.js";
 
 document.getElementById("app").innerHTML = `
     ${loginHtml}
@@ -392,6 +393,10 @@ function showDashboard() {
     statusEl.classList.add("bg-green-100", "text-green-800");
   }
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  initTheme();
+});
 
 function handleLogout() {
   session.clear();
