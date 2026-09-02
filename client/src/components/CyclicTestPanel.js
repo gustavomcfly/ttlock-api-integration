@@ -763,7 +763,7 @@ export class CyclicTestPanel {
     const map = {
       running: "bg-green-500 shadow-[0_0_6px_2px_rgba(34,197,94,0.4)]",
       paused: "bg-yellow-500",
-      completed: "bg-blue-500",
+      completed: "bg-green-500",
       failed: "bg-destructive",
       stopped: "bg-muted-foreground",
     };
@@ -774,7 +774,7 @@ export class CyclicTestPanel {
     const styles = {
       running: "bg-green-500/10 text-green-600 border-green-500/20",
       paused: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20",
-      completed: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+      completed: "bg-green-500/10 text-green-600 border-green-500/20",
       failed: "bg-destructive/10 text-destructive border-destructive/20",
       stopped: "bg-muted text-muted-foreground border-border",
     };

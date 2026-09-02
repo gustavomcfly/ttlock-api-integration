@@ -110,7 +110,7 @@ export class ReportsPanel {
         ? this._formatDuration(new Date(r.completedAt) - new Date(r.startedAt))
         : "—";
 
-    const accentColor = isCyclic ? "text-blue-500" : "text-purple-500";
+    const accentColor = isCyclic ? "text-primary" : "text-primary";
     const borderAccent = isSelected
       ? "border-primary shadow-[0_0_0_2px_hsl(var(--primary)/0.25)]"
       : "border-border hover:border-primary/40";
@@ -122,7 +122,7 @@ export class ReportsPanel {
           ${borderAccent} ${isSelected ? "bg-muted" : "hover:bg-card"}"
       >
         <!-- Faixa de tipo no topo -->
-        <div class="h-1 w-full ${isCyclic ? "bg-blue-500" : "bg-purple-500"}"></div>
+        <div class="h-1 w-full ${isCyclic ? "bg-primary" : "bg-primary"}"></div>
 
         <div class="p-4">
           <!-- Cabeçalho do card -->
@@ -236,7 +236,7 @@ export class ReportsPanel {
         <div class="border-border border-b px-5 py-4 flex flex-wrap items-start justify-between gap-4">
           <div class="min-w-0">
             <div class="flex items-center gap-2 mb-1">
-              <span class="text-xs font-semibold uppercase tracking-wider ${report.type === "cyclic" ? "text-blue-500" : "text-purple-500"}">
+              <span class="text-xs font-semibold uppercase tracking-wider ${report.type === "cyclic" ? "text-primary" : "text-primary"}">
                 ${report.type === "cyclic" ? "Ciclagem" : "Qualidade"}
               </span>
               ${this._statusBadge(report.status)}
@@ -634,7 +634,7 @@ export class ReportsPanel {
 
   _statusBadge(status) {
     const map = {
-      completed: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+      completed: "bg-green-500/10 text-green-600 border-green-500/20",
       aprovado: "bg-green-500/10 text-green-600 border-green-500/20",
       reprovado: "bg-destructive/10 text-destructive border-destructive/20",
       failed: "bg-destructive/10 text-destructive border-destructive/20",
