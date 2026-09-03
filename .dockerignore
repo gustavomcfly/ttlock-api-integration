@@ -1,0 +1,12 @@
+**/node_modules
+**/.env
+**/.env.*
+.git
+.gitignore
+**/dist
+netlify
+netlify.toml
+.claude
+.windsurf
+.agents
+*.md
