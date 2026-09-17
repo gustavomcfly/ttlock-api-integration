@@ -1,5 +1,5 @@
 <nav
-  class="bg-card border-border sticky top-0 z-40 flex items-center justify-between border-b px-6 py-6 shadow-sm"
+  class="bg-card border-border sticky top-0 z-40 flex items-center justify-between border-b px-6 py-5 shadow-sm"
 >
   <div class="flex items-center gap-4">
     <button
@@ -27,16 +27,47 @@
 
     <button
       id="btn-topbar-home"
-      class="hover:text-primary hidden cursor-pointer text-lg font-bold tracking-wide transition-colors sm:block"
+      class="hover:text-primary hidden cursor-pointer transition-colors sm:block"
     >
-      Home
+      <div class="flex h-10 w-24 items-center justify-center overflow-hidden">
+        <img
+          src="/src/assets/pado_marcas_rgb_Simbolo.svg"
+          alt="Pado Simbolo"
+          class="h-25 w-full scale-[1.8] object-contain"
+        />
+      </div>
     </button>
   </div>
 
-  <span
-    id="connection-status"
-    class="rounded-full bg-yellow-100 px-3 py-1 text-xs font-semibold tracking-wider text-yellow-800 uppercase"
-  >
-    ● Aguardando Autenticação
-  </span>
+  <div class="flex items-center gap-4">
+    <!-- Botão de Troca de Tema -->
+    <button
+      id="theme-toggle"
+      class="hover:bg-muted hover:text-primary text-muted-foreground cursor-pointer rounded-md p-2 transition-colors"
+      title="Alternar Tema"
+    >
+      <!-- Ícone Sol / Lua -->
+      <svg
+        id="theme-icon"
+        xmlns="http://www.w3.org/2000/svg"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+    </button>
+
+    <span
+      id="connection-status"
+      class="bg-muted text-muted-foreground hover:bg-muted hover:text-primary cursor-pointer rounded-full border px-3 py-1 text-xs font-semibold tracking-wider uppercase transition-all duration-300"
+    >
+      ● Aguardando API...
+    </span>
+  </div>
 </nav>

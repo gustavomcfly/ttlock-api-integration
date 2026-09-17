@@ -33,7 +33,7 @@
     <div
       class="border-border bg-muted/10 flex flex-col items-start justify-between gap-4 border-b p-4 sm:flex-row sm:items-center sm:p-6"
     >
-      <h3 class="text-xl font-semibold">Lista de Fechaduras</h3>
+      <h3 class="font-semibold">Lista de Fechaduras</h3>
 
       <div
         class="bg-muted/50 border-border/50 flex w-full items-center rounded-lg border p-1 sm:w-auto"
@@ -53,33 +53,14 @@
       </div>
     </div>
 
-    <div class="w-full overflow-hidden md:overflow-x-auto">
-      <table
-        id="device-table"
-        class="block hidden w-full border-collapse text-left md:table"
-      >
-        <thead class="hidden md:table-header-group">
-          <tr
-            class="bg-muted/30 text-muted-foreground border-border border-b text-xs tracking-wider uppercase"
-          >
-            <th class="px-6 py-4 text-center font-semibold">
-              Nome da Fechadura
-            </th>
-            <th class="px-6 py-4 text-center font-semibold">ID da Fechadura</th>
-            <th class="px-6 py-4 text-center font-semibold">Bateria</th>
-            <th class="px-6 py-4 text-center font-semibold">Ação</th>
-          </tr>
-        </thead>
-        <tbody
-          id="device-list-body"
-          class="divide-border block divide-y md:table-row-group"
-        ></tbody>
-      </table>
-      <div
-        id="no-devices"
-        class="text-muted-foreground hidden p-10 text-center text-sm"
-      >
-        Nenhum dispositivo carregado.
+    <div class="w-full">
+      <div id="device-table" class="p-4">
+        <div
+          id="no-devices"
+          class="text-muted-foreground hidden p-10 text-center text-sm"
+        >
+          Nenhum dispositivo carregado.
+        </div>
       </div>
     </div>
   </section>

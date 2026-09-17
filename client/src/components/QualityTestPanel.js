@@ -69,13 +69,11 @@ export class QualityTestPanel {
         const lockName = e.target.options[e.target.selectedIndex].text;
         if (lockId) {
           appState.setLock(lockId, lockName);
-          this.fetchTestList();
-          this.currentTestId = null;
         } else {
           appState.clearLock();
-          this.renderList([]);
-          this.currentTestId = null;
         }
+        this.currentTestId = null;
+        this.fetchTestList();
       });
     }
 
@@ -152,7 +150,6 @@ export class QualityTestPanel {
         );
         if (exists) {
           this.selectLock.value = appState.selectedLockId;
-          this.fetchTestList();
         }
       }
     } catch (err) {
@@ -165,15 +162,15 @@ export class QualityTestPanel {
   }
 
   startListPolling() {
+    this.fetchTestList();
     if (!this.listPollInterval) {
       this.listPollInterval = setInterval(() => this.fetchTestList(), 2500);
     }
   }
 
   async fetchTestList() {
-    if (!appState.selectedLockId) return;
     try {
-      const res = await qualityApi.getList(appState.selectedLockId);
+      const res = await qualityApi.getList();
       if (res.errcode === 0 && res.list) {
         this.renderList(res.list);
       }
@@ -184,7 +181,7 @@ export class QualityTestPanel {
     if (!this.tbody) return;
 
     if (list.length === 0) {
-      this.tbody.innerHTML = `<tr><td colspan="4" class="text-muted-foreground py-10 text-center text-sm">Nenhuma auditoria realizada nesta fechadura.</td></tr>`;
+      this.tbody.innerHTML = `<tr><td colspan="5" class="text-muted-foreground py-10 text-center text-sm">Nenhuma auditoria realizada.</td></tr>`;
       return;
     }
 
@@ -230,6 +227,7 @@ export class QualityTestPanel {
       tr.className = `transition-colors group ${rowClass}`;
       tr.innerHTML = `
             <td class="px-4 py-3 text-center font-mono text-xs text-primary">${test.testId}</td>
+            <td class="px-4 py-3 text-center text-sm font-medium truncate max-w-[160px]" title="${test.lockName || ""}">${test.lockName || "—"}</td>
             <td class="px-4 py-3 text-center text-sm font-semibold">${completed} / ${total} <span class="text-muted-foreground ml-1">(${progress}%)</span></td>
             <td class="px-4 py-3 text-center">${statusBadge}</td>
             <td class="px-4 py-3 text-center">

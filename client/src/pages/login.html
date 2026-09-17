@@ -1,69 +1,130 @@
 <div
   id="login-screen"
-  class="fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm z-50 overflow-hidden"
+  class="fixed inset-0 z-50 flex flex-col overflow-hidden bg-background md:flex-row"
 >
   <div
-    class="absolute inset-0 w-full h-full overflow-hidden pointer-events-none z-0"
+    class="relative hidden w-full shrink-0 overflow-hidden bg-black md:flex md:w-1/2 lg:w-3/5"
   >
+    <div class="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+      <div
+        class="bg-primary absolute top-1/2 left-1/2 h-[60vw] w-[60vw] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-15 blur-[160px]"
+      ></div>
+    </div>
+
+    <img
+      id="login-logo"
+      alt="Pado"
+      class="absolute top-8 left-8 z-20 h-30 w-auto"
+    />
+
     <div
-      class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-[#c603fc] rounded-full mix-blend-screen filter blur-[120px] opacity-25 animate-blob"
-    ></div>
-    <div
-      class="absolute top-[20%] right-[-10%] w-[40vw] h-[40vw] bg-[#fcfcfc] rounded-full mix-blend-screen filter blur-[300px] opacity-10 animate-blob animation-delay-2000"
-    ></div>
-    <div
-      class="absolute bottom-[-20%] left-[20%] w-[60vw] h-[60vw] bg-primary rounded-full mix-blend-screen filter blur-[130px] opacity-20 animate-blob animation-delay-4000"
-    ></div>
-  </div>
-  <div
-    class="bg-card text-card-foreground border border-border p-4 rounded-2x1 shadow-2xl w-full max-w-220 flex flex-col gap-5 z-10 relative"
-  >
-    <h2 class="text-3xl font-black tracking-wide text-center">Pado TestLock</h2>
-    <p class="text-base text-center italic text-muted-foreground">
-      Insira as credenciais da sua conta Pado Digital Locking
-    </p>
-    <div class="flex flex-col gap-3 relative">
-      <input
-        type="text"
-        id="username"
-        placeholder="E-mail"
-        class="w-full px-4 py-3 rounded-lg border border-border bg-black/80 focus:outline-none focus:ring-2 focus:ring-primary transition-all"
-      />
-      <div class="relative w-full">
-        <input
-          type="password"
-          id="password"
-          placeholder="Senha"
-          class="w-full px-4 py-3 pr-12 rounded-lg border border-border bg-black/80 focus:outline-none focus:ring-2 focus:ring-primary transition-all"
-        />
-        <button
-          type="button"
-          id="toggle-password"
-          class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer focus:outline-none"
-        >
-          <svg
-            id="eye-icon"
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
-            <circle cx="12" cy="12" r="3"></circle>
-          </svg>
-        </button>
+      class="relative z-10 flex h-full w-full flex-col items-center justify-center gap-8 p-12"
+    >
+      <div class="max-w-md text-center">
+        <h1 class="text-3xl font-black tracking-tight text-white">
+          Automatize testes em todas as
+          <span class="text-primary">fechaduras Pado/TTlock.</span>
+        </h1>
+
+      </div>
+
+      <div class="flex w-full max-w-sm flex-col items-center gap-4">
+        <div
+          id="login-carousel-viewport"
+          class="relative h-20 w-full sm:h-100"
+        ></div>
+        <p
+          id="login-carousel-caption"
+          class="text-sm font-semibold tracking-wide text-white"
+        ></p>
+        <div
+          id="login-carousel-dots"
+          class="flex items-center justify-center gap-2"
+        ></div>
       </div>
     </div>
-    <button
-      id="btn-enter-app"
-      class="w-full bg-primary text-primary-foreground hover:bg-primary-hover px-4 py-3 rounded-lg font-semibold transition-colors mt-2 shadow-md"
-    >
-      Entrar no Sistema
-    </button>
+  </div>
+
+  <div
+    class="border-border relative flex w-full flex-1 items-center justify-center border-l bg-background p-6 sm:p-10"
+  >
+    <div class="flex w-full max-w-sm flex-col gap-6">
+      <img
+        id="login-logo-mobile"
+        alt="Pado"
+        class="h-8 w-auto self-center md:hidden"
+      />
+
+      <div>
+        <h2 class="text-foreground text-2xl font-bold tracking-tight">
+          Entrar no TestLock
+        </h2>
+        <p class="text-muted-foreground mt-1 text-sm">
+          Use sua conta Pado Digital Locking.
+        </p>
+      </div>
+
+      <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-1.5">
+          <label
+            class="text-muted-foreground text-xs font-semibold tracking-wide uppercase"
+            >E-mail</label
+          >
+          <input
+            type="text"
+            id="username"
+            placeholder="seu@email.com"
+            class="border-border bg-background focus:border-primary rounded-lg border px-3 py-2.5 text-sm transition-all focus:outline-none"
+          />
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label
+            class="text-muted-foreground text-xs font-semibold tracking-wide uppercase"
+            >Senha</label
+          >
+          <div class="relative w-full">
+            <input
+              type="password"
+              id="password"
+              placeholder="••••••••"
+              class="border-border bg-background focus:border-primary w-full rounded-lg border px-3 py-2.5 pr-11 text-sm transition-all focus:outline-none"
+            />
+            <button
+              type="button"
+              id="toggle-password"
+              class="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer transition-colors focus:outline-none"
+            >
+              <svg
+                id="eye-icon"
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <button
+        id="btn-enter-app"
+        class="bg-primary text-primary-foreground hover:bg-primary-hover flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-base font-bold shadow-md transition-all disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        Entrar no Sistema
+      </button>
+
+      <p class="text-muted-foreground text-center text-xs">
+        Acesso restrito a testadores autorizados Pado.
+      </p>
+    </div>
   </div>
 </div>

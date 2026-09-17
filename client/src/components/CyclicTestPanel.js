@@ -36,6 +36,10 @@ export class CyclicTestPanel {
     this._countBadge = document.getElementById("cyclic-tests-count");
 
     this._bindFormEvents();
+    this._applyDefaultsFromSettings();
+    document.addEventListener("settings-updated", () =>
+      this._applyDefaultsFromSettings(),
+    );
   }
 
   _bindFormEvents() {
@@ -43,7 +47,17 @@ export class CyclicTestPanel {
     this._btnRefreshLocks?.addEventListener("click", () => this._fetchLocks());
   }
 
+    _applyDefaultsFromSettings() {
+    if (this._inputTotalCycles && settingsState.defaultCycles !== undefined) {
+      this._inputTotalCycles.value = settingsState.defaultCycles;
+    }
+    if (this._inputDelayCycles && settingsState.defaultInterval !== undefined) {
+      this._inputDelayCycles.value = settingsState.defaultInterval;
+    }
+  }
+
   async syncLock() {
+    this._applyDefaultsFromSettings();
     await this._fetchLocks();
     await this._loadUserHistory();
     await this._pollBackend();
@@ -111,6 +125,7 @@ export class CyclicTestPanel {
       const data = await cyclicTestApi.listActive();
       if (data.success) activeRows = data.list;
     } catch (e) {
+
       // Backend fora do ar momentaneamente: mantém último estado conhecido.
       this._render();
       return;
@@ -123,8 +138,6 @@ export class CyclicTestPanel {
       this._knownIds.add(row.id);
     }
 
-    // Testes que conhecíamos e estavam ativos, mas não aparecem mais na lista de ativos
-    // -> terminaram (completed/failed/stopped). Busca o estado final e avança a fila.
     const finishedNow = [];
     for (const id of this._knownIds) {
       if (activeIds.has(id)) continue;
@@ -750,7 +763,7 @@ export class CyclicTestPanel {
     const map = {
       running: "bg-green-500 shadow-[0_0_6px_2px_rgba(34,197,94,0.4)]",
       paused: "bg-yellow-500",
-      completed: "bg-blue-500",
+      completed: "bg-green-500",
       failed: "bg-destructive",
       stopped: "bg-muted-foreground",
     };
@@ -761,7 +774,7 @@ export class CyclicTestPanel {
     const styles = {
       running: "bg-green-500/10 text-green-600 border-green-500/20",
       paused: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20",
-      completed: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+      completed: "bg-green-500/10 text-green-600 border-green-500/20",
       failed: "bg-destructive/10 text-destructive border-destructive/20",
       stopped: "bg-muted text-muted-foreground border-border",
     };

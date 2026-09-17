@@ -12,7 +12,9 @@ export class ApiConnectionCard {
   }
 
   bindEvents() {
-    this.btnAuthenticate.addEventListener("click", () => this.authenticate());
+    if (this.btnAuthenticate) {
+      this.btnAuthenticate.addEventListener("click", () => this.authenticate());
+    }
   }
 
   async authenticate() {
@@ -22,6 +24,8 @@ export class ApiConnectionCard {
     }
 
     this.btnAuthenticate.innerText = "Conectando...";
+    this.setPendingUI();
+
     try {
       const data = await authApi.login({
         username: appState.username,
@@ -31,16 +35,19 @@ export class ApiConnectionCard {
       if (data.access_token) {
         session.save(data.access_token);
         session.saveUser(data.localUserId, appState.username);
+
         this.setConnectedUI();
         this.onConnectSuccess();
-        toast.error("Autentificação bem sucedida!");
+        toast.success("Autenticação bem sucedida!");
       } else {
+        this.setDisconnectedUI();
         toast.error(
           "Falha no login: " + (data.description || "Cheque suas credenciais."),
         );
       }
     } catch (err) {
-      toast.error("Falha de conexão com o servidor.");
+      this.setDisconnectedUI();
+      toast.error("Falha de conexão com o servidor da TTLock.");
       console.error(err);
     } finally {
       this.btnAuthenticate.innerText = "Conectar API";
@@ -48,8 +55,29 @@ export class ApiConnectionCard {
   }
 
   setConnectedUI() {
-    this.connectionStatus.innerText = "● Sistema Ativo";
-    this.connectionStatus.style.color = "#4CAF50";
-    document.getElementById("config-card").style.display = "none";
+    if (!this.connectionStatus) return;
+    this.connectionStatus.innerText = "● Online";
+
+    this.connectionStatus.className =
+      "rounded-full px-3 py-1 text-xs font-semibold tracking-wider uppercase border transition-all duration-300";
+
+    const configCard = document.getElementById("config-card");
+    if (configCard) configCard.style.display = "none";
+  }
+
+  setDisconnectedUI() {
+    if (!this.connectionStatus) return;
+    this.connectionStatus.innerText = "● Offline";
+
+    this.connectionStatus.className =
+      "rounded-full px-3 py-1 text-xs font-semibold tracking-wider uppercase border transition-all duration-300";
+  }
+
+  setPendingUI() {
+    if (!this.connectionStatus) return;
+    this.connectionStatus.innerText = "● Aguardando API...";
+
+    this.connectionStatus.className =
+      "rounded-full px-3 py-1 text-xs font-semibold tracking-wider uppercase border transition-all duration-300";
   }
 }
