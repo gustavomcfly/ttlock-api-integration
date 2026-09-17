@@ -9,7 +9,7 @@ import rfidRoutes from "./routes/rfid.routes.js";
 import fingerprintRoutes from "./routes/fingerprint.routes.js";
 import recordRoutes from "./routes/record.routes.js";
 import qualityRoutes from "./routes/quality.routes.js";
-import reportRoutes from "./routes/report.routes.js";       // ← NOVO
+import reportRoutes from "./routes/report.routes.js";
 import cyclicTestsDbRoutes from "./db-routes/cyclicTestsDB.js";
 import prisma from "./prismaClient.js";
 
@@ -17,15 +17,24 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use("/api/auth", authRoutes);
-app.use("/api/lock", lockRoutes);
-app.use("/api/passcode", passcodeRoutes);
-app.use("/api/rfid", rfidRoutes);
-app.use("/api/fingerprint", fingerprintRoutes);
-app.use("/api/record", recordRoutes);
-app.use("/api/quality", qualityRoutes);
-app.use("/api/reports", reportRoutes);                      // ← NOVO
+// 1. Group all your standard API routes
+const apiRouter = express.Router();
+apiRouter.use("/auth", authRoutes);
+apiRouter.use("/lock", lockRoutes);
+apiRouter.use("/passcode", passcodeRoutes);
+apiRouter.use("/rfid", rfidRoutes);
+apiRouter.use("/fingerprint", fingerprintRoutes);
+apiRouter.use("/record", recordRoutes);
+apiRouter.use("/quality", qualityRoutes);
+apiRouter.use("/reports", reportRoutes);
+
+// 2. Mount API routes for both Local Dev and Netlify Serverless
+app.use("/api", apiRouter);
+app.use("/.netlify/functions/api", apiRouter);
+
+// 3. Mount the DB routes for both Local Dev and Netlify Serverless
 app.use("/db/cyclic-tests", cyclicTestsDbRoutes);
+app.use("/.netlify/functions/api/db/cyclic-tests", cyclicTestsDbRoutes);
 
 // Só executa localmente — nunca quando importado pela Netlify Function
 if (process.env.NODE_ENV !== "production") {
@@ -51,14 +60,16 @@ if (process.env.NODE_ENV !== "production") {
 
     if (orphaned.length > 0) {
       console.log(
-        `⚠️  ${orphaned.length} teste(s) órfão(s) marcado(s) como interrompido(s) na inicialização.`
+        `⚠️  ${orphaned.length} teste(s) órfão(s) marcado(s) como interrompido(s) na inicialização.`,
       );
     }
   }
 
   const PORT = process.env.PORT || 3001;
   reconcileOrphanedTests()
-    .catch((err) => console.error("[Startup] Erro ao reconciliar testes órfãos:", err))
+    .catch((err) =>
+      console.error("[Startup] Erro ao reconciliar testes órfãos:", err),
+    )
     .finally(() => {
       app.listen(PORT, () => {
         console.log(`Servidor rodando na porta ${PORT}`);
