@@ -1,14 +1,20 @@
 [build]
-  command   = "npm install && cd server && npm install && npx prisma generate && cd ../client && npm install && npm run build"
+  command   = "npm install && cd server && npm install && npx prisma db push && npx prisma generate && cd ../client && npm install && npm run build"
   publish   = "client/dist"
   functions = "netlify/functions"
 
 [functions]
   node_bundler = "esbuild"
+  external_node_modules = ["@prisma/client"]
 
 [[redirects]]
   from   = "/api/*"
   to     = "/.netlify/functions/api/:splat"
+  status = 200
+
+[[redirects]]
+  from   = "/db/*"
+  to     = "/.netlify/functions/api/db/:splat"
   status = 200
 
 [[redirects]]
