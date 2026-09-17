@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <?xml version="1.0" encoding="UTF-8"?>
 <svg id="Camada_1" data-name="Camada 1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1920 1080">
   <defs>
@@ -10,3 +11,6 @@
   </defs>
   <path class="cls-1" d="M751.6,636.7h208.4v-140.3h105.3c29,0,46.5,18.6,46.5,43s-18.6,43.7-46.5,43.7h-36.9c-11.5,0-19.3,7.9-19.3,19.3v34.4h59.4c58,0,99.9-40.1,99.9-96.7s-41.9-96.7-99.9-96.7h-316.8v193.3Z"/>
 </svg>
+=======
+<svg xmlns="http://www.w3.org/2000/svg" data-name="Camada 1" viewBox="0 0 1920 1080"><path d="M751.6 636.7H960V496.4h105.3c29 0 46.5 18.6 46.5 43s-18.6 43.7-46.5 43.7h-36.9c-11.5 0-19.3 7.9-19.3 19.3v34.4h59.4c58 0 99.9-40.1 99.9-96.7s-41.9-96.7-99.9-96.7H751.7v193.3Z" style="fill:#ed0c6e;stroke-width:0"/></svg>
+>>>>>>> parent of 504803a (feat: replace SVG assets with PNG versions in sidebar and topbar)
