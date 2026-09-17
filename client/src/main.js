@@ -13,13 +13,24 @@ import reportsHtml from "./pages/reports.html?raw";
 import lockSettingsHtml from "./pages/lockSettings.html?raw";
 import settingsHtml from "./pages/settings.html?raw";
 import { initTheme } from "./utils/theme.js";
+import padoLogoSidebar from "./assets/pado_marcas_rgb_90anos.svg";
+import padoLogoTopbar from "./assets/pado_marcas_rgb_Simbolo.svg";
+
+const sidebarHtmlResolved = sidebarHtml.replace(
+  "{{PADO_LOGO_SIDEBAR}}",
+  padoLogoSidebar,
+);
+const topbarHtmlResolved = topbarHtml.replace(
+  "{{PADO_LOGO_TOPBAR}}",
+  padoLogoTopbar,
+);
 
 document.getElementById("app").innerHTML = `
     ${loginHtml}
     <div id="dashboard" style="display: none;" class="flex h-screen w-full overflow-hidden bg-background">
-        ${sidebarHtml}
+        ${sidebarHtmlResolved}
         <div class="flex flex-1 flex-col overflow-hidden min-w-0">
-            ${topbarHtml}
+            ${topbarHtmlResolved}
             <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 w-full">
                 ${homeHtml}
                 ${lockHtml}
