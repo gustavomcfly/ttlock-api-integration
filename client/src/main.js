@@ -13,7 +13,7 @@ import reportsHtml from "./pages/reports.html?raw";
 import lockSettingsHtml from "./pages/lockSettings.html?raw";
 import settingsHtml from "./pages/settings.html?raw";
 import { initTheme } from "./utils/theme.js";
-import padoLogoSidebar from "./assets/pado_marcas_rgb_90anos.svg";
+import padoLogoSidebar from "./assets/pado_marcas_rgb_Principal.svg";
 import padoLogoTopbar from "./assets/pado_marcas_rgb_Simbolo.svg";
 
 const sidebarHtmlResolved = sidebarHtml.replace(

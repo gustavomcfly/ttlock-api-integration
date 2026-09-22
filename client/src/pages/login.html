@@ -1,6 +1,6 @@
 <div
   id="login-screen"
-  class="fixed inset-0 z-50 flex flex-col overflow-hidden bg-background md:flex-row"
+  class="bg-background fixed inset-0 z-50 flex flex-col overflow-hidden md:flex-row"
 >
   <div
     class="relative hidden w-full shrink-0 overflow-hidden bg-black md:flex md:w-1/2 lg:w-3/5"
@@ -25,7 +25,6 @@
           Automatize testes em todas as
           <span class="text-primary">fechaduras Pado/TTlock.</span>
         </h1>
-
       </div>
 
       <div class="flex w-full max-w-sm flex-col items-center gap-4">
@@ -46,13 +45,13 @@
   </div>
 
   <div
-    class="border-border relative flex w-full flex-1 items-center justify-center border-l bg-background p-6 sm:p-10"
+    class="border-border bg-background relative flex w-full flex-1 items-center justify-center border-l p-6 sm:p-10"
   >
     <div class="flex w-full max-w-sm flex-col gap-6">
       <img
         id="login-logo-mobile"
         alt="Pado"
-        class="h-8 w-auto self-center md:hidden"
+        class="h-25 w-auto self-center md:hidden"
       />
 
       <div>
@@ -74,7 +73,7 @@
             type="text"
             id="username"
             placeholder="seu@email.com"
-            class="border-border bg-background focus:border-primary rounded-lg border px-3 py-2.5 text-sm transition-all focus:outline-none"
+            class="border-border bg-background text-foreground focus:border-primary rounded-lg border px-3 py-2.5 text-sm transition-all focus:outline-none"
           />
         </div>
 
@@ -88,7 +87,7 @@
               type="password"
               id="password"
               placeholder="••••••••"
-              class="border-border bg-background focus:border-primary w-full rounded-lg border px-3 py-2.5 pr-11 text-sm transition-all focus:outline-none"
+              class="border-border bg-background text-foreground focus:border-primary w-full rounded-lg border px-3 py-2.5 pr-11 text-sm transition-all focus:outline-none"
             />
             <button
               type="button"
