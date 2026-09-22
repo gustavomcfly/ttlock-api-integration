@@ -3,14 +3,13 @@ import { appState } from "../state/appState.js";
 import { authApi } from "../api/authApi.js";
 import { session } from "../utils/session.js";
 import { toast } from "../utils/toast.js";
-import padoLogo from "../assets/pado_marcas_rgb_Principal.svg";
+import padoLogo from "../assets/pado_marcas_rgb_90anos.svg";
 import fd500 from "../assets/fd-500.png";
 import fde250 from "../assets/fde-250.png";
 import fde300w from "../assets/fde-300w.png";
 import fde600w from "../assets/fde-600w.png";
 import fde800 from "../assets/fde-800.png";
 import fdv201 from "../assets/fdv-201.png";
-
 
 const LOCK_SLIDES = [
   { src: fdv201, label: "FDV-201" },
@@ -46,7 +45,6 @@ export class LoginScreen {
     this.onLoginSuccess = onLoginSuccess;
     this.bindEvents();
   }
-
 
   _buildCarousel() {
     if (!this.carouselViewport || !this.carouselDots) return;
@@ -127,13 +125,12 @@ export class LoginScreen {
         this.handleLogin();
       }
     };
-    
+
     if (this.usernameInput)
       this.usernameInput.addEventListener("keydown", submitOnEnter);
     if (this.passwordInput)
       this.passwordInput.addEventListener("keydown", submitOnEnter);
   }
-
 
   togglePasswordVisibility() {
     if (this.passwordInput.type === "password") {
