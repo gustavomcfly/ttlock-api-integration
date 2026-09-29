@@ -53,31 +53,4 @@ export class ApiConnectionCard {
       this.btnAuthenticate.innerText = "Conectar API";
     }
   }
-
-  setConnectedUI() {
-    if (!this.connectionStatus) return;
-    this.connectionStatus.innerText = "● Online";
-
-    this.connectionStatus.className =
-      "rounded-full px-3 py-1 text-xs font-semibold tracking-wider uppercase border transition-all duration-300";
-
-    const configCard = document.getElementById("config-card");
-    if (configCard) configCard.style.display = "none";
-  }
-
-  setDisconnectedUI() {
-    if (!this.connectionStatus) return;
-    this.connectionStatus.innerText = "● Offline";
-
-    this.connectionStatus.className =
-      "rounded-full px-3 py-1 text-xs font-semibold tracking-wider uppercase border transition-all duration-300";
-  }
-
-  setPendingUI() {
-    if (!this.connectionStatus) return;
-    this.connectionStatus.innerText = "● Aguardando API...";
-
-    this.connectionStatus.className =
-      "rounded-full px-3 py-1 text-xs font-semibold tracking-wider uppercase border transition-all duration-300";
-  }
 }
