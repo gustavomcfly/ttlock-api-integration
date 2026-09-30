@@ -16,11 +16,11 @@ import { initTheme } from "./utils/theme.js";
 import padoLogoSidebar from "./assets/pado_marcas_rgb_Principal.svg";
 import padoLogoTopbar from "./assets/pado_marcas_rgb_Simbolo.svg";
 
-const sidebarHtmlResolved = sidebarHtml.replace(
-  "{{PADO_LOGO_SIDEBAR}}",
-  padoLogoSidebar,
-);
-const topbarHtmlResolved = topbarHtml.replace(
+// replaceAll: o símbolo agora aparece na sidebar E na topbar
+const sidebarHtmlResolved = sidebarHtml
+  .replaceAll("{{PADO_LOGO_SIDEBAR}}", padoLogoSidebar)
+  .replaceAll("{{PADO_LOGO_TOPBAR}}", padoLogoTopbar);
+const topbarHtmlResolved = topbarHtml.replaceAll(
   "{{PADO_LOGO_TOPBAR}}",
   padoLogoTopbar,
 );
@@ -161,43 +161,32 @@ function init() {
 
   // --- LÓGICA DE FOLD DA SIDEBAR ---
   const btnToggleSidebar = document.getElementById("btn-toggle-sidebar");
-  const sidebarLogo = document.getElementById("sidebar-logo");
-  const sidebarTexts = document.querySelectorAll(".sidebar-text");
-  const toggleIcon = document.getElementById("sidebar-toggle-icon");
 
-  let isSidebarCollapsed = false;
+  const setSidebarCollapsed = (collapsed) => {
+    sidebar.classList.toggle("is-collapsed", collapsed);
+    if (btnToggleSidebar) {
+      btnToggleSidebar.setAttribute("aria-expanded", String(!collapsed));
+      btnToggleSidebar.title = collapsed ? "Expandir menu" : "Recolher menu";
+    }
+  };
+
+  setSidebarCollapsed(true);
 
   if (btnToggleSidebar) {
     btnToggleSidebar.addEventListener("click", () => {
-      isSidebarCollapsed = !isSidebarCollapsed;
-
-      if (isSidebarCollapsed) {
-        sidebar.classList.remove("w-80");
-        sidebar.classList.add("w-[80px]");
-
-        sidebarLogo.classList.add("scale-0", "opacity-0", "w-0");
-        sidebarTexts.forEach((t) =>
-          t.classList.add("scale-0", "opacity-0", "w-0"),
-        );
-        toggleIcon.classList.add("rotate-180");
-      } else {
-        sidebar.classList.remove("w-[80px]");
-        sidebar.classList.add("w-80");
-
-        sidebarLogo.classList.remove("scale-0", "opacity-0", "w-0");
-        sidebarTexts.forEach((t) =>
-          t.classList.remove("scale-0", "opacity-0", "w-0"),
-        );
-        toggleIcon.classList.remove("rotate-180");
-      }
+      setSidebarCollapsed(!sidebar.classList.contains("is-collapsed"));
     });
   }
 
   // --- NAVEGAÇÃO ---
-  document.getElementById("btn-topbar-home")?.addEventListener("click", (e) => {
-    e.preventDefault();
-    navigateToHomeView();
-  });
+  // Logo (principal / símbolo) no topo da sidebar leva para a home
+  document
+    .getElementById("btn-sidebar-logo")
+    ?.addEventListener("click", (e) => {
+      e.preventDefault();
+      closeSidebar();
+      navigateToHomeView();
+    });
   document.getElementById("btn-back-home")?.addEventListener("click", (e) => {
     e.preventDefault();
     navigateToHomeView();
