@@ -1,95 +1,152 @@
+import prisma from "../prismaClient.js";
 import { lockService } from "./lock.service.js";
 import { passcodeService } from "./passcode.service.js";
 import { rfidService } from "./rfid.service.js";
 import { fingerprintService } from "./fingerprint.service.js";
 import { recordService } from "./record.service.js";
 
-const activeQualityTests = new Map();
+const STEP_NAMES = {
+  get_info: "Obter Parâmetros da Fechadura",
+  remote_unlock: "Teste de Abertura Remota",
+  add_passcode: "Registro de Senha Padrão",
+  add_rfid: "Registro de Cartão RFID",
+  add_fingerprint: "Registro de Biometria",
+  rename_lock: "Renomear Fechadura",
+  passage_mode: "Ativar/Desativar Modo Passagem",
+  get_records: "Sincronizar Histórico de Registros",
+  check_update: "Verificar Atualização de Firmware",
+};
+
+const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
+const ok = (r) => !r.errcode || r.errcode === 0;
+
+const include = {
+  lock: true,
+  steps: { orderBy: { position: "asc" } },
+};
+
+// Converte a linha do banco para o formato que o front já consome
+// (o mesmo que o antigo estado em memória).
+function toClientShape(audit) {
+  return {
+    testId: audit.id,
+    lockId: audit.lockId,
+    lockName:
+      audit.params?.lockName ||
+      audit.lock?.lockAlias ||
+      `Lock ${audit.lockId}`,
+    status: audit.status,
+    startTime: audit.startedAt.getTime(),
+    endTime: audit.completedAt ? audit.completedAt.getTime() : null,
+    steps: audit.steps.map((s) => ({
+      id: s.stepKey,
+      name: s.stepName,
+      status: s.status,
+      errorMsg: s.errorMsg,
+      logs: s.logs ?? [],
+    })),
+    params: audit.params,
+  };
+}
 
 export const qualityService = {
-  startTest(accessToken, lockId, criteria, testParams) {
-    const testId = `Q-${Math.floor(Math.random() * 1000000)}`;
-
-    const steps = criteria.map((c) => ({
-      id: c,
-      name: this.getStepName(c),
-      status: "pendente",
-      errorMsg: null,
-      logs: [],
-    }));
-
-    const testState = {
-      testId,
-      lockId,
-      lockName: testParams.lockName || `Lock ${lockId}`,
-      status: "executando",
-      startTime: Date.now(),
-      endTime: null,
-      steps: steps,
-      params: testParams,
-    };
-
-    activeQualityTests.set(testId, testState);
-    this.runScript(accessToken, lockId, testId);
-
-    return testState;
-  },
-
   getStepName(stepId) {
-    const names = {
-      get_info: "Obter Parâmetros da Fechadura",
-      remote_unlock: "Teste de Abertura Remota",
-      add_passcode: "Registro de Senha Padrão",
-      add_rfid: "Registro de Cartão RFID",
-      add_fingerprint: "Registro de Biometria",
-      rename_lock: "Renomear Fechadura",
-      passage_mode: "Ativar/Desativar Modo Passagem",
-      get_records: "Sincronizar Histórico de Registros",
-      check_update: "Verificar Atualização de Firmware",
-    };
-    return names[stepId] || stepId;
+    return STEP_NAMES[stepId] || stepId;
   },
 
-  async runScript(accessToken, lockId, testId) {
-    const test = activeQualityTests.get(testId);
-    if (!test) return;
+  async startTest(userId, accessToken, lockId, criteria, testParams = {}) {
+    const lockIdInt = parseInt(lockId);
+    const lockName = testParams.lockName || `Lock ${lockIdInt}`;
 
-    for (let i = 0; i < test.steps.length; i++) {
-      const step = test.steps[i];
-      step.status = "executando";
+    // Garante a fechadura no banco (testes de qualidade antes nunca gravavam isso).
+    await prisma.lock.upsert({
+      where: { lockId: lockIdInt },
+      update: testParams.lockName ? { lockAlias: testParams.lockName } : {},
+      create: { lockId: lockIdInt, lockAlias: lockName },
+    });
 
-      const log = (msg) => {
-        step.logs.push(msg);
+    const audit = await prisma.qualityAudit.create({
+      data: {
+        lockId: lockIdInt,
+        userId,
+        status: "executando",
+        testerName: testParams.testerName || null,
+        params: { ...testParams, lockName },
+        steps: {
+          create: criteria.map((c, i) => ({
+            position: i,
+            stepKey: c,
+            stepName: this.getStepName(c),
+            status: "pendente",
+            logs: [],
+          })),
+        },
+      },
+      include,
+    });
+
+    // Roda em background; o front acompanha por polling em /quality/status.
+    this.runScript(accessToken, lockIdInt, audit.id).catch((err) =>
+      console.error("[Quality] Erro crítico no script:", err),
+    );
+
+    return toClientShape(audit);
+  },
+
+  async runScript(accessToken, lockId, auditId) {
+    const audit = await prisma.qualityAudit.findUnique({
+      where: { id: auditId },
+      include,
+    });
+    if (!audit) return;
+    const params = audit.params || {};
+
+    for (const step of audit.steps) {
+      const logs = [];
+      const log = async (msg) => {
+        logs.push(msg);
+        await prisma.qualityAuditStep.update({
+          where: { id: step.id },
+          data: { logs },
+        });
       };
 
+      await prisma.qualityAuditStep.update({
+        where: { id: step.id },
+        data: { status: "executando" },
+      });
+
+      let finalStatus = "falha";
+      let errorMsg = null;
+
       try {
-        await new Promise((res) => setTimeout(res, 1500));
+        await sleep(1500);
 
         let result = {};
-        switch (step.id) {
+        switch (step.stepKey) {
           case "get_info":
-            log("Solicitando parâmetros via Gateway...");
+            await log("Solicitando parâmetros via Gateway...");
             result = await lockService.getLockDetails(accessToken, lockId);
-            if (!result.errcode || result.errcode === 0) {
+            if (ok(result)) {
               result.success = true;
-              log(`Bateria: ${result.electricQuantity || 0}%`);
-              log(`MAC Address: ${result.lockMac || "Desconhecido"}`);
-              log(`Firmware: ${result.firmwareRevision || "Desconhecido"}`);
+              await log(`Bateria: ${result.electricQuantity || 0}%`);
+              await log(`MAC Address: ${result.lockMac || "Desconhecido"}`);
+              await log(`Firmware: ${result.firmwareRevision || "Desconhecido"}`);
             }
             break;
 
           case "remote_unlock":
-            log("Enviando comando de abertura remota...");
+            await log("Enviando comando de abertura remota...");
             result = await lockService.remoteUnlock(accessToken, lockId);
-            if (!result.errcode || result.errcode === 0) {
-              log("Fechadura desbloqueada.");
-              log("Aguardando 3 segundos...");
-              await new Promise((res) => setTimeout(res, 3000));
-              log("Enviando comando de bloqueio remoto...");
+            if (ok(result)) {
+              await log("Fechadura desbloqueada.");
+              await log("Aguardando 3 segundos...");
+              await sleep(3000);
+              await log("Enviando comando de bloqueio remoto...");
 
               const lockRes = await lockService.remoteLock(accessToken, lockId);
-              if (!lockRes.errcode || lockRes.errcode === 0) {
-                log("Fechadura bloqueada.");
+              if (ok(lockRes)) {
+                await log("Fechadura bloqueada.");
                 result.success = true;
               } else {
                 result.success = false;
@@ -99,12 +156,12 @@ export const qualityService = {
             break;
 
           case "add_passcode":
-            log(`Configurando senha numérica: ${test.params.stdPasscode}`);
+            await log(`Configurando senha numérica: ${params.stdPasscode}`);
             result = await passcodeService.addCustomPasscode(
               accessToken,
               lockId,
-              test.params.stdPasscode,
-              `${test.params.testerName} (QA)`,
+              params.stdPasscode,
+              `${params.testerName} (QA)`,
               Date.now(),
               0,
               1,
@@ -112,113 +169,98 @@ export const qualityService = {
               "",
               "",
             );
-            if (!result.errcode || result.errcode === 0) {
+            if (ok(result)) {
               result.success = true;
-              log("Senha sincronizada com sucesso.");
+              await log("Senha sincronizada com sucesso.");
             }
             break;
 
           case "add_rfid":
-            log(`Sincronizando ID RFID: ${test.params.stdCard}`);
+            await log(`Sincronizando ID RFID: ${params.stdCard}`);
             result = await rfidService.addCard(
               accessToken,
               lockId,
-              test.params.stdCard,
-              `${test.params.testerName} (QA)`,
+              params.stdCard,
+              `${params.testerName} (QA)`,
               0,
               0,
             );
-            if (!result.errcode || result.errcode === 0) {
+            if (ok(result)) {
               result.success = true;
-              log("Cartão RFID sincronizado com sucesso.");
+              await log("Cartão RFID sincronizado com sucesso.");
             }
             break;
 
           case "add_fingerprint":
-            log(`Sincronizando ID Biométrico: ${test.params.stdFingerprint}`);
+            await log(`Sincronizando ID Biométrico: ${params.stdFingerprint}`);
             result = await fingerprintService.addFingerprint(
               accessToken,
               lockId,
-              test.params.stdFingerprint,
-              `${test.params.testerName} (QA)`,
+              params.stdFingerprint,
+              `${params.testerName} (QA)`,
               0,
               0,
             );
-            if (!result.errcode || result.errcode === 0) {
+            if (ok(result)) {
               result.success = true;
-              log("Biometria sincronizada com sucesso.");
+              await log("Biometria sincronizada com sucesso.");
             }
             break;
 
           case "rename_lock":
-            log("Alterando nome da fechadura para 'Pado QA Test'...");
-            result = await lockService.renameLock(
-              accessToken,
-              lockId,
-              "Pado QA Test",
-            );
-            if (!result.errcode || result.errcode === 0) {
+            await log("Alterando nome da fechadura para 'Pado QA Test'...");
+            result = await lockService.renameLock(accessToken, lockId, "Pado QA Test");
+            if (ok(result)) {
               result.success = true;
-              log("Nome atualizado com sucesso.");
+              await log("Nome atualizado com sucesso.");
             }
             break;
 
-          case "passage_mode":
-            log("Ativando Modo Passagem (Always Open)...");
-            const pmOn = await lockService.configPassageMode(
-              accessToken,
-              lockId,
-              1,
-              1,
-            );
-            if (!pmOn.errcode || pmOn.errcode === 0) {
-              log("Modo Passagem ativado.");
-              log("Aguardando 2 segundos...");
-              await new Promise((res) => setTimeout(res, 2000));
-              log("Desativando Modo Passagem...");
-              const pmOff = await lockService.configPassageMode(
-                accessToken,
-                lockId,
-                0,
-                1,
-              );
-              if (!pmOff.errcode || pmOff.errcode === 0) {
-                log("Modo Passagem desativado.");
+          case "passage_mode": {
+            await log("Ativando Modo Passagem (Always Open)...");
+            const pmOn = await lockService.configPassageMode(accessToken, lockId, 1, 1);
+            if (ok(pmOn)) {
+              await log("Modo Passagem ativado.");
+              await log("Aguardando 2 segundos...");
+              await sleep(2000);
+              await log("Desativando Modo Passagem...");
+              const pmOff = await lockService.configPassageMode(accessToken, lockId, 0, 1);
+              if (ok(pmOff)) {
+                await log("Modo Passagem desativado.");
                 result.success = true;
               } else {
                 result.success = false;
-                result.errmsg =
-                  pmOff.errmsg || "Falha ao desativar Modo Passagem";
+                result.errmsg = pmOff.errmsg || "Falha ao desativar Modo Passagem";
               }
             } else {
               result.success = false;
               result.errmsg = pmOn.errmsg || "Falha ao ativar Modo Passagem";
             }
             break;
+          }
 
-          case "get_records":
-            log("Solicitando histórico do Datalog...");
+          case "get_records": {
+            await log("Solicitando histórico do Datalog...");
             result = await recordService.getRecords(accessToken, lockId, 1, 20);
-            if (!result.errcode || result.errcode === 0) {
+            if (ok(result)) {
               result.success = true;
               const count = result.list ? result.list.length : 0;
-              log(
-                `Histórico puxado com sucesso (${count} registros retornados).`,
-              );
+              await log(`Histórico puxado com sucesso (${count} registros retornados).`);
             }
             break;
+          }
 
           case "check_update":
-            log("Verificando atualizações de firmware...");
+            await log("Verificando atualizações de firmware...");
             result = await lockService.checkUpdate(accessToken, lockId);
-            if (!result.errcode || result.errcode === 0) {
+            if (ok(result)) {
               result.success = true;
               if (result.needUpgrade === 1) {
-                log("Atualização disponível (Necessário app via Bluetooth).");
+                await log("Atualização disponível (Necessário app via Bluetooth).");
               } else if (result.needUpgrade === 0) {
-                log("Firmware atualizado.");
+                await log("Firmware atualizado.");
               } else {
-                log("Status de versão desconhecido.");
+                await log("Status de versão desconhecido.");
               }
             }
             break;
@@ -228,32 +270,62 @@ export const qualityService = {
         }
 
         if (result.success) {
-          step.status = "sucesso";
+          finalStatus = "sucesso";
         } else {
-          step.status = "falha";
-          step.errorMsg = result.errmsg || "Falha de Sincronização no Gateway";
+          errorMsg = result.errmsg || "Falha de Sincronização no Gateway";
         }
       } catch (error) {
-        step.status = "falha";
-        step.errorMsg =
+        errorMsg =
           error.response?.data?.errmsg || error.message || "Erro Desconhecido";
       }
+
+      await prisma.qualityAuditStep.update({
+        where: { id: step.id },
+        data: { status: finalStatus, errorMsg, logs },
+      });
     }
 
-    test.status = "concluido";
-    test.endTime = Date.now();
+    await prisma.qualityAudit.update({
+      where: { id: auditId },
+      data: { status: "concluido", completedAt: new Date() },
+    });
   },
 
-  getStatus(testId) {
-    return activeQualityTests.get(testId) || null;
+  // Só devolve se a auditoria for do usuário informado.
+  async getStatus(userId, testId) {
+    const audit = await prisma.qualityAudit.findFirst({
+      where: { id: testId, userId },
+      include,
+    });
+    return audit ? toClientShape(audit) : null;
   },
 
-  // NOVO MODO PARA BUSCAR A LISTA DE TESTES
-  getAllTests(lockId) {
-    const tests = Array.from(activeQualityTests.values());
-    if (lockId) {
-      return tests.filter((t) => t.lockId == lockId);
+  async getAllTests(userId, lockId) {
+    const audits = await prisma.qualityAudit.findMany({
+      where: { userId, ...(lockId ? { lockId: parseInt(lockId) } : {}) },
+      orderBy: { startedAt: "desc" },
+      include,
+    });
+    return audits.map(toClientShape);
+  },
+
+  // O script roda dentro do processo; se o servidor reiniciar no meio, a auditoria
+  // ficaria "executando" para sempre. No boot, fecha as pendentes como reprovadas.
+  async reconcileOrphaned() {
+    const orphaned = await prisma.qualityAudit.findMany({
+      where: { status: "executando" },
+      select: { id: true },
+    });
+    for (const { id } of orphaned) {
+      await prisma.qualityAuditStep.updateMany({
+        where: { auditId: id, status: { in: ["pendente", "executando"] } },
+        data: { status: "falha", errorMsg: "Interrompido: servidor reiniciado." },
+      });
+      await prisma.qualityAudit.update({
+        where: { id },
+        data: { status: "concluido", completedAt: new Date() },
+      });
     }
-    return tests;
+    return orphaned.length;
   },
 };
