@@ -550,7 +550,7 @@ export class ReportsPanel {
       y += 2;
       hLine();
 
-      const logs = (p.logs || []).slice(-40);
+      const logs = p.logs || [];
       if (logs.length > 0) {
         line(`Log de Eventos (últimos ${logs.length})`, 11, "bold");
         y += 1;

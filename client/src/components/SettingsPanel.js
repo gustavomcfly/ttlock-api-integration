@@ -24,7 +24,8 @@ export class SettingsPanel {
   }
 
   // Called automatically when navigating to the Settings page
-  loadSettingsToUI() {
+  async loadSettingsToUI() {
+    await settingsState.load();
     if (this.inputName) this.inputName.value = settingsState.testerName;
     if (this.inputPasscode)
       this.inputPasscode.value = settingsState.stdPasscode;
@@ -39,7 +40,7 @@ export class SettingsPanel {
       this.inputInterval.value = settingsState.defaultInterval;
   }
 
-  saveSettings() {
+  async saveSettings() {
     const data = {
       testerName: this.inputName.value.trim(),
       stdPasscode: this.inputPasscode.value.trim(),
@@ -50,7 +51,12 @@ export class SettingsPanel {
       defaultInterval: parseInt(this.inputInterval.value) || 5,
     };
 
-    settingsState.save(data);
+    try {
+      await settingsState.save(data);
+    } catch (err) {
+      toast.error(err.message || "Não foi possível salvar as configurações.");
+      return;
+    }
     toast.success("Configurações salvas com sucesso!");
 
     // Dispatch a custom event in case other panels (like TestsPanel) want to listen and update immediately

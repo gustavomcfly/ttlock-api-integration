@@ -226,7 +226,7 @@ export class QualityTestPanel {
       const tr = document.createElement("tr");
       tr.className = `transition-colors group ${rowClass}`;
       tr.innerHTML = `
-            <td class="px-4 py-3 text-center font-mono text-xs text-primary">${test.testId}</td>
+            <td class="px-4 py-3 text-center font-mono text-xs text-primary" title="${test.testId}">${test.testId.slice(0, 8)}</td>
             <td class="px-4 py-3 text-center text-sm font-medium truncate max-w-[160px]" title="${test.lockName || ""}">${test.lockName || "—"}</td>
             <td class="px-4 py-3 text-center text-sm font-semibold">${completed} / ${total} <span class="text-muted-foreground ml-1">(${progress}%)</span></td>
             <td class="px-4 py-3 text-center">${statusBadge}</td>
@@ -342,12 +342,8 @@ export class QualityTestPanel {
   async saveReport() {
     if (!this.currentTestId) return;
     try {
-      const res = await qualityApi.getStatus(this.currentTestId);
-      if (res.errcode !== 0 || !res.data) {
-        return toast.error("Não foi possível obter os dados do teste.");
-      }
       const testerName = settingsState.testerName || null;
-      const data = await reportApi.saveQuality(res.data, testerName);
+      const data = await reportApi.saveQuality(this.currentTestId, testerName);
       if (data.success) {
         toast.success("Relatório salvo com sucesso!");
       } else {
