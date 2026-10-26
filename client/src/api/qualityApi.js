@@ -1,29 +1,24 @@
 import { API_BASE } from "../config.js";
+import { authFetch } from "../utils/http.js";
 const API_BASE_URL = `${API_BASE}/quality`;
 
+const post = async (path, body) => {
+  const response = await authFetch(`${API_BASE_URL}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  return response.json();
+};
+
 export const qualityApi = {
-  async startTest(accessToken, lockId, criteria, testParams) {
-    const response = await fetch(`${API_BASE_URL}/start`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ accessToken, lockId, criteria, testParams }),
-    });
-    return response.json();
+  startTest(accessToken, lockId, criteria, testParams) {
+    return post("/start", { accessToken, lockId, criteria, testParams });
   },
-  async getStatus(testId) {
-    const response = await fetch(`${API_BASE_URL}/status`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ testId }),
-    });
-    return response.json();
+  getStatus(testId) {
+    return post("/status", { testId });
   },
-  async getList(lockId) {
-    const response = await fetch(`${API_BASE_URL}/list`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ lockId }),
-    });
-    return response.json();
+  getList(lockId) {
+    return post("/list", { lockId });
   },
 };
