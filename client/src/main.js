@@ -7,6 +7,7 @@ import passcodeHtml from "./pages/passcode.html?raw";
 import rfidHtml from "./pages/rfid.html?raw";
 import fingerprintHtml from "./pages/fingerprint.html?raw";
 import cyclicTestHtml from "./pages/cyclicTest.html?raw";
+import cyclicTestProgressHtml from "./pages/cyclicTestProgress.html?raw";
 import qualityTestHtml from "./pages/qualityTest.html?raw";
 import qualityTestProgressHtml from "./pages/qualityTestProgress.html?raw";
 import reportsHtml from "./pages/reports.html?raw";
@@ -39,6 +40,7 @@ document.getElementById("app").innerHTML = `
                 ${rfidHtml}
                 ${fingerprintHtml}
                 ${cyclicTestHtml}
+                ${cyclicTestProgressHtml}
                 ${qualityTestHtml}
                 ${qualityTestProgressHtml}
                 ${reportsHtml}
@@ -82,6 +84,9 @@ const viewPasscode = document.getElementById("view-passcode");
 const viewRfid = document.getElementById("view-rfid");
 const viewFingerprint = document.getElementById("view-fingerprint");
 const viewCyclicTest = document.getElementById("view-cyclic-test");
+const viewCyclicTestProgress = document.getElementById(
+  "view-cyclic-test-progress",
+);
 const viewQualityTest = document.getElementById("view-quality-test");
 const viewQualityTestProgress = document.getElementById(
   "view-quality-test-progress",
@@ -337,6 +342,7 @@ function hideAllViews() {
     viewRfid,
     viewFingerprint,
     viewCyclicTest,
+    viewCyclicTestProgress,
     viewQualityTest,
     viewQualityTestProgress,
     viewReports,
