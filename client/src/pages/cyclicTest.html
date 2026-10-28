@@ -2,9 +2,9 @@
   id="view-cyclic-test"
   class="hidden w-full transition-opacity duration-300"
 >
-  <header class="mb-8">
+  <header class="mb-6">
     <div class="mb-1 flex items-center gap-3">
-      <div class="bg-primary/10 text-primary rounded-lg p-2">
+      <div class="ui-icon-tile ui-icon-tile-lg">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="22"
@@ -16,50 +16,67 @@
           stroke-linecap="round"
           stroke-linejoin="round"
         >
-          <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-10.02l5.67-5.67" />
+          <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+          <path d="M21 3v5h-5" />
+          <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+          <path d="M8 16H3v5" />
         </svg>
       </div>
       <h2 class="text-primary text-3xl font-bold tracking-tight">
         Teste de Ciclagem
       </h2>
     </div>
-    <p class="text-muted-foreground mt-1 ml-1">
+    <p class="text-muted-foreground mt-1 ml-1 max-w-3xl text-sm">
       Cada ciclo = 1 desbloqueio + 1 travamento. Testes simultâneos na mesma
       fechadura são enfileirados automaticamente.
     </p>
   </header>
-
   <div class="flex flex-col gap-6">
-    <div class="bg-card border-border w-full rounded-2xl border shadow-sm">
-      <div class="border-border border-b px-5 py-4">
-        <h3 class="font-semibold">Novo Teste</h3>
-        <p class="text-muted-foreground mt-0.5 text-xs">
-          Configure os parâmetros abaixo
-        </p>
-      </div>
-
-      <div class="flex flex-col gap-4 p-5">
-        <div class="flex flex-col gap-1.5">
-          <label
-            class="text-muted-foreground text-xs font-semibold tracking-wide uppercase"
-            >Fechadura</label
-          >
-          <div class="flex gap-2">
-            <select
-              id="cyclic-lock-select"
-              class="border-border bg-background focus:border-primary min-w-0 flex-1 rounded-lg border px-3 py-2 text-sm focus:outline-none"
+    <!-- Novo teste -->
+    <section class="ui-panel">
+      <div class="ui-panel-head">
+        <div class="flex items-center gap-3">
+          <span class="ui-icon-tile ui-icon-tile-sm"
+            ><svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
             >
+              <path d="M5 12h14" />
+              <path d="M12 5v14" /></svg
+          ></span>
+          <div>
+            <h3 class="ui-panel-title">Novo teste</h3>
+            <p class="ui-panel-subtitle">
+              Escolha a fechadura e defina os parâmetros do ciclo
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="ui-section">
+        <div class="ui-field max-w-xl">
+          <label for="cyclic-lock-select" class="ui-label">Fechadura</label>
+          <div class="flex gap-2">
+            <select id="cyclic-lock-select" class="ui-input flex-1">
               <option value="">Carregando...</option>
             </select>
             <button
               id="btn-cyclic-refresh-locks"
-              class="bg-muted text-muted-foreground hover:bg-secondary hover:text-secondary-foreground shrink-0 cursor-pointer rounded-lg p-2 transition-colors"
+              type="button"
+              class="ui-btn ui-btn-soft ui-btn-icon"
               title="Atualizar lista"
+              aria-label="Atualizar lista de fechaduras"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="15"
-                height="15"
+                width="16"
+                height="16"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -72,116 +89,182 @@
               </svg>
             </button>
           </div>
+          <span class="ui-hint">Somente fechaduras com gateway online.</span>
         </div>
-
-        <div class="border-border my-1 border-t"></div>
-
+      </div>
+      <div class="ui-section">
+        <h4 class="ui-section-title">Parâmetros do teste</h4>
+        <p class="ui-section-desc mb-4">
+          Ciclos e intervalo iniciam com o padrão das suas Configurações.
+        </p>
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div class="flex flex-col gap-1">
-            <label
-              class="text-muted-foreground text-xs font-semibold tracking-wide uppercase"
-              >Ciclos</label
-            >
-            <input
-              type="number"
-              id="cyclic-total-cycles"
-              value="100"
-              class="border-border bg-background focus:border-primary rounded-lg border px-3 py-2 text-sm focus:outline-none"
-            />
+          <div class="ui-field">
+            <label for="cyclic-total-cycles" class="ui-label">Ciclos</label>
+            <div class="ui-input-wrap">
+              <input
+                type="number"
+                id="cyclic-total-cycles"
+                value="100"
+                min="1"
+                class="ui-input"
+              /><span class="ui-suffix">ciclos</span>
+            </div>
+            <span class="ui-hint">Abrir + travar</span>
           </div>
-
-          <div class="flex flex-col gap-1">
-            <label
-              class="text-muted-foreground text-xs font-semibold tracking-wide uppercase"
-              >Intervalo (s)</label
-            >
-            <input
-              type="number"
-              id="cyclic-delay-cycles"
-              value="5"
-              class="border-border bg-background focus:border-primary rounded-lg border px-3 py-2 text-sm focus:outline-none"
-            />
-            <span class="text-muted-foreground text-[10px]"
-              >Entre comandos</span
-            >
+          <div class="ui-field">
+            <label for="cyclic-delay-cycles" class="ui-label">Intervalo</label>
+            <div class="ui-input-wrap">
+              <input
+                type="number"
+                id="cyclic-delay-cycles"
+                value="5"
+                min="0"
+                class="ui-input"
+              /><span class="ui-suffix">seg</span>
+            </div>
+            <span class="ui-hint">Entre comandos</span>
           </div>
-
-          <div class="flex flex-col gap-1">
-            <label
-              class="text-muted-foreground text-xs font-semibold tracking-wide uppercase"
-              >Falhas max.</label
+          <div class="ui-field">
+            <label for="cyclic-max-failures" class="ui-label"
+              >Falhas máx.</label
             >
-            <input
-              type="number"
-              id="cyclic-max-failures"
-              value="3"
-              class="border-border bg-background focus:border-primary rounded-lg border px-3 py-2 text-sm focus:outline-none"
-            />
-            <span class="text-muted-foreground text-[10px]">Consecutivas</span>
+            <div class="ui-input-wrap">
+              <input
+                type="number"
+                id="cyclic-max-failures"
+                value="3"
+                min="1"
+                class="ui-input"
+              /><span class="ui-suffix">falhas</span>
+            </div>
+            <span class="ui-hint">Consecutivas até parar</span>
           </div>
-
-          <div class="flex flex-col gap-1">
-            <label
-              class="text-muted-foreground text-xs font-semibold tracking-wide uppercase"
-              >Bateria baixa (%)</label
+          <div class="ui-field">
+            <label for="cyclic-battery-threshold" class="ui-label"
+              >Bateria baixa</label
             >
-            <input
-              type="number"
-              id="cyclic-battery-threshold"
-              value="20"
-              class="border-border bg-background focus:border-primary rounded-lg border px-3 py-2 text-sm focus:outline-none"
-            />
-            <span class="text-muted-foreground text-[10px]"
-              >0 = desativado</span
-            >
+            <div class="ui-input-wrap">
+              <input
+                type="number"
+                id="cyclic-battery-threshold"
+                value="20"
+                min="0"
+                max="100"
+                class="ui-input"
+              /><span class="ui-suffix">%</span>
+            </div>
+            <span class="ui-hint">0 desativa o alerta</span>
           </div>
         </div>
-
+      </div>
+      <div class="ui-panel-foot">
         <button
           id="btn-start-cyclic-test"
-          class="bg-secondary text-secondary-foreground mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-3 font-bold transition-all hover:opacity-90"
+          type="button"
+          class="ui-btn ui-btn-primary ui-btn-lg"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="15"
-            height="15"
+            width="16"
+            height="16"
             viewBox="0 0 24 24"
-            fill="none"
+            fill="currentColor"
             stroke="currentColor"
-            stroke-width="2.5"
+            stroke-width="2"
             stroke-linecap="round"
             stroke-linejoin="round"
           >
-            <polygon points="5 3 19 12 5 21 5 3" />
+            <polygon points="6 3 20 12 6 21 6 3" />
           </svg>
-          Iniciar Teste
+          Iniciar teste
         </button>
-      </div>
-    </div>
-
-    <div class="bg-card border-border rounded-2xl border shadow-sm">
-      <div
-        class="border-border flex items-center justify-between border-b px-5 py-4"
-      >
-        <div class="flex items-center gap-2.5">
-          <h3 class="font-semibold">Fila de Testes</h3>
-          <span
-            id="cyclic-tests-count"
-            class="bg-primary/10 text-primary rounded-full px-2 py-0.5 text-xs font-bold"
-            >0</span
-          >
-        </div>
-        <span class="text-muted-foreground text-xs"
-          >Clique em um teste para ver detalhes</span
-        >
-      </div>
-      <div id="cyclic-tests-list" class="p-3">
-        <p class="text-muted-foreground py-10 text-center text-sm">
-          Nenhum teste ativo.
+        <p class="ui-hint mt-2.5 text-center">
+          Se a fechadura já estiver em teste, o novo entra na fila.
         </p>
       </div>
-    </div>
-
-    <div id="cyclic-test-detail" class="hidden"></div>
+    </section>
+    <!-- Histórico -->
+    <section class="ui-panel">
+      <div class="ui-panel-head">
+        <div class="flex items-center gap-3">
+          <span class="ui-icon-tile ui-icon-tile-sm"
+            ><svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+              <path d="M3 3v5h5" />
+              <path d="M12 7v5l4 2" /></svg
+          ></span>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="ui-panel-title">Histórico de testes</h3>
+              <span
+                id="cyclic-tests-count"
+                class="ui-badge ui-tone-primary"
+                title="Testes ativos"
+                >0</span
+              >
+            </div>
+            <p class="ui-panel-subtitle">
+              Selecione um teste para acompanhar a execução
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="ui-table">
+          <thead>
+            <tr>
+              <th>Fechadura</th>
+              <th class="min-w-48">Progresso</th>
+              <th>Falhas</th>
+              <th>Status</th>
+              <th class="text-right">Ação</th>
+            </tr>
+          </thead>
+          <tbody id="cyclic-tests-list">
+            <tr>
+              <td colspan="5">
+                <div class="ui-empty">
+                  <span class="ui-icon-tile ui-tone-neutral mb-2"
+                    ><svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path
+                        d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+                      />
+                      <path d="M21 3v5h-5" />
+                      <path
+                        d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+                      />
+                      <path d="M8 16H3v5" /></svg
+                  ></span>
+                  <p class="text-sm font-semibold">Nenhum teste realizado</p>
+                  <p class="text-muted-foreground text-xs">
+                    Inicie o primeiro teste no painel acima.
+                  </p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
   </div>
 </div>
