@@ -84,10 +84,8 @@ export class CyclicTestPanel {
   // eles "desapareceriam" a cada reload mesmo estando salvos no banco. Carrega o
   // histórico do usuário logado uma vez ao entrar na tela.
   async _loadUserHistory() {
-    const userId = session.getUserId();
-    if (!userId) return; // sessão antiga, sem userId local — faça login novamente
     try {
-      const data = await cyclicTestApi.listByUser(userId);
+      const data = await cyclicTestApi.listMine();
       if (data.success) {
         for (const row of data.list) {
           cyclicTestStore.upsertFromServer(row);
@@ -253,7 +251,6 @@ export class CyclicTestPanel {
     const config = {
       lockId,
       lockName: lockObj.lockAlias || `Lock ${lockId}`,
-      userId: session.getUserId(),
       totalCycles,
       delayBetweenCycles: Math.max(
         0,

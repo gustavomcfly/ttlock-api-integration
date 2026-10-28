@@ -1,15 +1,26 @@
 import express from "express";
 import prisma from "../prismaClient.js";
 import { cyclicEngine } from "../cyclicEngine.js";
+import { requireAuth } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// Testes ativos (running/paused), em qualquer fechadura — usado para "reidratar" a UI
-// ao carregar/recarregar a página, mesmo que tenham sido iniciados em outra aba/sessão.
+// Todas as rotas exigem sessão. O dono do teste é SEMPRE req.user.id (vindo do token),
+// nunca um userId enviado pelo navegador.
+router.use(requireAuth);
+
+const FINAL_STATUSES = ["completed", "failed", "stopped"];
+
+// Busca o teste apenas se pertencer ao usuário logado.
+const findOwnedTest = (id, userId) =>
+  prisma.cyclicTest.findFirst({ where: { id, userId } });
+
+// Testes ativos (running/paused) do usuário, em qualquer fechadura — usado para "reidratar"
+// a UI ao carregar/recarregar a página, mesmo que tenham sido iniciados em outra aba/sessão.
 router.get("/active", async (req, res) => {
   try {
     const tests = await prisma.cyclicTest.findMany({
-      where: { status: { in: ["running", "paused"] } },
+      where: { userId: req.user.id, status: { in: ["running", "paused"] } },
       orderBy: { startedAt: "desc" },
       include: {
         lock: true,
@@ -29,7 +40,6 @@ router.post("/start", async (req, res) => {
     const {
       lockId,
       lockAlias,
-      userId,
       totalCycles,
       delayBetweenCycles,
       maxConsecutiveFailures,
@@ -70,7 +80,7 @@ router.post("/start", async (req, res) => {
     const newTest = await prisma.cyclicTest.create({
       data: {
         lockId: parseInt(lockId),
-        userId: userId || null,
+        userId: req.user.id,
         totalCycles: parseInt(totalCycles),
         delayBetweenCycles: parseInt(delayBetweenCycles ?? 5),
         maxConsecutiveFailures: Math.max(
@@ -107,7 +117,7 @@ router.post("/start", async (req, res) => {
 router.post("/:id/pause", async (req, res) => {
   try {
     const { id } = req.params;
-    const test = await prisma.cyclicTest.findUnique({ where: { id } });
+    const test = await findOwnedTest(id, req.user.id);
     if (!test)
       return res
         .status(404)
@@ -151,7 +161,7 @@ router.post("/:id/pause", async (req, res) => {
 router.post("/:id/resume", async (req, res) => {
   try {
     const { id } = req.params;
-    const test = await prisma.cyclicTest.findUnique({ where: { id } });
+    const test = await findOwnedTest(id, req.user.id);
     if (!test)
       return res
         .status(404)
@@ -197,7 +207,7 @@ router.post("/:id/resume", async (req, res) => {
 router.patch("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const test = await prisma.cyclicTest.findUnique({ where: { id } });
+    const test = await findOwnedTest(id, req.user.id);
     if (!test)
       return res
         .status(404)
@@ -241,51 +251,23 @@ router.patch("/:id", async (req, res) => {
   }
 });
 
-router.post("/:id/log", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { type, level, message, currentCycle, isFailure } = req.body;
-
-    await prisma.cyclicTestLog.create({
-      data: {
-        testId: id,
-        type: type || "SYSTEM",
-        level: level || "info",
-        message: message || "",
-      },
-    });
-
-    const updateData = {};
-    if (currentCycle !== undefined) {
-      updateData.completedCycles = currentCycle;
-    }
-    if (isFailure) {
-      updateData.totalFailures = { increment: 1 };
-    }
-
-    if (Object.keys(updateData).length > 0) {
-      await prisma.cyclicTest.update({
-        where: { id: id },
-        data: updateData,
-      });
-    }
-
-    res.status(200).json({ success: true });
-  } catch (error) {
-    console.error("[DB] Erro ao registrar log:", error);
-    res.status(500).json({ success: false });
-  }
-});
-
 router.post("/:id/stop", async (req, res) => {
   try {
     const { id } = req.params;
     const { status, batteryEnd } = req.body;
 
+    const test = await findOwnedTest(id, req.user.id);
+    if (!test)
+      return res
+        .status(404)
+        .json({ success: false, message: "Teste não encontrado." });
+
+    const finalStatus = FINAL_STATUSES.includes(status) ? status : "stopped";
+
     const updatedTest = await prisma.cyclicTest.update({
-      where: { id: id },
+      where: { id },
       data: {
-        status: status || "stopped",
+        status: finalStatus,
         batteryEnd: batteryEnd ? parseInt(batteryEnd) : undefined,
         completedAt: new Date(),
       },
@@ -299,12 +281,11 @@ router.post("/:id/stop", async (req, res) => {
   }
 });
 
-// Histórico de testes de um usuário específico (todas as fechaduras) — base para relatórios.
-router.get("/user/:userId", async (req, res) => {
+// Histórico de testes do usuário logado (todas as fechaduras) — base para relatórios.
+router.get("/mine", async (req, res) => {
   try {
-    const { userId } = req.params;
     const tests = await prisma.cyclicTest.findMany({
-      where: { userId },
+      where: { userId: req.user.id },
       orderBy: { startedAt: "desc" },
       include: {
         lock: true,
@@ -319,13 +300,12 @@ router.get("/user/:userId", async (req, res) => {
   }
 });
 
-// Relatório agregado, filtrável por usuário e/ou fechadura.
-// Ex: /db/cyclic-tests/reports/summary?userId=...&lockId=...
+// Relatório agregado do usuário logado, filtrável por fechadura.
+// Ex: /db/cyclic-tests/reports/summary?lockId=...
 router.get("/reports/summary", async (req, res) => {
   try {
-    const { userId, lockId } = req.query;
-    const where = {};
-    if (userId) where.userId = userId;
+    const { lockId } = req.query;
+    const where = { userId: req.user.id };
     if (lockId) where.lockId = parseInt(lockId);
 
     const [totalTests, byStatus, agg] = await Promise.all([
@@ -366,7 +346,7 @@ router.get("/lock/:lockId", async (req, res) => {
     const { lockId } = req.params;
 
     const tests = await prisma.cyclicTest.findMany({
-      where: { lockId: parseInt(lockId) },
+      where: { lockId: parseInt(lockId), userId: req.user.id },
       orderBy: { startedAt: "desc" },
       include: {
         logs: {
@@ -390,7 +370,7 @@ router.get("/lock/:lockId", async (req, res) => {
 router.delete("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const test = await prisma.cyclicTest.findUnique({ where: { id } });
+    const test = await findOwnedTest(id, req.user.id);
     if (!test) {
       return res
         .status(404)
@@ -414,8 +394,8 @@ router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-    const test = await prisma.cyclicTest.findUnique({
-      where: { id: id },
+    const test = await prisma.cyclicTest.findFirst({
+      where: { id, userId: req.user.id },
       include: {
         logs: {
           orderBy: { timestamp: "desc" },

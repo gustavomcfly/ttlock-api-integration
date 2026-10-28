@@ -34,7 +34,7 @@ export class ApiConnectionCard {
 
       if (data.access_token) {
         session.save(data.access_token);
-        session.saveUser(data.localUserId, appState.username);
+        session.saveUser(data.sessionToken, appState.username);
 
         this.setConnectedUI();
         this.onConnectSuccess();

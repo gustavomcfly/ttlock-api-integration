@@ -1,3 +1,5 @@
+import { authFetch } from "../utils/http.js";
+
 const BASE_URL = "/db/cyclic-tests";
 
 async function parse(response) {
@@ -12,30 +14,29 @@ export const cyclicTestApi = {
   // Testes "running"/"paused" em qualquer fechadura — usado para reidratar a UI
   // ao entrar na tela, mesmo que o teste tenha sido iniciado em outra aba ou sessão.
   async listActive() {
-    const res = await fetch(`${BASE_URL}/active`);
+    const res = await authFetch(`${BASE_URL}/active`);
     return parse(res);
   },
 
   async get(id) {
-    const res = await fetch(`${BASE_URL}/${id}`);
+    const res = await authFetch(`${BASE_URL}/${id}`);
     return parse(res);
   },
 
   // Histórico completo do usuário logado (inclui testes já finalizados) — usado para
   // repopular a tela ao recarregar a página, já que /active só retorna testes em andamento.
-  async listByUser(userId) {
-    const res = await fetch(`${BASE_URL}/user/${userId}`);
+  async listMine() {
+    const res = await authFetch(`${BASE_URL}/mine`);
     return parse(res);
   },
 
   async start(config, token) {
-    const res = await fetch(`${BASE_URL}/start`, {
+    const res = await authFetch(`${BASE_URL}/start`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         lockId: config.lockId,
         lockAlias: config.lockName,
-        userId: config.userId,
         totalCycles: config.totalCycles,
         delayBetweenCycles: config.delayBetweenCycles,
         maxConsecutiveFailures: config.maxConsecutiveFailures,
@@ -47,17 +48,17 @@ export const cyclicTestApi = {
   },
 
   async pause(id) {
-    const res = await fetch(`${BASE_URL}/${id}/pause`, { method: "POST" });
+    const res = await authFetch(`${BASE_URL}/${id}/pause`, { method: "POST" });
     return parse(res);
   },
 
   async resume(id) {
-    const res = await fetch(`${BASE_URL}/${id}/resume`, { method: "POST" });
+    const res = await authFetch(`${BASE_URL}/${id}/resume`, { method: "POST" });
     return parse(res);
   },
 
   async stop(id, { status, batteryEnd } = {}) {
-    const res = await fetch(`${BASE_URL}/${id}/stop`, {
+    const res = await authFetch(`${BASE_URL}/${id}/stop`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: status || "stopped", batteryEnd }),
@@ -66,7 +67,7 @@ export const cyclicTestApi = {
   },
 
   async edit(id, updates) {
-    const res = await fetch(`${BASE_URL}/${id}`, {
+    const res = await authFetch(`${BASE_URL}/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(updates),
@@ -77,7 +78,7 @@ export const cyclicTestApi = {
   // Remove definitivamente o teste no backend/Postgres — sem isso, ele reaparece
   // no histórico ao recarregar a página.
   async remove(id) {
-    const res = await fetch(`${BASE_URL}/${id}`, { method: "DELETE" });
+    const res = await authFetch(`${BASE_URL}/${id}`, { method: "DELETE" });
     return parse(res);
   },
 };

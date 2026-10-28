@@ -67,40 +67,42 @@
         <div id="reports-grid-container" class="w-full"></div>
 
         <!-- Empty State -->
-        <div
-          id="reports-empty-state"
-          class="hidden flex-col items-center justify-center py-16 text-center"
-        >
-          <div class="bg-muted mb-5 rounded-2xl p-6">
-            <svg
-              class="text-muted-foreground"
-              xmlns="http://www.w3.org/2000/svg"
-              width="40"
-              height="40"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path
-                d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
-              />
-              <polyline points="14 2 14 8 20 8" />
-              <circle cx="10" cy="13" r="2" />
-              <path d="m14 17-3.5-3.5" />
-            </svg>
+        <div id="reports-empty-state" class="hidden">
+          <!-- Adicionada uma div interna com a classe 'flex' ativada -->
+          <div
+            class="flex flex-col items-center justify-center py-16 text-center"
+          >
+            <div class="bg-muted mb-5 rounded-2xl p-6">
+              <svg
+                class="text-muted-foreground"
+                xmlns="http://www.w3.org/2000/svg"
+                width="40"
+                height="40"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                />
+                <polyline points="14 2 14 8 20 8" />
+                <circle cx="10" cy="13" r="2" />
+                <path d="m14 17-3.5-3.5" />
+              </svg>
+            </div>
+            <h3 class="mb-1 text-lg font-bold">Nenhum relatório ainda</h3>
+            <p class="text-muted-foreground max-w-xs text-sm">
+              Conclua um teste de ciclagem ou qualidade e salve o relatório para
+              vê-lo aqui.
+            </p>
           </div>
-          <h3 class="mb-1 text-lg font-bold">Nenhum relatório ainda</h3>
-          <p class="text-muted-foreground max-w-xs text-sm">
-            Conclua um teste de ciclagem ou qualidade e salve o relatório para
-            vê-lo aqui.
-          </p>
         </div>
       </div>
-    </div>
 
-    <div id="reports-detail-container" class="hidden w-full"></div>
+      <div id="reports-detail-container" class="hidden w-full"></div>
+    </div>
   </div>
 </div>

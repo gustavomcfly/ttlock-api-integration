@@ -17,8 +17,10 @@ model User {
   name          String?
   createdAt     DateTime       @default(now())
 
+  settings      UserSettings?
   cyclicTests   CyclicTest[]
   qualityAudits QualityAudit[]
+  reports       Report[]
 }
 
 model Lock {
@@ -29,20 +31,27 @@ model Lock {
 
   cyclicTests   CyclicTest[]
   qualityAudits QualityAudit[]
+  reports       Report[]
 }
 
 // ------------------------------------------------------
-// 2. Configurações do Sistema
+// 2. Configurações (uma linha por usuário)
 // ------------------------------------------------------
 
-model Settings {
-  id                 Int      @id @default(1)
-  defaultDelay       Int      @default(5)
-  maxFailures        Int      @default(3)
-  lowBatteryAlert    Int      @default(20)
-  testerName         String?
-  strictValidation   Boolean  @default(false)
-  updatedAt          DateTime @updatedAt
+// Antes vivia no localStorage do navegador ("pado_test_settings").
+// Agora é do usuário e acompanha o login em qualquer máquina.
+model UserSettings {
+  userId            String   @id
+  testerName        String?
+  stdPasscode       String?
+  stdCard           String?
+  stdFingerprint    String?
+  defaultCycles     Int      @default(100)
+  defaultUnlockTime Int      @default(5)
+  defaultInterval   Int      @default(5)
+  updatedAt         DateTime @updatedAt
+
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 // ------------------------------------------------------
@@ -67,8 +76,13 @@ model CyclicTest {
   completedAt            DateTime?
 
   lock                   Lock            @relation(fields: [lockId], references: [lockId])
-  user                   User?           @relation(fields: [userId], references: [id])
+  user                   User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
   logs                   CyclicTestLog[]
+  report                 Report?
+
+  @@index([userId])
+  @@index([lockId])
+  @@index([status])
 }
 
 model CyclicTestLog {
@@ -80,50 +94,77 @@ model CyclicTestLog {
   timestamp DateTime   @default(now())
 
   test      CyclicTest @relation(fields: [testId], references: [id], onDelete: Cascade)
+
+  @@index([testId])
 }
 
 // ------------------------------------------------------
 // 4. Auditoria de Qualidade
 // ------------------------------------------------------
 
+// Antes ficava só em memória do processo (Map) e sumia a cada reinício.
 model QualityAudit {
   id          String             @id @default(uuid())
   lockId      Int
   userId      String?
-  status      String
+  status      String             // "executando" | "concluido"
+  testerName  String?
+  params      Json?              // parâmetros usados no teste (lockName, senha/cartão/digital padrão)
   startedAt   DateTime           @default(now())
   completedAt DateTime?
 
   lock        Lock               @relation(fields: [lockId], references: [lockId])
-  user        User?              @relation(fields: [userId], references: [id])
+  user        User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
   steps       QualityAuditStep[]
+  report      Report?
+
+  @@index([userId])
+  @@index([lockId])
 }
 
 model QualityAuditStep {
   id        String       @id @default(uuid())
   auditId   String
+  position  Int
+  stepKey   String       // "get_info", "remote_unlock", ...
   stepName  String
-  status    String
-  details   String?
+  status    String       // "pendente" | "executando" | "sucesso" | "falha"
+  errorMsg  String?
+  logs      Json         @default("[]")
   timestamp DateTime     @default(now())
 
   audit     QualityAudit @relation(fields: [auditId], references: [id], onDelete: Cascade)
+
+  @@index([auditId])
 }
 
 // ------------------------------------------------------
 // 5. Relatórios Salvos
 // ------------------------------------------------------
 
+// Snapshot (payload) do teste, mas agora ligado a quem gerou e ao teste de origem.
+// Se o teste de origem for apagado, o relatório permanece (FK vira NULL).
 model Report {
-  id          String    @id @default(uuid())
-  type        String    // "cyclic" | "quality"
-  title       String
-  lockId      Int
-  lockAlias   String
-  status      String
-  testerName  String?
-  startedAt   DateTime
-  completedAt DateTime?
-  createdAt   DateTime  @default(now())
-  payload     Json      // snapshot completo do teste
+  id             String        @id @default(uuid())
+  type           String        // "cyclic" | "quality"
+  title          String
+  userId         String?
+  lockId         Int
+  cyclicTestId   String?       @unique
+  qualityAuditId String?       @unique
+  lockAlias      String
+  status         String
+  testerName     String?
+  startedAt      DateTime
+  completedAt    DateTime?
+  createdAt      DateTime      @default(now())
+  payload        Json          // snapshot completo do teste
+
+  user           User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  lock           Lock          @relation(fields: [lockId], references: [lockId])
+  cyclicTest     CyclicTest?   @relation(fields: [cyclicTestId], references: [id], onDelete: SetNull)
+  qualityAudit   QualityAudit? @relation(fields: [qualityAuditId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([lockId])
 }

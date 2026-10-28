@@ -10,6 +10,8 @@ import fingerprintRoutes from "./routes/fingerprint.routes.js";
 import recordRoutes from "./routes/record.routes.js";
 import qualityRoutes from "./routes/quality.routes.js";
 import reportRoutes from "./routes/report.routes.js";
+import settingsRoutes from "./routes/settings.routes.js";
+import { qualityService } from "./services/quality.service.js";
 import cyclicTestsDbRoutes from "./db-routes/cyclicTestsDB.js";
 import prisma from "./prismaClient.js";
 
@@ -27,6 +29,7 @@ apiRouter.use("/fingerprint", fingerprintRoutes);
 apiRouter.use("/record", recordRoutes);
 apiRouter.use("/quality", qualityRoutes);
 apiRouter.use("/reports", reportRoutes);
+apiRouter.use("/settings", settingsRoutes);
 
 // 2. Mount API routes for both Local Dev and Netlify Serverless
 app.use("/api", apiRouter);
@@ -61,6 +64,13 @@ if (process.env.NODE_ENV !== "production") {
     if (orphaned.length > 0) {
       console.log(
         `⚠️  ${orphaned.length} teste(s) órfão(s) marcado(s) como interrompido(s) na inicialização.`,
+      );
+    }
+
+    const orphanedAudits = await qualityService.reconcileOrphaned();
+    if (orphanedAudits > 0) {
+      console.log(
+        `⚠️  ${orphanedAudits} auditoria(s) de qualidade interrompida(s) fechada(s) na inicialização.`,
       );
     }
   }

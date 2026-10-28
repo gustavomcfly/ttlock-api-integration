@@ -13,6 +13,7 @@ import reportsHtml from "./pages/reports.html?raw";
 import lockSettingsHtml from "./pages/lockSettings.html?raw";
 import settingsHtml from "./pages/settings.html?raw";
 import { initTheme } from "./utils/theme.js";
+import { settingsState } from "./state/settingsState.js";
 import padoLogoSidebar from "./assets/pado_marcas_rgb_Principal.svg";
 import padoLogoTopbar from "./assets/pado_marcas_rgb_Simbolo.svg";
 
@@ -147,7 +148,14 @@ function init() {
     navigateToLockView(lockId, lockName);
   });
 
+  // Configurações do usuário vêm do banco; avisa os painéis quando chegarem.
+  const loadUserSettings = () =>
+    settingsState.load().then(() =>
+      document.dispatchEvent(new CustomEvent("settings-updated")),
+    );
+
   const loginScreen = new LoginScreen(() => {
+    loadUserSettings();
     deviceTable.enable();
     showDashboard();
     deviceTable.fetchLocks();
@@ -285,6 +293,7 @@ function init() {
 
   if (session.isAuthenticated()) {
     loginScreen.hide();
+    loadUserSettings();
     deviceTable.enable();
     showDashboard();
     deviceTable.fetchLocks();

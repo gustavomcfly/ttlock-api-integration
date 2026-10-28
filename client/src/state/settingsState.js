@@ -1,4 +1,6 @@
-export const settingsState = {
+import { settingsApi } from "../api/settingsApi.js";
+
+const DEFAULTS = {
   testerName: "",
   stdPasscode: "",
   stdCard: "",
@@ -6,20 +8,28 @@ export const settingsState = {
   defaultCycles: 100,
   defaultUnlockTime: 5,
   defaultInterval: 5,
+};
 
-  load() {
-    const saved = localStorage.getItem("pado_test_settings");
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      Object.assign(this, parsed);
+// As configurações pertencem ao usuário e ficam no banco (tabela UserSettings).
+// Este objeto é só o espelho em memória para os painéis lerem de forma síncrona;
+// nada é gravado no navegador.
+export const settingsState = {
+  ...DEFAULTS,
+
+  async load() {
+    try {
+      const data = await settingsApi.get();
+      if (data.success) Object.assign(this, data.settings);
+    } catch (_) {
+      // Servidor indisponível: mantém o que já está em memória.
     }
   },
 
-  save(data) {
-    Object.assign(this, data);
-    localStorage.setItem("pado_test_settings", JSON.stringify(this));
+  async save(data) {
+    const res = await settingsApi.save(data);
+    if (!res.success) {
+      throw new Error(res.message || "Erro ao salvar configurações.");
+    }
+    Object.assign(this, res.settings);
   },
 };
-
-// Auto-load settings when the app starts
-settingsState.load();
