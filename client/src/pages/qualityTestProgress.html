@@ -4,16 +4,17 @@
 >
   <button
     id="btn-back-quality-list"
-    class="text-muted-foreground hover:text-primary mb-6 flex cursor-pointer items-center gap-2 font-medium transition-colors"
+    type="button"
+    class="ui-btn ui-btn-ghost ui-btn-sm -ml-2 mb-4"
   >
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="20"
-      height="20"
+      width="16"
+      height="16"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      stroke-width="2"
+      stroke-width="2.2"
       stroke-linecap="round"
       stroke-linejoin="round"
     >
@@ -22,28 +23,65 @@
     Voltar para a Auditoria de Qualidade
   </button>
 
-  <header class="mb-8">
-    <h2 class="text-primary text-3xl font-bold tracking-tight">
-      Progresso da Auditoria Atual
-    </h2>
+  <header class="mb-6">
+    <div class="mb-1 flex items-center gap-3">
+      <div class="ui-icon-tile ui-icon-tile-lg">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+        </svg>
+      </div>
+      <h2 class="text-primary text-3xl font-bold tracking-tight">
+        Progresso da Auditoria
+      </h2>
+    </div>
+    <div class="mt-2 ml-1 flex flex-wrap items-center gap-2">
+      <span class="ui-chip" title="Fechadura">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="13"
+          height="13"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+        </svg>
+        <span id="quality-progress-lock">—</span>
+      </span>
+      <span class="ui-chip ui-mono" title="ID da auditoria">
+        <span id="quality-progress-id">—</span>
+      </span>
+    </div>
   </header>
 
-  <div
-    id="quality-steps-container"
-    class="bg-card border-border w-full rounded-2xl border shadow-sm"
-  >
-    <div
-      class="border-border flex items-center justify-between border-b px-5 py-4"
-    >
-      <h3 class="text-lg font-bold">Status Atual</h3>
-      <span
-        id="quality-test-status"
-        class="text-muted-foreground text-sm font-bold"
-        >Aguardando Início</span
-      >
+  <section id="quality-steps-container" class="ui-panel">
+    <div class="ui-panel-head">
+      <div class="flex flex-wrap items-center gap-3">
+        <h3 class="ui-panel-title">Status atual</h3>
+        <span
+          id="quality-test-status"
+          class="ui-badge ui-badge-dot ui-tone-neutral"
+          >Aguardando início</span
+        >
+      </div>
       <button
         id="btn-save-quality-report"
-        class="bg-secondary text-secondary-foreground flex hidden cursor-pointer items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold transition-colors hover:opacity-90"
+        type="button"
+        class="ui-btn ui-btn-primary ui-btn-sm hidden"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -61,11 +99,32 @@
           />
           <polyline points="14 2 14 8 20 8" />
         </svg>
-        Salvar Relatório
+        Salvar relatório
       </button>
     </div>
-    <div class="p-5">
-      <ul id="quality-results-list" class="flex flex-col gap-2"></ul>
+
+    <div class="ui-section">
+      <div class="mb-2 flex items-baseline justify-between gap-3">
+        <p class="text-sm font-semibold">
+          <span id="quality-progress-label">0 de 0 etapas</span>
+        </p>
+        <p id="quality-progress-pct" class="text-sm font-bold tabular-nums">
+          0%
+        </p>
+      </div>
+      <div
+        id="quality-progress-track"
+        class="ui-progress ui-tone-primary"
+        style="height: 0.5rem"
+      >
+        <span id="quality-progress-bar" style="width: 0%"></span>
+      </div>
+      <div id="quality-progress-chips" class="mt-3 flex flex-wrap gap-2"></div>
     </div>
-  </div>
+
+    <div class="ui-section">
+      <h4 class="ui-section-title mb-4">Etapas do roteiro</h4>
+      <ol id="quality-results-list" class="ui-timeline"></ol>
+    </div>
+  </section>
 </div>

@@ -6,6 +6,31 @@ import { settingsState } from "../state/settingsState.js";
 import { toast } from "../utils/toast.js";
 import { reportApi } from "../api/reportApi.js";
 
+// ---------------------------------------------------------
+// Helpers visuais (somente apresentação)
+// ---------------------------------------------------------
+const esc = (v) =>
+  String(v ?? "").replace(
+    /[&<>"']/g,
+    (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
+        c
+      ],
+  );
+
+const svg = (inner, size = 14, sw = 2) =>
+  `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${inner}</svg>`;
+
+const ICON_CHECK = '<path d="M20 6 9 17l-5-5"/>';
+const ICON_X = '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>';
+const ICON_LOCK =
+  '<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>';
+const ICON_SPINNER =
+  '<path d="M21 12a9 9 0 1 1-6.219-8.56"/>';
+
+// Resultado final de uma auditoria concluída
+const isApproved = (test) => test.steps.every((s) => s.status === "sucesso");
+
 export class QualityTestPanel {
   constructor() {
     this.viewQualityTest = document.getElementById("view-quality-test");
@@ -24,6 +49,17 @@ export class QualityTestPanel {
     this.lblPasscode = document.getElementById("qt-param-passcode");
     this.lblCard = document.getElementById("qt-param-card");
     this.lblFingerprint = document.getElementById("qt-param-fingerprint");
+
+    this.lblProgressLock = document.getElementById("quality-progress-lock");
+    this.lblProgressId = document.getElementById("quality-progress-id");
+    this.progressLabel = document.getElementById("quality-progress-label");
+    this.progressPct = document.getElementById("quality-progress-pct");
+    this.progressTrack = document.getElementById("quality-progress-track");
+    this.progressBar = document.getElementById("quality-progress-bar");
+    this.progressChips = document.getElementById("quality-progress-chips");
+    this.btnSaveReport = document.getElementById("btn-save-quality-report");
+    this.criteriaCount = document.getElementById("qt-criteria-count");
+    this._lastStepsHtml = "";
 
     this.pollInterval = null;
     this.listPollInterval = null;
@@ -51,9 +87,14 @@ export class QualityTestPanel {
         }
         this.fetchTestList();
       });
-      const btnSave = document.getElementById("btn-save-quality-report");
-      if (btnSave) btnSave.classList.add("hidden");
     }
+
+    if (this.btnSaveReport) {
+      this.btnSaveReport.classList.add("hidden");
+      this.btnSaveReport.addEventListener("click", () => this.saveReport());
+    }
+
+    this.bindCriteriaControls();
 
     document.addEventListener("settings-updated", () => this.loadSettings());
 
@@ -86,6 +127,52 @@ export class QualityTestPanel {
       this.populateLockDropdown();
       this.startListPolling();
     });
+  }
+
+  bindCriteriaControls() {
+    const boxes = () =>
+      Array.from(document.querySelectorAll(".qt-criteria-checkbox"));
+    const updateCount = () => {
+      const all = boxes();
+      const checked = all.filter((cb) => cb.checked).length;
+      if (this.criteriaCount)
+        this.criteriaCount.textContent = `${checked} de ${all.length}`;
+    };
+
+    boxes().forEach((cb) => cb.addEventListener("change", updateCount));
+    document
+      .getElementById("btn-qt-select-all")
+      ?.addEventListener("click", () => {
+        boxes().forEach((cb) => (cb.checked = true));
+        updateCount();
+      });
+    document
+      .getElementById("btn-qt-select-none")
+      ?.addEventListener("click", () => {
+        boxes().forEach((cb) => (cb.checked = false));
+        updateCount();
+      });
+    updateCount();
+  }
+
+  // Limpa o painel de progresso ao trocar de auditoria (evita mostrar dados da anterior)
+  resetProgressView() {
+    this._lastStepsHtml = "";
+    if (this.resultsList) this.resultsList.innerHTML = "";
+    if (this.lblProgressLock) this.lblProgressLock.textContent = "—";
+    if (this.lblProgressId) this.lblProgressId.textContent = "—";
+    if (this.progressLabel) this.progressLabel.textContent = "0 de 0 etapas";
+    if (this.progressPct) this.progressPct.textContent = "0%";
+    if (this.progressBar) this.progressBar.style.width = "0%";
+    if (this.progressChips) this.progressChips.innerHTML = "";
+    if (this.btnSaveReport) this.btnSaveReport.classList.add("hidden");
+    this.setStatus("Carregando...", "neutral");
+  }
+
+  setStatus(label, tone, live = false) {
+    if (!this.statusText) return;
+    this.statusText.textContent = label;
+    this.statusText.className = `ui-badge ui-badge-dot ui-tone-${tone} ${live ? "is-live" : ""}`;
   }
 
   loadSettings() {
@@ -181,67 +268,74 @@ export class QualityTestPanel {
     if (!this.tbody) return;
 
     if (list.length === 0) {
-      this.tbody.innerHTML = `<tr><td colspan="5" class="text-muted-foreground py-10 text-center text-sm">Nenhuma auditoria realizada.</td></tr>`;
+      this.tbody.innerHTML = `
+        <tr><td colspan="5">
+          <div class="ui-empty">
+            <span class="ui-icon-tile ui-tone-neutral mb-2">${svg('<path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/>', 20)}</span>
+            <p class="text-sm font-semibold">Nenhuma auditoria realizada</p>
+            <p class="text-muted-foreground text-xs">Inicie a primeira auditoria no painel acima.</p>
+          </div>
+        </td></tr>`;
       return;
     }
 
-    this.tbody.innerHTML = "";
     list.sort((a, b) => b.startTime - a.startTime);
 
-    list.forEach((test) => {
-      const total = test.steps.length;
-      const completed = test.steps.filter(
-        (s) => s.status === "sucesso" || s.status === "falha",
-      ).length;
-      const progress = ((completed / total) * 100).toFixed(0);
+    this.tbody.innerHTML = list
+      .map((test) => {
+        const total = test.steps.length;
+        const completed = test.steps.filter(
+          (s) => s.status === "sucesso" || s.status === "falha",
+        ).length;
+        const pct = total ? Math.round((completed / total) * 100) : 0;
 
-      let statusBadge = "";
-      if (test.status === "executando") {
-        statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-green-400/10 text-green-400 border border-green-400/20">Executando</span>`;
-      } else if (test.status === "concluido") {
-        const allSuccess = test.steps.every((s) => s.status === "sucesso");
-        if (allSuccess) {
-          statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-green-500/10 text-green-500 border border-green-500/20">Aprovado</span>`;
+        let tone;
+        let label;
+        let live = false;
+        if (test.status === "executando") {
+          tone = "primary";
+          label = "Executando";
+          live = true;
+        } else if (test.status === "concluido") {
+          tone = isApproved(test) ? "success" : "danger";
+          label = isApproved(test) ? "Aprovado" : "Reprovado";
         } else {
-          statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-red-500/10 text-red-500 border border-red-500/20">Reprovado</span>`;
+          tone = "warning";
+          label = "Erro";
         }
-      } else {
-        statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">Erro</span>`;
-      }
-      const btnSave = document.getElementById("btn-save-quality-report");
-      if (btnSave) {
-        btnSave.classList.remove("hidden");
-        btnSave.onclick = () => this.saveReport();
-      }
 
-      const isSelected = test.testId === this.currentTestId;
-      const rowClass = isSelected
-        ? "border-primary/30 bg-primary/5"
-        : "hover:bg-muted/30";
-      const btnText = isSelected ? "Ocultar" : "Visualizar";
-      const btnClass = isSelected
-        ? "bg-primary text-primary-foreground hover:bg-primary/90"
-        : "bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground";
+        const isSelected = test.testId === this.currentTestId;
+        const id = esc(test.testId);
 
-      const tr = document.createElement("tr");
-      tr.className = `transition-colors group ${rowClass}`;
-      tr.innerHTML = `
-            <td class="px-4 py-3 text-center font-mono text-xs text-primary" title="${test.testId}">${test.testId.slice(0, 8)}</td>
-            <td class="px-4 py-3 text-center text-sm font-medium truncate max-w-[160px]" title="${test.lockName || ""}">${test.lockName || "—"}</td>
-            <td class="px-4 py-3 text-center text-sm font-semibold">${completed} / ${total} <span class="text-muted-foreground ml-1">(${progress}%)</span></td>
-            <td class="px-4 py-3 text-center">${statusBadge}</td>
-            <td class="px-4 py-3 text-center">
-                <button class="btn-view-test inline-flex items-center justify-center gap-1 ${btnClass} px-3 py-1.5 rounded-md text-sm font-semibold transition-all cursor-pointer" data-id="${test.testId}">${btnText}</button>
+        return `
+          <tr class="ui-tone-${tone} ${isSelected ? "is-selected" : ""}">
+            <td><span class="ui-chip ui-mono" title="${id}">${id.slice(0, 8)}</span></td>
+            <td>
+              <div class="flex max-w-56 items-center gap-2">
+                <span class="text-muted-foreground shrink-0">${svg(ICON_LOCK, 14)}</span>
+                <span class="truncate font-medium" title="${esc(test.lockName)}">${esc(test.lockName) || "—"}</span>
+              </div>
             </td>
-         `;
-      this.tbody.appendChild(tr);
-    });
+            <td>
+              <div class="flex items-center gap-3">
+                <div class="ui-progress min-w-24 flex-1 ${live ? "is-live" : ""}"><span style="width: ${pct}%"></span></div>
+                <span class="w-28 shrink-0 text-right whitespace-nowrap text-xs font-semibold tabular-nums">${completed}/${total}<span class="text-muted-foreground ml-1 font-normal">${pct}%</span></span>
+              </div>
+            </td>
+            <td><span class="ui-badge ui-badge-dot ${live ? "is-live" : ""}">${label}</span></td>
+            <td class="text-right">
+              <button type="button" class="btn-view-test ui-btn ui-btn-sm ${isSelected ? "ui-btn-primary" : "ui-btn-soft"}" data-id="${id}">${isSelected ? "Ocultar" : "Visualizar"}</button>
+            </td>
+          </tr>`;
+      })
+      .join("");
   }
 
   handleTableAction(e) {
     const btn = e.target.closest(".btn-view-test");
     if (btn) {
       this.currentTestId = btn.getAttribute("data-id");
+      this.resetProgressView();
       if (this.viewQualityTest) this.viewQualityTest.classList.add("hidden");
       if (this.viewQualityProgress)
         this.viewQualityProgress.classList.remove("hidden");
@@ -290,6 +384,7 @@ export class QualityTestPanel {
       );
       if (res.errcode === 0 && res.data) {
         this.currentTestId = res.data.testId;
+        this.resetProgressView();
         if (this.viewQualityTest) this.viewQualityTest.classList.add("hidden");
         if (this.viewQualityProgress)
           this.viewQualityProgress.classList.remove("hidden");
@@ -320,20 +415,17 @@ export class QualityTestPanel {
           clearInterval(this.pollInterval);
           this.pollInterval = null;
 
-          const allSuccess = res.data.steps.every(
-            (s) => s.status === "sucesso",
+          const approved = isApproved(res.data);
+          this.setStatus(
+            approved ? "Auditoria aprovada" : "Auditoria reprovada",
+            approved ? "success" : "danger",
           );
-          this.statusText.innerText = allSuccess
-            ? "Auditoria Aprovada"
-            : "Auditoria Reprovada";
-          this.statusText.className = allSuccess
-            ? "text-green-500 font-bold"
-            : "text-red-500 font-bold";
+          if (this.btnSaveReport) this.btnSaveReport.classList.remove("hidden");
 
           this.fetchTestList();
         } else {
-          this.statusText.innerText = "Executando Script...";
-          this.statusText.className = "text-green-400 font-bold animate-pulse";
+          this.setStatus("Executando roteiro...", "primary", true);
+          if (this.btnSaveReport) this.btnSaveReport.classList.add("hidden");
         }
       }
     } catch (e) {}
@@ -355,58 +447,90 @@ export class QualityTestPanel {
   }
 
   renderSteps(testData) {
-    this.resultsList.innerHTML = "";
+    if (!this.resultsList) return;
+    const steps = testData.steps;
+    const total = steps.length;
+    const count = (st) => steps.filter((x) => x.status === st).length;
+    const success = count("sucesso");
+    const failed = count("falha");
+    const running = count("executando");
+    const pending = count("pendente");
+    const done = success + failed;
+    const pct = total ? Math.round((done / total) * 100) : 0;
+    const finished = testData.status === "concluido";
 
-    testData.steps.forEach((step) => {
-      const li = document.createElement("li");
-      li.className =
-        "flex flex-col justify-center p-4 rounded-lg border border-border bg-background shadow-sm mb-3";
+    // --- cabeçalho: fechadura + id ---
+    if (this.lblProgressLock)
+      this.lblProgressLock.textContent = testData.lockName || "—";
+    if (this.lblProgressId)
+      this.lblProgressId.textContent = (testData.testId || "").slice(0, 8);
 
-      let icon = "";
-      let textColor = "text-muted-foreground";
+    // --- resumo de progresso ---
+    const barTone = finished ? (failed === 0 ? "success" : "danger") : "primary";
+    if (this.progressLabel)
+      this.progressLabel.textContent = `${done} de ${total} etapas`;
+    if (this.progressPct) this.progressPct.textContent = `${pct}%`;
+    if (this.progressTrack)
+      this.progressTrack.className = `ui-progress ui-tone-${barTone} ${finished ? "" : "is-live"}`;
+    if (this.progressBar) this.progressBar.style.width = `${pct}%`;
+    if (this.progressChips) {
+      const chip = (tone, text) =>
+        `<span class="ui-chip ui-chip-tone ui-tone-${tone}">${text}</span>`;
+      this.progressChips.innerHTML = [
+        success > 0 ? chip("success", `${success} aprovada(s)`) : "",
+        failed > 0 ? chip("danger", `${failed} com falha`) : "",
+        running > 0 ? chip("primary", `${running} em execução`) : "",
+        pending > 0 ? chip("neutral", `${pending} pendente(s)`) : "",
+      ].join("");
+    }
 
-      if (step.status === "pendente") {
-        icon = `<div class="w-5 h-5 rounded-full border-2 border-muted shrink-0"></div>`;
-      } else if (step.status === "executando") {
-        textColor = "text-green-400 font-bold";
-        icon = `<svg class="animate-spin w-5 h-5 text-green-400 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>`;
-      } else if (step.status === "sucesso") {
-        textColor = "text-foreground font-semibold";
-        icon = `<div class="bg-green-500/20 text-green-500 rounded-full p-0.5 shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>`;
-      } else if (step.status === "falha") {
-        textColor = "text-red-500 font-semibold";
-        icon = `<div class="bg-red-500/20 text-red-500 rounded-full p-0.5 shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></div>`;
-      }
+    // --- linha do tempo das etapas ---
+    const stateMap = {
+      pendente: { tone: "neutral", cls: "is-pending", label: "Pendente" },
+      executando: { tone: "primary", cls: "is-running", label: "Executando" },
+      sucesso: { tone: "success", cls: "is-done", label: "Concluída" },
+      falha: { tone: "danger", cls: "is-failed", label: "Falhou" },
+    };
 
-      let logsHtml = "";
-      if (step.logs && step.logs.length > 0) {
-        logsHtml = `
-          <div class="mt-3 pl-8 flex flex-col gap-1.5">
-            ${step.logs
-              .map(
-                (log) => `
-              <div class="flex items-center gap-2 text-xs text-muted-foreground font-mono bg-muted/30 px-2 py-1.5 rounded">
-                <span class="w-1.5 h-1.5 rounded-full bg-border shrink-0"></span>
-                <span>${log}</span>
+    const html = steps
+      .map((step, i) => {
+        const st = stateMap[step.status] || stateMap.pendente;
+        let marker = String(i + 1);
+        if (step.status === "executando")
+          marker = `<span class="animate-spin">${svg(ICON_SPINNER, 16, 2.5)}</span>`;
+        else if (step.status === "sucesso") marker = svg(ICON_CHECK, 16, 3);
+        else if (step.status === "falha") marker = svg(ICON_X, 16, 3);
+
+        const logs =
+          step.logs && step.logs.length > 0
+            ? `<div class="ui-log ui-mono">${step.logs
+                .map((log) => `<div class="ui-log-line">${esc(log)}</div>`)
+                .join("")}</div>`
+            : "";
+
+        const error = step.errorMsg
+          ? `<div class="ui-chip-tone ui-tone-danger mt-2 rounded-lg px-2.5 py-1.5 text-xs">${esc(step.errorMsg)}</div>`
+          : "";
+
+        return `
+          <li class="ui-step ui-tone-${st.tone} ${st.cls}">
+            <span class="ui-step-marker">${marker}</span>
+            <div class="ui-step-card">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <span class="text-sm font-semibold ${step.status === "pendente" ? "text-muted-foreground" : ""}">${esc(step.name)}</span>
+                <span class="ui-badge ui-badge-dot ${step.status === "executando" ? "is-live" : ""}">${st.label}</span>
               </div>
-            `,
-              )
-              .join("")}
-          </div>
-        `;
-      }
-
-      li.innerHTML = `
-        <div class="flex items-center justify-between w-full">
-            <div class="flex items-center gap-3">
-                ${icon}
-                <span class="text-sm ${textColor}">${step.name}</span>
+              ${error}
+              ${logs}
             </div>
-            ${step.errorMsg ? `<span class="text-xs text-red-400 bg-red-400/10 px-2 py-1 rounded border border-red-400/20 truncate ml-4 max-w-[200px] sm:max-w-xs" title="${step.errorMsg}">${step.errorMsg}</span>` : ""}
-        </div>
-        ${logsHtml}
-      `;
-      this.resultsList.appendChild(li);
-    });
+          </li>`;
+      })
+      .join("");
+
+    // Só redesenha se algo mudou: evita reiniciar a animação do spinner a cada polling
+    if (html !== this._lastStepsHtml) {
+      this._lastStepsHtml = html;
+      this.resultsList.innerHTML = html;
+    }
   }
 }
