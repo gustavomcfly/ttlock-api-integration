@@ -2,9 +2,9 @@
   id="view-quality-test"
   class="hidden w-full transition-opacity duration-300"
 >
-  <header class="mb-8">
+  <header class="mb-6">
     <div class="mb-1 flex items-center gap-3">
-      <div class="bg-primary/10 text-primary rounded-lg p-2">
+      <div class="ui-icon-tile ui-icon-tile-lg">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="22"
@@ -26,215 +26,457 @@
         Auditoria de Qualidade
       </h2>
     </div>
-    <p class="text-muted-foreground mt-1 ml-1">
+    <p class="text-muted-foreground mt-1 ml-1 max-w-3xl text-sm">
       Execute um roteiro completo de testes para validar todos os componentes da
       fechadura.
     </p>
   </header>
-
   <div class="flex flex-col gap-6">
-    <div
-      class="bg-card border-border w-full rounded-2xl border p-6 shadow-sm sm:p-8"
-    >
-      <div
-        class="border-border mb-6 flex flex-col justify-between gap-4 border-b pb-4 sm:flex-row sm:items-center"
-      >
-        <h3 class="font-semibold">Configuração da Auditoria</h3>
-        <select
-          id="select-quality-lock"
-          class="border-border bg-background focus:ring-secondary text-foreground w-full cursor-pointer truncate rounded-lg border px-3 py-2 text-sm font-medium transition-all focus:ring-2 focus:outline-none sm:w-auto"
-        >
-          <option value="" class="text-foreground font-medium">
-            Selecione uma fechadura online...
-          </option>
-        </select>
+    <!-- Nova auditoria -->
+    <section class="ui-panel">
+      <div class="ui-panel-head">
+        <div class="flex items-center gap-3">
+          <span class="ui-icon-tile ui-icon-tile-sm"
+            ><svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M5 12h14" />
+              <path d="M12 5v14" /></svg
+          ></span>
+          <div>
+            <h3 class="ui-panel-title">Nova auditoria</h3>
+            <p class="ui-panel-subtitle">
+              Escolha a fechadura e os critérios que farão parte do roteiro
+            </p>
+          </div>
+        </div>
       </div>
-
-      <div class="mb-8 grid grid-cols-1 gap-8 md:grid-cols-2">
-        <div>
-          <h4
-            class="text-muted-foreground mb-3 text-sm font-bold tracking-wide uppercase"
-          >
-            Critérios Avaliados
-          </h4>
-          <div
-            class="bg-muted/10 border-border flex flex-col gap-2 rounded-xl border p-4"
-          >
-            <label class="flex cursor-pointer items-center gap-2 text-sm"
+      <div class="ui-section">
+        <div class="ui-field max-w-xl">
+          <label for="select-quality-lock" class="ui-label">Fechadura</label>
+          <select id="select-quality-lock" class="ui-input">
+            <option value="">Selecione uma fechadura online...</option>
+          </select>
+          <span class="ui-hint">Somente fechaduras com gateway online.</span>
+        </div>
+      </div>
+      <div
+        class="ui-section grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_21rem] lg:gap-0"
+      >
+        <div class="lg:pr-6">
+          <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
+            <div>
+              <h4 class="ui-section-title">Critérios avaliados</h4>
+              <p class="ui-section-desc">
+                <span id="qt-criteria-count">9 de 9</span> selecionados
+              </p>
+            </div>
+            <div class="flex items-center gap-1">
+              <button
+                id="btn-qt-select-all"
+                type="button"
+                class="ui-btn ui-btn-ghost ui-btn-sm"
+              >
+                Marcar todos
+              </button>
+              <button
+                id="btn-qt-select-none"
+                type="button"
+                class="ui-btn ui-btn-ghost ui-btn-sm"
+              >
+                Limpar
+              </button>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <label class="ui-check"
               ><input
                 type="checkbox"
                 value="get_info"
-                class="qt-criteria-checkbox"
+                class="qt-criteria-checkbox sr-only"
                 checked
-              />
-              Ler Status & Parâmetros</label
+              /><span class="ui-check-box"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M20 6 9 17l-5-5" /></svg></span
+              ><span>Ler Status &amp; Parâmetros</span></label
             >
-            <label class="flex cursor-pointer items-center gap-2 text-sm"
+            <label class="ui-check"
               ><input
                 type="checkbox"
                 value="remote_unlock"
-                class="qt-criteria-checkbox"
+                class="qt-criteria-checkbox sr-only"
                 checked
-              />
-              Abertura Remota (Gateway)</label
+              /><span class="ui-check-box"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M20 6 9 17l-5-5" /></svg></span
+              ><span>Abertura Remota (Gateway)</span></label
             >
-            <label class="flex cursor-pointer items-center gap-2 text-sm"
+            <label class="ui-check"
               ><input
                 type="checkbox"
                 value="add_passcode"
-                class="qt-criteria-checkbox"
+                class="qt-criteria-checkbox sr-only"
                 checked
-              />
-              Sincronizar Senha Numérica</label
+              /><span class="ui-check-box"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M20 6 9 17l-5-5" /></svg></span
+              ><span>Sincronizar Senha Numérica</span></label
             >
-            <label class="flex cursor-pointer items-center gap-2 text-sm"
+            <label class="ui-check"
               ><input
                 type="checkbox"
                 value="add_rfid"
-                class="qt-criteria-checkbox"
+                class="qt-criteria-checkbox sr-only"
                 checked
-              />
-              Sincronizar Cartão RFID</label
+              /><span class="ui-check-box"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M20 6 9 17l-5-5" /></svg></span
+              ><span>Sincronizar Cartão RFID</span></label
             >
-            <label class="flex cursor-pointer items-center gap-2 text-sm"
+            <label class="ui-check"
               ><input
                 type="checkbox"
                 value="add_fingerprint"
-                class="qt-criteria-checkbox"
+                class="qt-criteria-checkbox sr-only"
                 checked
-              />
-              Sincronizar Biometria</label
+              /><span class="ui-check-box"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M20 6 9 17l-5-5" /></svg></span
+              ><span>Sincronizar Biometria</span></label
             >
-            <label class="flex cursor-pointer items-center gap-2 text-sm"
+            <label class="ui-check"
               ><input
                 type="checkbox"
                 value="rename_lock"
-                class="qt-criteria-checkbox"
+                class="qt-criteria-checkbox sr-only"
                 checked
-              />
-              Atualizar Nome Interno</label
+              /><span class="ui-check-box"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M20 6 9 17l-5-5" /></svg></span
+              ><span>Atualizar Nome Interno</span></label
             >
-            <label class="flex cursor-pointer items-center gap-2 text-sm"
+            <label class="ui-check"
               ><input
                 type="checkbox"
                 value="passage_mode"
-                class="qt-criteria-checkbox"
+                class="qt-criteria-checkbox sr-only"
                 checked
-              />
-              Testar Modo Passagem</label
+              /><span class="ui-check-box"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M20 6 9 17l-5-5" /></svg></span
+              ><span>Testar Modo Passagem</span></label
             >
-            <label class="flex cursor-pointer items-center gap-2 text-sm"
+            <label class="ui-check"
               ><input
                 type="checkbox"
                 value="get_records"
-                class="qt-criteria-checkbox"
+                class="qt-criteria-checkbox sr-only"
                 checked
-              />
-              Puxar Histórico Datalog</label
+              /><span class="ui-check-box"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M20 6 9 17l-5-5" /></svg></span
+              ><span>Puxar Histórico Datalog</span></label
             >
-            <label class="flex cursor-pointer items-center gap-2 text-sm"
+            <label class="ui-check"
               ><input
                 type="checkbox"
                 value="check_update"
-                class="qt-criteria-checkbox"
+                class="qt-criteria-checkbox sr-only"
                 checked
-              />
-              Verificar Atualização de Firmware</label
+              /><span class="ui-check-box"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M20 6 9 17l-5-5" /></svg></span
+              ><span>Verificar Atualização de Firmware</span></label
             >
           </div>
         </div>
-
-        <div>
-          <h4
-            class="text-muted-foreground mb-3 text-sm font-bold tracking-wide uppercase"
-          >
-            Parâmetros Padrão Injetados
-          </h4>
-          <div
-            class="bg-muted/10 border-border flex flex-col gap-3 rounded-xl border p-4"
-          >
-            <div class="border-border/50 flex justify-between border-b pb-2">
-              <span class="text-muted-foreground text-xs">Testador:</span
-              ><span
-                id="qt-param-tester"
-                class="text-primary text-sm font-semibold"
-                >--</span
-              >
-            </div>
-            <div class="border-border/50 flex justify-between border-b pb-2">
-              <span class="text-muted-foreground text-xs">Senha Padrão:</span
-              ><span
-                id="qt-param-passcode"
-                class="text-foreground font-mono text-sm"
-                >--</span
-              >
-            </div>
-            <div class="border-border/50 flex justify-between border-b pb-2">
-              <span class="text-muted-foreground text-xs">Cartão Padrão:</span
-              ><span
-                id="qt-param-card"
-                class="text-foreground font-mono text-sm"
-                >--</span
-              >
-            </div>
-            <div class="flex justify-between">
-              <span class="text-muted-foreground text-xs"
-                >Biometria Padrão:</span
-              ><span
-                id="qt-param-fingerprint"
-                class="text-foreground font-mono text-sm"
-                >--</span
-              >
-            </div>
-          </div>
-          <p class="text-muted-foreground mt-3 text-xs italic">
-            * Altere estes dados na página "Configurações".
+        <aside class="lg:border-l lg:pl-6">
+          <h4 class="ui-section-title">Parâmetros padrão injetados</h4>
+          <p class="ui-section-desc mb-4">
+            Usados nas etapas de senha, cartão e biometria.
           </p>
+          <div class="ui-kv">
+            <span class="ui-kv-label"
+              ><svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" /></svg
+              >Testador</span
+            ><span id="qt-param-tester" class="ui-value">--</span>
+          </div>
+          <div class="ui-kv">
+            <span class="ui-kv-label"
+              ><svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect width="18" height="18" x="3" y="3" rx="2" />
+                <path
+                  d="M8 12h.01M12 12h.01M16 12h.01M8 16h.01M12 16h.01M16 16h.01M8 8h.01M12 8h.01M16 8h.01"
+                /></svg
+              >Senha padrão</span
+            ><span id="qt-param-passcode" class="ui-value ui-mono">--</span>
+          </div>
+          <div class="ui-kv">
+            <span class="ui-kv-label"
+              ><svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect width="20" height="14" x="2" y="5" rx="2" />
+                <line x1="2" x2="22" y1="10" y2="10" /></svg
+              >Cartão padrão</span
+            ><span id="qt-param-card" class="ui-value ui-mono">--</span>
+          </div>
+          <div class="ui-kv">
+            <span class="ui-kv-label"
+              ><svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M2 12C2 6.5 6.5 2 12 2a10 10 0 0 1 8 4" />
+                <path d="M5 19.5C5.5 18 6 15 6 12c0-.7.12-1.37.34-2" />
+                <path d="M17.29 21.02c.12-.6.43-2.3.5-3.02" />
+                <path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4" />
+                <path d="M8.65 22c.21-.66.45-1.32.57-2" />
+                <path d="M14 13.12c0 2.38 0 6.38-1 8.88" />
+                <path d="M2 16h.01" />
+                <path d="M21.8 16c.2-2 .131-5.354 0-6" />
+                <path d="M9 6.8a6 6 0 0 1 9 5.2c0 .47 0 1.17-.02 2" /></svg
+              >Biometria padrão</span
+            ><span id="qt-param-fingerprint" class="ui-value ui-mono">--</span>
+          </div>
+          <p class="ui-hint mt-4">
+            Para alterar, acesse a página “Configurações”.
+          </p>
+        </aside>
+      </div>
+      <div class="ui-panel-foot">
+        <button
+          id="btn-start-quality-test"
+          type="button"
+          class="ui-btn ui-btn-primary ui-btn-lg"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polygon points="6 3 20 12 6 21 6 3" />
+          </svg>
+          Iniciar auditoria de qualidade
+        </button>
+        <p class="ui-hint mt-2.5 text-center">
+          Cada critério selecionado vira uma etapa do roteiro.
+        </p>
+      </div>
+    </section>
+    <!-- Histórico -->
+    <section class="ui-panel">
+      <div class="ui-panel-head">
+        <div class="flex items-center gap-3">
+          <span class="ui-icon-tile ui-icon-tile-sm"
+            ><svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+              <path d="M3 3v5h5" />
+              <path d="M12 7v5l4 2" /></svg
+          ></span>
+          <div>
+            <h3 class="ui-panel-title">Histórico de auditorias</h3>
+            <p class="ui-panel-subtitle">
+              Selecione uma auditoria para acompanhar as etapas
+            </p>
+          </div>
         </div>
       </div>
-
-      <button
-        id="btn-start-quality-test"
-        class="bg-secondary text-secondary-foreground hover:bg-secondary-hover w-full cursor-pointer rounded-xl px-4 py-4 text-base font-bold shadow-md transition-all disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        Iniciar Auditoria de Qualidade
-      </button>
-    </div>
-
-    <div class="bg-card border-border w-full rounded-2xl border shadow-sm">
-      <div
-        class="border-border flex items-center justify-between border-b px-5 py-4"
-      >
-        <h3 class="font-semibold">Lista de Testes</h3>
-        <span class="text-muted-foreground text-xs"
-          >Selecione para ver detalhes</span
-        >
-      </div>
-      <div class="overflow-x-auto p-3">
-        <table class="w-full border-collapse text-left text-sm">
+      <div class="overflow-x-auto">
+        <table class="ui-table">
           <thead>
-            <tr
-              class="bg-muted/30 text-muted-foreground border-border border-b text-xs tracking-wider uppercase"
-            >
-              <th class="px-4 py-3 text-center font-semibold">ID do Teste</th>
-              <th class="px-4 py-3 text-center font-semibold">Fechadura</th>
-              <th class="px-4 py-3 text-center font-semibold">Progresso</th>
-              <th class="px-4 py-3 text-center font-semibold">Resultado</th>
-              <th class="px-4 py-3 text-center font-semibold">Ação</th>
+            <tr>
+              <th>Auditoria</th>
+              <th>Fechadura</th>
+              <th class="min-w-48">Progresso</th>
+              <th>Resultado</th>
+              <th class="text-right">Ação</th>
             </tr>
           </thead>
-          <tbody id="quality-test-list-body" class="divide-border divide-y">
+          <tbody id="quality-test-list-body">
             <tr>
-              <td
-                colspan="5"
-                class="text-muted-foreground py-10 text-center text-sm"
-              >
-                Nenhuma auditoria realizada.
+              <td colspan="5">
+                <div class="ui-empty">
+                  <span class="ui-icon-tile ui-tone-neutral mb-2"
+                    ><svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path
+                        d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"
+                      />
+                      <path d="m9 12 2 2 4-4" /></svg
+                  ></span>
+                  <p class="text-sm font-semibold">
+                    Nenhuma auditoria realizada
+                  </p>
+                  <p class="text-muted-foreground text-xs">
+                    Inicie a primeira auditoria no painel acima.
+                  </p>
+                </div>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
-    </div>
+    </section>
   </div>
 </div>

@@ -22,9 +22,9 @@
     Voltar para o painel
   </button>
 
-  <header class="mb-8">
+  <header class="mb-6">
     <div class="mb-1 flex items-center gap-3">
-      <div class="bg-primary/10 text-primary rounded-lg p-2">
+      <div class="ui-icon-tile ui-icon-tile-lg">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="22"
@@ -46,7 +46,7 @@
         Configurações Avançadas
       </h2>
     </div>
-    <p class="text-muted-foreground mt-1 ml-1">
+    <p class="text-muted-foreground mt-1 ml-1 max-w-3xl text-sm">
       Fechadura:
       <span id="lock-settings-name" class="text-foreground font-semibold"
         >---</span
@@ -58,12 +58,12 @@
     <div
       class="bg-card border-border flex flex-col gap-4 rounded-xl border p-6 shadow-sm"
     >
-      <h3 class="border-border border-b pb-2 font-semibold">
+      <h3 class="border-border border-b pb-2 ui-panel-title">
         Dispositivo e Acesso
       </h3>
 
       <div class="flex flex-col gap-2">
-        <label class="text-muted-foreground text-xs font-semibold uppercase"
+        <label class="ui-label"
           >Renomear Fechadura</label
         >
         <div class="flex gap-2">
@@ -83,7 +83,7 @@
       </div>
 
       <div class="flex flex-col gap-2">
-        <label class="text-muted-foreground text-xs font-semibold uppercase"
+        <label class="ui-label"
           >Alterar Senha de Admin (Super Senha)</label
         >
         <div class="flex gap-2">
@@ -103,7 +103,7 @@
       </div>
 
       <div class="flex flex-col gap-2">
-        <label class="text-muted-foreground text-xs font-semibold uppercase"
+        <label class="ui-label"
           >Modo Passagem</label
         >
         <div class="flex gap-2">
@@ -146,7 +146,7 @@
           <line x1="14" y1="11" x2="14" y2="17" />
         </svg>
       </div>
-      <h3 class="font-semibold">Zona de Perigo</h3>
+      <h3 class="ui-panel-title">Zona de Perigo</h3>
       <p class="text-muted-foreground mb-2 max-w-sm text-sm">
         Excluir esta fechadura apagará todos os dados, senhas, cartões e
         biometrias permanentemente. A ação é irreversível.
