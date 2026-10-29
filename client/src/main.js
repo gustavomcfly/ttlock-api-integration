@@ -348,6 +348,7 @@ function updateSidebarActiveState(activeId) {
 
 function hideAllViews() {
   if (cyclicPanel) cyclicPanel.deactivate();
+  if (qualityPanel) qualityPanel.deactivate();
   const views = [
     viewHome,
     viewLock,

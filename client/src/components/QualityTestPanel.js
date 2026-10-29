@@ -25,8 +25,7 @@ const ICON_CHECK = '<path d="M20 6 9 17l-5-5"/>';
 const ICON_X = '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>';
 const ICON_LOCK =
   '<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>';
-const ICON_SPINNER =
-  '<path d="M21 12a9 9 0 1 1-6.219-8.56"/>';
+const ICON_SPINNER = '<path d="M21 12a9 9 0 1 1-6.219-8.56"/>';
 
 // Resultado final de uma auditoria concluída
 const isApproved = (test) => test.steps.every((s) => s.status === "sucesso");
@@ -63,6 +62,7 @@ export class QualityTestPanel {
 
     this.pollInterval = null;
     this.listPollInterval = null;
+    this._active = false; // tela visível (só então o polling pode existir)
     this.currentTestId = null;
 
     this.bindEvents();
@@ -123,6 +123,7 @@ export class QualityTestPanel {
     }
 
     document.addEventListener("navigate-quality-test", () => {
+      this._active = true;
       this.loadSettings();
       this.populateLockDropdown();
       this.startListPolling();
@@ -250,8 +251,34 @@ export class QualityTestPanel {
 
   startListPolling() {
     this.fetchTestList();
-    if (!this.listPollInterval) {
-      this.listPollInterval = setInterval(() => this.fetchTestList(), 2500);
+  }
+
+  // Chamado pelo main.js ao sair da tela: nenhuma requisição deve continuar em segundo plano
+  deactivate() {
+    this._active = false;
+    this.stopListPolling();
+    if (this.pollInterval) {
+      clearInterval(this.pollInterval);
+      this.pollInterval = null;
+    }
+    this.currentTestId = null;
+  }
+
+  stopListPolling() {
+    if (this.listPollInterval) {
+      clearInterval(this.listPollInterval);
+      this.listPollInterval = null;
+    }
+  }
+
+  // O polling da lista só existe enquanto a tela está ativa E há auditoria em execução
+  syncListPolling(list) {
+    const hasRunning = list.some((t) => t.status === "executando");
+    if (this._active && hasRunning) {
+      if (!this.listPollInterval)
+        this.listPollInterval = setInterval(() => this.fetchTestList(), 2500);
+    } else {
+      this.stopListPolling();
     }
   }
 
@@ -260,6 +287,7 @@ export class QualityTestPanel {
       const res = await qualityApi.getList();
       if (res.errcode === 0 && res.list) {
         this.renderList(res.list);
+        this.syncListPolling(res.list);
       }
     } catch (err) {}
   }
@@ -324,14 +352,37 @@ export class QualityTestPanel {
             </td>
             <td><span class="ui-badge ui-badge-dot ${live ? "is-live" : ""}">${label}</span></td>
             <td class="text-right">
-              <button type="button" class="btn-view-test ui-btn ui-btn-sm ${isSelected ? "ui-btn-primary" : "ui-btn-soft"}" data-id="${id}">${isSelected ? "Ocultar" : "Visualizar"}</button>
+              <div class="inline-flex items-center gap-1">
+                <button type="button" class="btn-view-test ui-btn ui-btn-sm ${isSelected ? "ui-btn-primary" : "ui-btn-soft"}" data-id="${id}">${isSelected ? "Ocultar" : "Visualizar"}</button>
+                <button type="button" class="btn-delete-test ui-btn ui-btn-ghost hover:text-destructive h-8 w-8 p-0" data-id="${id}" ${live ? "disabled" : ""} title="${live ? "Aguarde a auditoria terminar para apagar" : "Apagar auditoria"}" aria-label="Apagar auditoria">${svg('<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>', 14)}</button>
+              </div>
             </td>
           </tr>`;
       })
       .join("");
   }
 
+  async deleteTest(testId) {
+    if (!confirm("Apagar esta auditoria do histórico?")) return;
+    try {
+      const res = await qualityApi.deleteTest(testId);
+      if (res.errcode === 0) {
+        toast.success("Auditoria apagada.");
+        this.fetchTestList();
+      } else {
+        toast.error(res.errmsg || "Não foi possível apagar a auditoria.");
+      }
+    } catch (err) {
+      toast.error("Falha ao comunicar com o servidor.");
+    }
+  }
+
   handleTableAction(e) {
+    const del = e.target.closest(".btn-delete-test");
+    if (del) {
+      this.deleteTest(del.getAttribute("data-id"));
+      return;
+    }
     const btn = e.target.closest(".btn-view-test");
     if (btn) {
       this.currentTestId = btn.getAttribute("data-id");
@@ -466,7 +517,11 @@ export class QualityTestPanel {
       this.lblProgressId.textContent = (testData.testId || "").slice(0, 8);
 
     // --- resumo de progresso ---
-    const barTone = finished ? (failed === 0 ? "success" : "danger") : "primary";
+    const barTone = finished
+      ? failed === 0
+        ? "success"
+        : "danger"
+      : "primary";
     if (this.progressLabel)
       this.progressLabel.textContent = `${done} de ${total} etapas`;
     if (this.progressPct) this.progressPct.textContent = `${pct}%`;
