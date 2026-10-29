@@ -95,6 +95,9 @@ const viewReports = document.getElementById("view-reports");
 const viewLockSettings = document.getElementById("view-lock-settings");
 const viewSettings = document.getElementById("view-settings");
 
+let passcodePanel;
+let rfidPanel;
+let fingerprintPanel;
 let recordPanel;
 let cyclicPanel;
 let qualityPanel;
@@ -108,17 +111,17 @@ function init() {
     console.error(e);
   }
   try {
-    new PasscodePanel();
+    passcodePanel = new PasscodePanel();
   } catch (e) {
     console.error(e);
   }
   try {
-    new RfidPanel();
+    rfidPanel = new RfidPanel();
   } catch (e) {
     console.error(e);
   }
   try {
-    new FingerprintPanel();
+    fingerprintPanel = new FingerprintPanel();
   } catch (e) {
     console.error(e);
   }
@@ -155,9 +158,9 @@ function init() {
 
   // Configurações do usuário vêm do banco; avisa os painéis quando chegarem.
   const loadUserSettings = () =>
-    settingsState.load().then(() =>
-      document.dispatchEvent(new CustomEvent("settings-updated")),
-    );
+    settingsState
+      .load()
+      .then(() => document.dispatchEvent(new CustomEvent("settings-updated")));
 
   const loginScreen = new LoginScreen(() => {
     loadUserSettings();
@@ -211,12 +214,16 @@ function init() {
       e.preventDefault();
       hideAllViews();
       if (viewLockSettings) viewLockSettings.classList.remove("hidden");
+      const nameEl = document.getElementById("lock-settings-name");
+      if (nameEl && appState.selectedLockName)
+        nameEl.innerText = appState.selectedLockName;
     });
 
   document.getElementById("btn-go-rfid")?.addEventListener("click", (e) => {
     e.preventDefault();
     hideAllViews();
     if (viewRfid) viewRfid.classList.remove("hidden");
+    if (rfidPanel) rfidPanel.syncLock();
   });
 
   document
@@ -225,6 +232,7 @@ function init() {
       e.preventDefault();
       hideAllViews();
       if (viewFingerprint) viewFingerprint.classList.remove("hidden");
+      if (fingerprintPanel) fingerprintPanel.syncLock();
     });
 
   const backButtons = [
@@ -296,6 +304,11 @@ function init() {
     if (recordPanel) recordPanel.syncLock();
   });
 
+  // Disparado pelo ActionPanel ao abrir "Registrar Senha"
+  document.addEventListener("navigate-passcode", () => {
+    if (passcodePanel) passcodePanel.syncLock();
+  });
+
   if (session.isAuthenticated()) {
     loginScreen.hide();
     loadUserSettings();
@@ -311,7 +324,7 @@ function init() {
 function updateSidebarActiveState(activeId) {
   const links = document.querySelectorAll(".sidebar-link");
   links.forEach((link) => {
-    // Removemos todas as cores de estado ativo/inativo
+    // Remove todas as cores de estado ativo/inativo
     link.classList.remove(
       "bg-primary/10",
       "text-primary",
@@ -320,7 +333,7 @@ function updateSidebarActiveState(activeId) {
       "hover:text-foreground",
     );
 
-    // Injetamos a cor correta dependendo do link clicado
+    // Injeta a cor correta dependendo do link clicado
     if (link.id === activeId) {
       link.classList.add("bg-primary/10", "text-primary");
     } else {

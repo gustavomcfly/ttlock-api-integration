@@ -19,9 +19,9 @@
     Voltar para a fechadura
   </button>
 
-  <header class="mb-8">
+  <header class="mb-6">
     <div class="mb-1 flex items-center gap-3">
-      <div class="bg-primary/10 text-primary rounded-lg p-2">
+      <div class="ui-icon-tile ui-icon-tile-lg">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="22"
@@ -42,7 +42,7 @@
         Registrar Senha
       </h2>
     </div>
-    <p class="text-muted-foreground mt-1 ml-1">
+    <p class="text-muted-foreground mt-1 ml-1 max-w-3xl text-sm">
       Fechadura:
       <span id="passcode-lock-name" class="text-foreground font-semibold"
         >---</span
@@ -55,7 +55,7 @@
   >
     <div class="border-border bg-muted/30 border-b p-4">
       <p
-        class="text-muted-foreground mb-3 text-xs font-semibold tracking-wider uppercase"
+        class="ui-section-title mb-3"
       >
         Tipo de Senha
       </p>
@@ -122,7 +122,7 @@
 
       <div class="flex flex-col gap-1.5">
         <label
-          class="text-muted-foreground text-xs font-semibold tracking-wide uppercase"
+          class="ui-label"
           >Nome da Senha</label
         >
         <input
@@ -135,7 +135,7 @@
 
       <div id="passcode-custom-input-group" class="hidden flex-col gap-1.5">
         <label
-          class="text-muted-foreground text-xs font-semibold tracking-wide uppercase"
+          class="ui-label"
           >Senha Desejada (4 a 9 dígitos)</label
         >
         <input
@@ -150,7 +150,7 @@
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <div class="flex flex-col gap-1.5">
             <label
-              class="text-muted-foreground text-xs font-semibold tracking-wide uppercase"
+              class="ui-label"
               >Data de Início</label
             >
             <input
@@ -161,7 +161,7 @@
           </div>
           <div class="flex flex-col gap-1.5">
             <label
-              class="text-muted-foreground text-xs font-semibold tracking-wide uppercase"
+              class="ui-label"
               >Data de Término</label
             >
             <input
@@ -179,7 +179,7 @@
       >
         <div class="flex flex-col gap-2">
           <label
-            class="text-muted-foreground text-xs font-semibold tracking-wide uppercase"
+            class="ui-label"
             >Dias da Semana</label
           >
           <div class="flex flex-wrap gap-2">
@@ -223,7 +223,7 @@
         <div class="mt-2 grid grid-cols-1 gap-6 sm:grid-cols-2">
           <div class="flex flex-col gap-1.5">
             <label
-              class="text-muted-foreground text-xs font-semibold tracking-wide uppercase"
+              class="ui-label"
               >Hora de Início</label
             >
             <input
@@ -235,7 +235,7 @@
           </div>
           <div class="flex flex-col gap-1.5">
             <label
-              class="text-muted-foreground text-xs font-semibold tracking-wide uppercase"
+              class="ui-label"
               >Hora de Término</label
             >
             <input
@@ -291,7 +291,7 @@
     <div
       class="border-border bg-muted/10 flex flex-col items-start justify-between gap-4 border-b p-4 sm:flex-row sm:items-center sm:p-6"
     >
-      <h3 class="font-semibold">Senhas Registradas</h3>
+      <h3 class="ui-panel-title">Senhas Registradas</h3>
       <button
         id="btn-refresh-passcodes"
         class="bg-muted/50 hover:bg-muted border-border text-muted-foreground hover:text-foreground cursor-pointer rounded-md border px-5 py-1.5 text-sm font-medium transition-all"
@@ -307,7 +307,7 @@
       >
         <thead>
           <tr
-            class="bg-muted/30 text-muted-foreground border-border border-b text-xs tracking-wider uppercase"
+            class="bg-muted/30 text-muted-foreground border-border border-b text-xs"
           >
             <th class="px-6 py-4 text-center font-semibold">Nome</th>
             <th class="px-6 py-4 text-center font-semibold">Senha</th>

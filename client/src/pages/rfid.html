@@ -19,9 +19,9 @@
     Voltar para a fechadura
   </button>
 
-  <header class="mb-8">
+  <header class="mb-6">
     <div class="mb-1 flex items-center gap-3">
-      <div class="bg-primary/10 text-primary rounded-lg p-2">
+      <div class="ui-icon-tile ui-icon-tile-lg">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="22"
@@ -41,7 +41,7 @@
         Registrar Cartão RFID
       </h2>
     </div>
-    <p class="text-muted-foreground mt-1 ml-1">
+    <p class="text-muted-foreground mt-1 ml-1 max-w-3xl text-sm">
       Fechadura:
       <span id="rfid-lock-name" class="text-foreground font-semibold">---</span>
     </p>
@@ -52,7 +52,7 @@
   >
     <div class="border-border bg-muted/30 border-b p-4">
       <p
-        class="text-muted-foreground mb-3 text-xs font-semibold tracking-wider uppercase"
+        class="ui-section-title mb-3"
       >
         Validade do Cartão
       </p>
@@ -76,7 +76,7 @@
       <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
         <div class="flex flex-col gap-1.5">
           <label
-            class="text-muted-foreground text-xs font-semibold tracking-wide uppercase"
+            class="ui-label"
             >Nome do Cartão</label
           >
           <input
@@ -88,7 +88,7 @@
         </div>
         <div class="flex flex-col gap-1.5">
           <label
-            class="text-muted-foreground text-xs font-semibold tracking-wide uppercase"
+            class="ui-label"
             >Número do Cartão <span class="text-red-500">*</span></label
           >
           <input
@@ -107,7 +107,7 @@
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <div class="flex flex-col gap-1.5">
             <label
-              class="text-muted-foreground text-xs font-semibold tracking-wide uppercase"
+              class="ui-label"
               >Data de Início</label
             >
             <input
@@ -118,7 +118,7 @@
           </div>
           <div class="flex flex-col gap-1.5">
             <label
-              class="text-muted-foreground text-xs font-semibold tracking-wide uppercase"
+              class="ui-label"
               >Data de Término</label
             >
             <input
@@ -181,7 +181,7 @@
     <div
       class="border-border bg-muted/10 flex flex-col items-start justify-between gap-4 border-b p-4 sm:flex-row sm:items-center sm:p-6"
     >
-      <h3 class="font-semibold">Cartões Registrados</h3>
+      <h3 class="ui-panel-title">Cartões Registrados</h3>
       <button
         id="btn-refresh-rfids"
         class="bg-muted/50 hover:bg-muted border-border text-muted-foreground hover:text-foreground w-full cursor-pointer rounded-md border px-5 py-2 text-sm font-medium transition-all sm:w-auto sm:py-1.5"
@@ -196,7 +196,7 @@
       >
         <thead class="hidden md:table-header-group">
           <tr
-            class="bg-muted/30 text-muted-foreground border-border border-b text-xs tracking-wider uppercase"
+            class="bg-muted/30 text-muted-foreground border-border border-b text-xs"
           >
             <th class="px-6 py-4 text-center font-semibold">Nome</th>
             <th class="px-6 py-4 text-center font-semibold">
