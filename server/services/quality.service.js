@@ -32,9 +32,7 @@ function toClientShape(audit) {
     testId: audit.id,
     lockId: audit.lockId,
     lockName:
-      audit.params?.lockName ||
-      audit.lock?.lockAlias ||
-      `Lock ${audit.lockId}`,
+      audit.params?.lockName || audit.lock?.lockAlias || `Lock ${audit.lockId}`,
     status: audit.status,
     startTime: audit.startedAt.getTime(),
     endTime: audit.completedAt ? audit.completedAt.getTime() : null,
@@ -131,7 +129,9 @@ export const qualityService = {
               result.success = true;
               await log(`Bateria: ${result.electricQuantity || 0}%`);
               await log(`MAC Address: ${result.lockMac || "Desconhecido"}`);
-              await log(`Firmware: ${result.firmwareRevision || "Desconhecido"}`);
+              await log(
+                `Firmware: ${result.firmwareRevision || "Desconhecido"}`,
+              );
             }
             break;
 
@@ -209,7 +209,11 @@ export const qualityService = {
 
           case "rename_lock":
             await log("Alterando nome da fechadura para 'Pado QA Test'...");
-            result = await lockService.renameLock(accessToken, lockId, "Pado QA Test");
+            result = await lockService.renameLock(
+              accessToken,
+              lockId,
+              "Pado QA Test",
+            );
             if (ok(result)) {
               result.success = true;
               await log("Nome atualizado com sucesso.");
@@ -218,19 +222,30 @@ export const qualityService = {
 
           case "passage_mode": {
             await log("Ativando Modo Passagem (Always Open)...");
-            const pmOn = await lockService.configPassageMode(accessToken, lockId, 1, 1);
+            const pmOn = await lockService.configPassageMode(
+              accessToken,
+              lockId,
+              1,
+              1,
+            );
             if (ok(pmOn)) {
               await log("Modo Passagem ativado.");
               await log("Aguardando 2 segundos...");
               await sleep(2000);
               await log("Desativando Modo Passagem...");
-              const pmOff = await lockService.configPassageMode(accessToken, lockId, 0, 1);
+              const pmOff = await lockService.configPassageMode(
+                accessToken,
+                lockId,
+                0,
+                1,
+              );
               if (ok(pmOff)) {
                 await log("Modo Passagem desativado.");
                 result.success = true;
               } else {
                 result.success = false;
-                result.errmsg = pmOff.errmsg || "Falha ao desativar Modo Passagem";
+                result.errmsg =
+                  pmOff.errmsg || "Falha ao desativar Modo Passagem";
               }
             } else {
               result.success = false;
@@ -245,7 +260,9 @@ export const qualityService = {
             if (ok(result)) {
               result.success = true;
               const count = result.list ? result.list.length : 0;
-              await log(`Histórico puxado com sucesso (${count} registros retornados).`);
+              await log(
+                `Histórico puxado com sucesso (${count} registros retornados).`,
+              );
             }
             break;
           }
@@ -256,7 +273,9 @@ export const qualityService = {
             if (ok(result)) {
               result.success = true;
               if (result.needUpgrade === 1) {
-                await log("Atualização disponível (Necessário app via Bluetooth).");
+                await log(
+                  "Atualização disponível (Necessário app via Bluetooth).",
+                );
               } else if (result.needUpgrade === 0) {
                 await log("Firmware atualizado.");
               } else {
@@ -309,6 +328,20 @@ export const qualityService = {
     return audits.map(toClientShape);
   },
 
+  // Apaga uma auditoria do histórico (etapas saem em cascata; relatórios salvos permanecem).
+  // Auditoria em execução não pode ser apagada: o script ainda grava nas etapas.
+  async deleteTest(userId, testId) {
+    const audit = await prisma.qualityAudit.findFirst({
+      where: { id: testId, userId },
+      select: { id: true, status: true },
+    });
+    if (!audit) return { deleted: false, reason: "not_found" };
+    if (audit.status === "executando")
+      return { deleted: false, reason: "running" };
+    await prisma.qualityAudit.delete({ where: { id: audit.id } });
+    return { deleted: true };
+  },
+
   // O script roda dentro do processo; se o servidor reiniciar no meio, a auditoria
   // ficaria "executando" para sempre. No boot, fecha as pendentes como reprovadas.
   async reconcileOrphaned() {
@@ -319,7 +352,10 @@ export const qualityService = {
     for (const { id } of orphaned) {
       await prisma.qualityAuditStep.updateMany({
         where: { auditId: id, status: { in: ["pendente", "executando"] } },
-        data: { status: "falha", errorMsg: "Interrompido: servidor reiniciado." },
+        data: {
+          status: "falha",
+          errorMsg: "Interrompido: servidor reiniciado.",
+        },
       });
       await prisma.qualityAudit.update({
         where: { id },

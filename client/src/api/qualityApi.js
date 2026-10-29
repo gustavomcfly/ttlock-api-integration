@@ -21,4 +21,7 @@ export const qualityApi = {
   getList(lockId) {
     return post("/list", { lockId });
   },
+  deleteTest(testId) {
+    return post("/delete", { testId });
+  },
 };
