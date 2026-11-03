@@ -27,125 +27,162 @@
       Defina seu perfil de testador e os parâmetros padrão para as automações.
     </p>
   </header>
-
   <div class="flex flex-col gap-6">
-    <section
-      class="bg-card border-border overflow-hidden rounded-xl border shadow-sm"
-    >
-      <div class="border-border bg-muted/10 border-b p-4 sm:p-6">
-        <h3 class="ui-panel-title">Perfil do Testador</h3>
-        <p class="text-muted-foreground mt-1 text-sm">
-          Esses dados serão usados como padrão ao injetar credenciais na
-          fechadura.
-        </p>
-      </div>
-      <div class="grid grid-cols-1 gap-6 p-6 sm:grid-cols-2 sm:p-8">
-        <div class="flex flex-col gap-1.5">
-          <label
-            class="ui-label"
-            >Nome Padrão</label
-          >
-          <input
-            type="text"
-            id="cfg-tester-name"
-            placeholder="Ex: QA - Gustavo"
-            class="border-border bg-background focus:ring-primary rounded-lg border px-3 py-2.5 text-sm transition-all focus:ring-2 focus:outline-none"
-          />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label
-            class="ui-label"
-            >Senha Numérica Padrão</label
-          >
-          <input
-            type="text"
-            id="cfg-std-passcode"
-            placeholder="Ex: 123456"
-            class="border-border bg-background focus:ring-primary rounded-lg border px-3 py-2.5 text-sm transition-all focus:ring-2 focus:outline-none"
-          />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label
-            class="ui-label"
-            >Número do Cartão RFID</label
-          >
-          <input
-            type="text"
-            id="cfg-std-card"
-            placeholder="Ex: 1234567890"
-            class="border-border bg-background focus:ring-primary rounded-lg border px-3 py-2.5 text-sm transition-all focus:ring-2 focus:outline-none"
-          />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label
-            class="ui-label"
-            >Número da Biometria</label
-          >
-          <input
-            type="text"
-            id="cfg-std-fingerprint"
-            placeholder="Ex: 54293766864855"
-            class="border-border bg-background focus:ring-primary rounded-lg border px-3 py-2.5 text-sm transition-all focus:ring-2 focus:outline-none"
-          />
+    <!-- Perfil do testador -->
+    <section class="ui-panel">
+      <div class="ui-panel-head">
+        <div class="flex items-center gap-3">
+          <span class="ui-icon-tile ui-icon-tile-sm"
+            ><svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" /></svg
+          ></span>
+          <div>
+            <h3 class="ui-panel-title">Perfil do Testador</h3>
+            <p class="ui-panel-subtitle">
+              Esses dados serão usados como padrão ao injetar credenciais na
+              fechadura
+            </p>
+          </div>
         </div>
       </div>
-    </section>
-
-    <section
-      class="bg-card border-border overflow-hidden rounded-xl border shadow-sm"
-    >
-      <div class="border-border bg-muted/10 border-b p-4 sm:p-6">
-        <h3 class="ui-panel-title">Parâmetros Padrão de Teste</h3>
-        <p class="text-muted-foreground mt-1 text-sm">
-          Configurações padrão para a rotina de Teste de Ciclagem.
-        </p>
-      </div>
-      <div class="grid grid-cols-1 gap-6 p-6 sm:grid-cols-3 sm:p-8">
-        <div class="flex flex-col gap-1.5">
-          <label
-            class="ui-label"
-            >Qtd. de Ciclos Padrão</label
-          >
-          <input
-            type="number"
-            id="cfg-def-cycles"
-            class="border-border bg-background focus:ring-primary rounded-lg border px-3 py-2.5 text-sm transition-all focus:ring-2 focus:outline-none"
-          />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label
-            class="ui-label"
-            >Tempo Aberta (Segundos)</label
-          >
-          <input
-            type="number"
-            id="cfg-def-unlock-time"
-            class="border-border bg-background focus:ring-primary rounded-lg border px-3 py-2.5 text-sm transition-all focus:ring-2 focus:outline-none"
-          />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label
-            class="ui-label"
-            >Intervalo (Segundos)</label
-          >
-          <input
-            type="number"
-            id="cfg-def-interval"
-            class="border-border bg-background focus:ring-primary rounded-lg border px-3 py-2.5 text-sm transition-all focus:ring-2 focus:outline-none"
-          />
+      <div class="ui-section">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div class="ui-field">
+            <label for="cfg-tester-name" class="ui-label">Nome padrão</label
+            ><input
+              type="text"
+              id="cfg-tester-name"
+              placeholder="Ex: QA - Gustavo"
+              class="ui-input"
+            />
+          </div>
+          <div class="ui-field">
+            <label for="cfg-std-passcode" class="ui-label"
+              >Senha numérica padrão</label
+            ><input
+              type="text"
+              id="cfg-std-passcode"
+              placeholder="Ex: 123456"
+              class="ui-input"
+            />
+          </div>
+          <div class="ui-field">
+            <label for="cfg-std-card" class="ui-label"
+              >Número do cartão RFID</label
+            ><input
+              type="text"
+              id="cfg-std-card"
+              placeholder="Ex: 1234567890"
+              class="ui-input"
+            />
+          </div>
+          <div class="ui-field">
+            <label for="cfg-std-fingerprint" class="ui-label"
+              >Número da biometria</label
+            ><input
+              type="text"
+              id="cfg-std-fingerprint"
+              placeholder="Ex: 54293766864855"
+              class="ui-input"
+            />
+          </div>
         </div>
       </div>
     </section>
 
-    <div class="mt-2 flex justify-end">
+    <!-- Parâmetros de teste -->
+    <section class="ui-panel">
+      <div class="ui-panel-head">
+        <div class="flex items-center gap-3">
+          <span class="ui-icon-tile ui-icon-tile-sm"
+            ><svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="4" x2="4" y1="21" y2="14" />
+              <line x1="4" x2="4" y1="10" y2="3" />
+              <line x1="12" x2="12" y1="21" y2="12" />
+              <line x1="12" x2="12" y1="8" y2="3" />
+              <line x1="20" x2="20" y1="21" y2="16" />
+              <line x1="20" x2="20" y1="12" y2="3" />
+              <line x1="2" x2="6" y1="14" y2="14" />
+              <line x1="10" x2="14" y1="8" y2="8" />
+              <line x1="18" x2="22" y1="16" y2="16" /></svg
+          ></span>
+          <div>
+            <h3 class="ui-panel-title">Parâmetros Padrão de Teste</h3>
+            <p class="ui-panel-subtitle">
+              Configurações padrão para a rotina de Teste de Ciclagem
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="ui-section">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div class="ui-field">
+            <label for="cfg-def-cycles" class="ui-label"
+              >Qtd. de ciclos padrão</label
+            >
+            <div class="ui-input-wrap">
+              <input type="number" id="cfg-def-cycles" class="ui-input" /><span
+                class="ui-suffix"
+                >ciclos</span
+              >
+            </div>
+          </div>
+          <div class="ui-field">
+            <label for="cfg-def-unlock-time" class="ui-label"
+              >Tempo aberta</label
+            >
+            <div class="ui-input-wrap">
+              <input
+                type="number"
+                id="cfg-def-unlock-time"
+                class="ui-input"
+              /><span class="ui-suffix">seg</span>
+            </div>
+          </div>
+          <div class="ui-field">
+            <label for="cfg-def-interval" class="ui-label">Intervalo</label>
+            <div class="ui-input-wrap">
+              <input
+                type="number"
+                id="cfg-def-interval"
+                class="ui-input"
+              /><span class="ui-suffix">seg</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <div class="flex justify-end">
       <button
         id="btn-save-settings"
-        class="bg-secondary text-secondary-foreground flex cursor-pointer items-center gap-2 rounded-xl px-8 py-3 text-base font-bold shadow-md transition-all hover:opacity-80"
+        type="button"
+        class="ui-btn ui-btn-primary px-6 py-2.5 text-sm"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          width="20"
-          height="20"
+          width="16"
+          height="16"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -155,11 +192,11 @@
         >
           <path
             d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"
-          ></path>
-          <polyline points="17 21 17 13 7 13 7 21"></polyline>
-          <polyline points="7 3 7 8 15 8"></polyline>
+          />
+          <polyline points="17 21 17 13 7 13 7 21" />
+          <polyline points="7 3 7 8 15 8" />
         </svg>
-        Salvar Configurações
+        Salvar configurações
       </button>
     </div>
   </div>

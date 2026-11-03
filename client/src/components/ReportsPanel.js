@@ -1,6 +1,52 @@
 import { reportApi } from "../api/reportApi.js";
 import { toast } from "../utils/toast.js";
 
+// ---------------------------------------------------------
+// Helpers visuais (somente apresentação)
+// ---------------------------------------------------------
+const esc = (v) =>
+  String(v ?? "").replace(
+    /[&<>"']/g,
+    (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
+        c
+      ],
+  );
+
+const svg = (inner, size = 14, sw = 2) =>
+  `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${inner}</svg>`;
+
+const ICON = {
+  cycle:
+    '<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>',
+  quality:
+    '<path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/>',
+  trash:
+    '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>',
+  check: '<path d="M20 6 9 17l-5-5"/>',
+  x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  close: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  download:
+    '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+  list: '<path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/>',
+  chart: '<path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/>',
+};
+
+const STATUS_TONE = {
+  completed: "success",
+  aprovado: "success",
+  reprovado: "danger",
+  failed: "danger",
+  stopped: "neutral",
+};
+const STATUS_LABEL = {
+  completed: "Concluído",
+  aprovado: "Aprovado",
+  reprovado: "Reprovado",
+  failed: "Falhou",
+  stopped: "Interrompido",
+};
+
 export class ReportsPanel {
   constructor() {
     this._reports = [];
@@ -110,26 +156,26 @@ export class ReportsPanel {
         ? this._formatDuration(new Date(r.completedAt) - new Date(r.startedAt))
         : "—";
 
-    const accentColor = isCyclic ? "text-primary" : "text-primary";
+    const accentColor = "text-primary";
     const borderAccent = isSelected
       ? "border-primary shadow-[0_0_0_2px_hsl(var(--primary)/0.25)]"
       : "border-border hover:border-primary/40";
 
     return `
       <div
-        data-id="${r.id}"
+        data-id="${esc(r.id)}"
         class="report-card relative bg-card rounded-2xl border cursor-pointer transition-all duration-200 overflow-hidden group
           ${borderAccent} ${isSelected ? "bg-muted" : "hover:bg-card"}"
       >
         <!-- Faixa de tipo no topo -->
-        <div class="h-1 w-full ${isCyclic ? "bg-primary" : "bg-primary"}"></div>
+        <div class="h-1 w-full bg-primary"></div>
 
         <div class="p-4">
           <!-- Cabeçalho do card -->
           <div class="flex items-start justify-between gap-2 mb-3">
             <div class="flex items-center gap-2 min-w-0">
               <div class="shrink-0 ${accentColor}">
-                ${isCyclic ? this._iconCyclic() : this._iconQuality()}
+                ${svg(isCyclic ? ICON.cycle : ICON.quality, 16)}
               </div>
               <span class="text-xs font-semibold uppercase tracking-wider ${accentColor}">
                 ${isCyclic ? "Ciclagem" : "Qualidade"}
@@ -138,21 +184,18 @@ export class ReportsPanel {
             <div class="flex items-center gap-1 shrink-0">
               ${this._statusBadge(r.status)}
               <button
-                data-delete="${r.id}"
+                data-delete="${esc(r.id)}"
                 class="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive p-1 rounded cursor-pointer transition-all"
                 title="Remover"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-                </svg>
+                ${svg(ICON.trash, 13)}
               </button>
             </div>
           </div>
 
           <!-- Nome da fechadura -->
-          <p class="font-bold text-sm leading-snug truncate mb-1" title="${r.lockAlias}">${r.lockAlias}</p>
-          <p class="text-muted-foreground text-xs truncate mb-4" title="${r.title}">${r.title}</p>
+          <p class="font-bold text-sm leading-snug truncate mb-1" title="${esc(r.lockAlias)}">${esc(r.lockAlias)}</p>
+          <p class="text-muted-foreground text-xs truncate mb-4" title="${esc(r.title)}">${esc(r.title)}</p>
 
           <!-- Métricas -->
           <div class="grid grid-cols-3 gap-2 mb-4">
@@ -173,7 +216,7 @@ export class ReportsPanel {
           <!-- Rodapé do card -->
           <div class="flex items-center justify-between gap-2">
             <p class="text-muted-foreground text-xs truncate">${date}</p>
-            ${r.testerName ? `<p class="text-muted-foreground text-xs truncate shrink-0">${r.testerName}</p>` : ""}
+            ${r.testerName ? `<p class="text-muted-foreground text-xs truncate shrink-0">${esc(r.testerName)}</p>` : ""}
           </div>
         </div>
 
@@ -229,70 +272,44 @@ export class ReportsPanel {
         ? this._cyclicDetailBody(p)
         : this._qualityDetailBody(p);
 
-    this._detail.innerHTML = `
-      <div class="bg-card border-border rounded-2xl border shadow-sm overflow-hidden">
+    const isCyclic = report.type === "cyclic";
+    const info = (label, value) => `
+      <div class="ui-tile min-h-0 py-3">
+        <p class="text-muted-foreground text-xs">${label}</p>
+        <p class="max-w-full truncate text-sm font-semibold" title="${esc(value)}">${esc(value)}</p>
+      </div>`;
 
-        <!-- Cabeçalho do detalhe -->
-        <div class="border-border border-b px-5 py-4 flex flex-wrap items-start justify-between gap-4">
+    this._detail.innerHTML = `
+      <section class="ui-panel">
+        <div class="ui-panel-head">
           <div class="min-w-0">
-            <div class="flex items-center gap-2 mb-1">
-              <span class="text-xs font-semibold uppercase tracking-wider ${report.type === "cyclic" ? "text-primary" : "text-primary"}">
-                ${report.type === "cyclic" ? "Ciclagem" : "Qualidade"}
-              </span>
+            <div class="mb-1.5 flex flex-wrap items-center gap-2">
+              <span class="ui-chip ui-chip-tone ui-tone-primary">${svg(isCyclic ? ICON.cycle : ICON.quality, 12)}${isCyclic ? "Ciclagem" : "Qualidade"}</span>
               ${this._statusBadge(report.status)}
             </div>
-            <h3 class="font-bold text-lg leading-tight truncate">${report.title}</h3>
-            <p class="text-muted-foreground text-xs mt-1">
-              Gerado em ${createdAt}
-              ${report.testerName ? ` · Testador: <strong class="text-foreground">${report.testerName}</strong>` : ""}
+            <h3 class="ui-panel-title truncate">${esc(report.title)}</h3>
+            <p class="ui-panel-subtitle">
+              Gerado em ${createdAt}${report.testerName ? ` · Testador: <strong class="text-foreground">${esc(report.testerName)}</strong>` : ""}
             </p>
           </div>
-          <div class="flex items-center gap-2 shrink-0">
-            <button
-              id="btn-close-detail"
-              class="bg-muted text-muted-foreground hover:bg-secondary hover:text-secondary-foreground flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold cursor-pointer transition-colors"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-              </svg>
-              Fechar
-            </button>
-            <button
-              id="btn-export-pdf"
-              class="bg-primary text-primary-foreground hover:bg-primary-hover flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold cursor-pointer transition-colors"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="7 10 12 15 17 10"/>
-                <line x1="12" y1="15" x2="12" y2="3"/>
-              </svg>
-              Exportar PDF
-            </button>
+          <div class="flex shrink-0 items-center gap-2">
+            <button type="button" id="btn-close-detail" class="ui-btn ui-btn-soft ui-btn-sm">${svg(ICON.close, 13, 2.5)}Fechar</button>
+            <button type="button" id="btn-export-pdf" class="ui-btn ui-btn-primary ui-btn-sm">${svg(ICON.download, 13, 2.5)}Exportar PDF</button>
           </div>
         </div>
 
-        <!-- Métricas resumidas -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 border-b border-border divide-x divide-border">
-          <div class="flex flex-col items-center justify-center gap-1 p-4">
-            <p class="text-xs text-muted-foreground font-medium uppercase tracking-wide">Fechadura</p>
-            <p class="font-bold text-sm truncate max-w-full">${report.lockAlias}</p>
-          </div>
-          <div class="flex flex-col items-center justify-center gap-1 p-4">
-            <p class="text-xs text-muted-foreground font-medium uppercase tracking-wide">Início</p>
-            <p class="font-semibold text-sm">${startedAt}</p>
-          </div>
-          <div class="flex flex-col items-center justify-center gap-1 p-4">
-            <p class="text-xs text-muted-foreground font-medium uppercase tracking-wide">Conclusão</p>
-            <p class="font-semibold text-sm">${completedAt}</p>
-          </div>
-          <div class="flex flex-col items-center justify-center gap-1 p-4">
-            <p class="text-xs text-muted-foreground font-medium uppercase tracking-wide">Duração</p>
-            <p class="font-bold text-sm">${duration}</p>
+        <div class="ui-section">
+          <div class="mb-3 flex items-center gap-2">${svg(ICON.list, 15)}<h4 class="ui-section-title">Resumo do teste</h4></div>
+          <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            ${info("Fechadura", report.lockAlias)}
+            ${info("Início", startedAt)}
+            ${info("Conclusão", completedAt)}
+            ${info("Duração", duration)}
           </div>
         </div>
 
         ${bodyHtml}
-      </div>`;
+      </section>`;
 
     document
       .getElementById("btn-export-pdf")
@@ -306,6 +323,14 @@ export class ReportsPanel {
       });
   }
 
+  _metric(value, label, tone = "", small = false) {
+    return `
+      <div class="ui-tile min-h-0 ${tone ? `ui-tone-${tone}` : ""}">
+        <p class="${small ? "text-xl" : "text-3xl"} leading-tight font-bold tracking-tight tabular-nums ${tone ? "ui-text-tone" : ""}">${value}</p>
+        <p class="text-muted-foreground text-xs">${label}</p>
+      </div>`;
+  }
+
   _cyclicDetailBody(p) {
     const successRate =
       p.totalCycles > 0
@@ -316,114 +341,77 @@ export class ReportsPanel {
         ? `${p.batteryStart}% → ${p.batteryEnd}% (−${p.batteryStart - p.batteryEnd}%)`
         : "—";
     const logs = (p.logs || []).slice(-50);
+    const failures = p.totalFailures ?? 0;
 
     return `
-      <div class="grid grid-cols-2 sm:grid-cols-4 border-b border-border divide-x divide-border">
-        <div class="flex flex-col items-center justify-center gap-1 p-4">
-          <p class="text-2xl font-bold tabular-nums">${p.completedCycles?.toFixed(0) ?? 0}</p>
-          <p class="text-xs text-muted-foreground">de ${p.totalCycles} ciclos</p>
-        </div>
-        <div class="flex flex-col items-center justify-center gap-1 p-4">
-          <p class="text-2xl font-bold tabular-nums text-destructive">${p.totalFailures ?? 0}</p>
-          <p class="text-xs text-muted-foreground">Falhas</p>
-        </div>
-        <div class="flex flex-col items-center justify-center gap-1 p-4">
-          <p class="text-2xl font-bold tabular-nums">${successRate}%</p>
-          <p class="text-xs text-muted-foreground">Taxa de sucesso</p>
-        </div>
-        <div class="flex flex-col items-center justify-center gap-1 p-4">
-          <p class="text-2xl font-bold tabular-nums">${batteryDrop}</p>
-          <p class="text-xs text-muted-foreground">Variação de bateria</p>
+      <div class="ui-section">
+        <div class="mb-3 flex items-center gap-2">${svg(ICON.chart, 15)}<h4 class="ui-section-title">Resultados</h4></div>
+        <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          ${this._metric(p.completedCycles?.toFixed(0) ?? 0, `de ${p.totalCycles} ciclos`)}
+          ${this._metric(failures, "Falhas", failures > 0 ? "danger" : "")}
+          ${this._metric(`${successRate}%`, "Taxa de sucesso")}
+          ${this._metric(batteryDrop, "Variação de bateria", "", true)}
         </div>
       </div>
-      <div class="p-5">
-        <h4 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-          Log de Eventos ${logs.length < (p.logs?.length ?? 0) ? `(últimos ${logs.length} de ${p.logs.length})` : ""}
-        </h4>
+      <div class="ui-section">
+        <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-2">${svg(ICON.list, 15)}<h4 class="ui-section-title">Log de eventos</h4></div>
+          ${logs.length < (p.logs?.length ?? 0) ? `<span class="ui-hint">Últimos ${logs.length} de ${p.logs.length} eventos</span>` : ""}
+        </div>
         ${
           logs.length === 0
-            ? `<p class="text-muted-foreground text-sm text-center py-6">Nenhum log registrado.</p>`
-            : `<div class="overflow-hidden rounded-lg border border-border max-h-72 overflow-y-auto">
-              <table class="w-full border-collapse text-sm">
-                <thead class="sticky top-0 bg-muted/80 backdrop-blur">
-                  <tr class="text-muted-foreground text-xs uppercase tracking-wide">
-                    <th class="px-3 py-2 text-left font-semibold w-36">Hora</th>
-                    <th class="px-3 py-2 text-left font-semibold w-20">Tipo</th>
-                    <th class="px-3 py-2 text-left font-semibold">Mensagem</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-border/50">
-                  ${logs
-                    .map(
-                      (l) => `
-                    <tr class="hover:bg-muted/20 transition-colors">
-                      <td class="px-3 py-1.5 font-mono text-xs text-muted-foreground whitespace-nowrap">
-                        ${new Date(l.timestamp).toLocaleString("pt-BR")}
-                      </td>
-                      <td class="px-3 py-1.5">${this._logTypeBadge(l.type)}</td>
-                      <td class="px-3 py-1.5 text-xs ${this._logLevelClass(l.level)}">${l.message}</td>
-                    </tr>`,
-                    )
-                    .join("")}
-                </tbody>
-              </table>
-            </div>`
+            ? `<div class="border-border text-muted-foreground rounded-xl border border-dashed py-8 text-center text-sm">Nenhum log registrado.</div>`
+            : `<div class="border-border overflow-hidden rounded-xl border"><div class="ui-scroll"><table class="ui-table">
+                <thead><tr><th class="w-44">Hora</th><th class="w-28">Tipo</th><th>Mensagem</th></tr></thead>
+                <tbody>${logs
+                  .map(
+                    (l) => `
+                  <tr>
+                    <td class="ui-mono text-muted-foreground text-xs whitespace-nowrap">${new Date(l.timestamp).toLocaleString("pt-BR")}</td>
+                    <td>${this._logTypeBadge(l.type)}</td>
+                    <td class="text-xs ${this._logLevelClass(l.level)}">${esc(l.message)}</td>
+                  </tr>`,
+                  )
+                  .join("")}</tbody>
+              </table></div></div>`
         }
       </div>`;
   }
 
   _qualityDetailBody(p) {
+    const failCount = p.failCount ?? 0;
+    const steps = p.steps || [];
+
     return `
-      <div class="grid grid-cols-3 border-b border-border divide-x divide-border">
-        <div class="flex flex-col items-center justify-center gap-1 p-4">
-          <p class="text-2xl font-bold tabular-nums">${p.totalSteps}</p>
-          <p class="text-xs text-muted-foreground">Etapas totais</p>
-        </div>
-        <div class="flex flex-col items-center justify-center gap-1 p-4">
-          <p class="text-2xl font-bold tabular-nums text-green-600">${p.successCount}</p>
-          <p class="text-xs text-muted-foreground">Aprovadas</p>
-        </div>
-        <div class="flex flex-col items-center justify-center gap-1 p-4">
-          <p class="text-2xl font-bold tabular-nums text-destructive">${p.failCount}</p>
-          <p class="text-xs text-muted-foreground">Reprovadas</p>
+      <div class="ui-section">
+        <div class="mb-3 flex items-center gap-2">${svg(ICON.chart, 15)}<h4 class="ui-section-title">Resultados</h4></div>
+        <div class="grid grid-cols-3 gap-4">
+          ${this._metric(p.totalSteps, "Etapas totais")}
+          ${this._metric(p.successCount, "Aprovadas", "success")}
+          ${this._metric(failCount, "Reprovadas", failCount > 0 ? "danger" : "")}
         </div>
       </div>
-      <div class="p-5">
-        <h4 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Detalhes por Etapa</h4>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          ${(p.steps || [])
-            .map(
-              (s) => `
-            <div class="rounded-lg border border-border bg-background px-4 py-3">
-              <div class="flex items-center gap-2.5 min-w-0 mb-2">
-                ${
-                  s.status === "sucesso"
-                    ? `<div class="bg-green-500/20 text-green-500 rounded-full p-0.5 shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>`
-                    : `<div class="bg-red-500/20 text-red-500 rounded-full p-0.5 shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>`
-                }
-                <p class="text-sm font-semibold truncate">${s.name}</p>
+      <div class="ui-section">
+        <div class="mb-4 flex items-center gap-2">${svg(ICON.list, 15)}<h4 class="ui-section-title">Etapas do roteiro</h4></div>
+        <ol class="ui-timeline">
+          ${steps
+            .map((st) => {
+              const ok = st.status === "sucesso";
+              return `
+            <li class="ui-step ${ok ? "ui-tone-success is-done" : "ui-tone-danger is-failed"}">
+              <span class="ui-step-marker">${svg(ok ? ICON.check : ICON.x, 16, 3)}</span>
+              <div class="ui-step-card">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <span class="text-sm font-semibold">${esc(st.name)}</span>
+                  <span class="ui-badge ui-badge-dot">${ok ? "Concluída" : "Falhou"}</span>
+                </div>
+                ${st.errorMsg ? `<div class="ui-chip-tone ui-tone-danger mt-2 rounded-lg px-2.5 py-1.5 text-xs">${esc(st.errorMsg)}</div>` : ""}
+                ${st.logs && st.logs.length > 0 ? `<div class="ui-log ui-mono">${st.logs.map((log) => `<div class="ui-log-line">${esc(log)}</div>`).join("")}</div>` : ""}
               </div>
-              ${s.errorMsg ? `<p class="text-xs text-destructive bg-destructive/10 px-2 py-1 rounded mb-2">${s.errorMsg}</p>` : ""}
-              ${
-                s.logs && s.logs.length > 0
-                  ? `
-                <div class="flex flex-col gap-1">
-                  ${s.logs
-                    .map(
-                      (log) => `
-                    <div class="flex items-center gap-2 text-xs text-muted-foreground font-mono bg-muted/30 px-2 py-1 rounded">
-                      <span class="w-1.5 h-1.5 rounded-full bg-border shrink-0"></span>
-                      <span class="truncate">${log}</span>
-                    </div>`,
-                    )
-                    .join("")}
-                </div>`
-                  : ""
-              }
-            </div>`,
-            )
+            </li>`;
+            })
             .join("")}
-        </div>
+        </ol>
       </div>`;
   }
 
@@ -633,39 +621,26 @@ export class ReportsPanel {
   }
 
   _statusBadge(status) {
-    const map = {
-      completed: "bg-green-500/10 text-green-600 border-green-500/20",
-      aprovado: "bg-green-500/10 text-green-600 border-green-500/20",
-      reprovado: "bg-destructive/10 text-destructive border-destructive/20",
-      failed: "bg-destructive/10 text-destructive border-destructive/20",
-      stopped: "bg-muted text-muted-foreground border-border",
-    };
-    const labels = {
-      completed: "Concluído",
-      aprovado: "Aprovado",
-      reprovado: "Reprovado",
-      failed: "Falhou",
-      stopped: "Interrompido",
-    };
-    return `<span class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold ${map[status] || "bg-muted text-muted-foreground border-border"}">${labels[status] || status}</span>`;
+    const tone = STATUS_TONE[status] || "neutral";
+    return `<span class="ui-badge ui-badge-dot ui-tone-${tone}">${STATUS_LABEL[status] || esc(status)}</span>`;
   }
 
   _logTypeBadge(type) {
-    const s = {
-      UNLOCK: "bg-green-500/10 text-green-700",
-      LOCK: "bg-blue-500/10 text-blue-700",
-      BATTERY: "bg-yellow-500/10 text-yellow-700",
-      SYSTEM: "bg-muted text-muted-foreground",
+    const tones = {
+      UNLOCK: "success",
+      LOCK: "info",
+      BATTERY: "warning",
+      SYSTEM: "neutral",
     };
-    return `<span class="rounded px-1.5 py-0.5 font-mono text-xs font-semibold ${s[type] || s.SYSTEM}">${type}</span>`;
+    return `<span class="ui-chip ui-chip-tone ui-tone-${tones[type] || "neutral"} ui-mono font-semibold">${esc(type)}</span>`;
   }
 
   _logLevelClass(level) {
     return (
       {
-        success: "text-green-600",
-        error: "text-destructive",
-        warning: "text-yellow-600",
+        success: "ui-tone-success ui-text-tone",
+        error: "ui-tone-danger ui-text-tone",
+        warning: "ui-tone-warning ui-text-tone",
         info: "text-muted-foreground",
       }[level] || "text-muted-foreground"
     );
@@ -679,13 +654,5 @@ export class ReportsPanel {
     if (h > 0) return `${h}h ${m}m`;
     if (m > 0) return `${m}m ${sec}s`;
     return `${sec}s`;
-  }
-
-  _iconCyclic() {
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-10.02l5.67-5.67"/></svg>`;
-  }
-
-  _iconQuality() {
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>`;
   }
 }
