@@ -104,6 +104,24 @@ export const lockService = {
     return response.data;
   },
 
+  // seconds > 0: tranca sozinha após N segundos; 0 ou -1: desativa o fechamento automático.
+  // type 2 = via gateway/WiFi (aplica direto pela nuvem, sem precisar de Bluetooth).
+  async setAutoLockTime(accessToken, lockId, seconds) {
+    const params = new URLSearchParams({
+      clientId: process.env.TTLOCK_CLIENT_ID,
+      accessToken: accessToken,
+      lockId: lockId,
+      seconds: seconds,
+      type: 2,
+      date: Date.now(),
+    });
+    const response = await axios.post(
+      `${BASE_URL}/v3/lock/setAutoLockTime`,
+      params.toString(),
+    );
+    return response.data;
+  },
+
   async remoteLock(accessToken, lockId) {
     const params = new URLSearchParams({
       clientId: process.env.TTLOCK_CLIENT_ID,

@@ -65,6 +65,16 @@ export const lockApi = {
     return response.json();
   },
 
+  // seconds > 0 ativa o fechamento automático; -1 desativa
+  async setAutoLock(accessToken, lockId, seconds) {
+    const response = await fetch(`${API_BASE_URL}/auto-lock`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ accessToken, lockId, seconds }),
+    });
+    return response.json();
+  },
+
   async checkUpdate(accessToken, lockId) {
     const response = await fetch(`${API_BASE_URL}/check-update`, {
       method: "POST",

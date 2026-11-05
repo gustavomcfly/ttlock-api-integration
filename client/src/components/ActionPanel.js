@@ -11,6 +11,7 @@ export class ActionPanel {
     this.btnRename = document.getElementById("btn-rename");
     this.btnChangePasscode = document.getElementById("btn-change-passcode");
     this.btnConfigPassage = document.getElementById("btn-config-passage");
+    this.btnConfigAutoLock = document.getElementById("btn-config-auto-lock");
     this.btnDeleteLock = document.getElementById("btn-delete-lock");
     this.btnGoPasscode = document.getElementById("btn-go-passcode");
 
@@ -18,6 +19,10 @@ export class ActionPanel {
     this.inputNewName = document.getElementById("input-new-name");
     this.inputSuperPasscode = document.getElementById("input-super-passcode");
     this.selectPassageMode = document.getElementById("select-passage-mode");
+    this.selectAutoLock = document.getElementById("select-auto-lock");
+    this.inputAutoLockSeconds = document.getElementById(
+      "input-auto-lock-seconds",
+    );
 
     // Detail spans
     this.detailBattery = document.getElementById("detail-battery");
@@ -26,6 +31,7 @@ export class ActionPanel {
     this.detailPassage = document.getElementById("detail-passage");
 
     this.bindEvents();
+    this.syncAutoLockInput();
   }
 
   bindEvents() {
@@ -44,6 +50,14 @@ export class ActionPanel {
     if (this.btnConfigPassage)
       this.btnConfigPassage.addEventListener("click", () =>
         this.configPassageMode(),
+      );
+    if (this.btnConfigAutoLock)
+      this.btnConfigAutoLock.addEventListener("click", () =>
+        this.configAutoLock(),
+      );
+    if (this.selectAutoLock)
+      this.selectAutoLock.addEventListener("change", () =>
+        this.syncAutoLockInput(),
       );
     if (this.btnDeleteLock)
       this.btnDeleteLock.addEventListener("click", () => this.deleteLock());
@@ -87,6 +101,7 @@ export class ActionPanel {
         this.detailFirmware.innerText = data.firmwareRevision || "N/A";
         this.detailPassage.innerText =
           data.passageMode === 1 ? "Ativado" : "Desativado";
+        this.applyAutoLockDetails(data.autoLockTime);
       } else {
         toast.error(
           `Falha: ${data.errmsg || "Não foi possível carregar os detalhes."}`,
@@ -94,6 +109,58 @@ export class ActionPanel {
       }
     } catch (err) {
       console.error(err);
+    }
+  }
+
+  // autoLockTime vem do detail: > 0 = segundos; -1/0/ausente = desativado
+  applyAutoLockDetails(autoLockTime) {
+    if (!this.selectAutoLock || !this.inputAutoLockSeconds) return;
+    const seconds = parseInt(autoLockTime);
+    const enabled = Number.isFinite(seconds) && seconds > 0;
+    this.selectAutoLock.value = enabled ? "1" : "0";
+    if (enabled) this.inputAutoLockSeconds.value = seconds;
+    this.syncAutoLockInput();
+  }
+
+  syncAutoLockInput() {
+    if (!this.selectAutoLock || !this.inputAutoLockSeconds) return;
+    this.inputAutoLockSeconds.disabled = this.selectAutoLock.value !== "1";
+  }
+
+  async configAutoLock() {
+    if (!appState.selectedLockId) return;
+
+    const enabled = this.selectAutoLock.value === "1";
+    let seconds = -1;
+    if (enabled) {
+      seconds = parseInt(this.inputAutoLockSeconds.value);
+      if (!Number.isInteger(seconds) || seconds < 1)
+        return toast.info("Informe um tempo válido em segundos (mínimo 1).");
+    }
+
+    this.btnConfigAutoLock.innerText = "...";
+    this.btnConfigAutoLock.disabled = true;
+    try {
+      const data = await lockApi.setAutoLock(
+        session.getToken(),
+        appState.selectedLockId,
+        seconds,
+      );
+      if (data.errcode === 0) {
+        toast.success(
+          enabled
+            ? `Fechamento automático ativado (${seconds}s).`
+            : "Fechamento automático desativado.",
+        );
+        this.loadLockDetails();
+      } else {
+        toast.error(`Falha: ${data.errmsg || "Erro"}`);
+      }
+    } catch (err) {
+      toast.error("Erro de conexão.");
+    } finally {
+      this.btnConfigAutoLock.innerText = "Aplicar";
+      this.btnConfigAutoLock.disabled = false;
     }
   }
 

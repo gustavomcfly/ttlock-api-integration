@@ -111,6 +111,32 @@ router.post("/passage-mode", async (req, res) => {
   }
 });
 
+router.post("/auto-lock", async (req, res) => {
+  try {
+    const seconds = parseInt(req.body.seconds);
+    // 0 / -1 desativam; qualquer outro valor precisa ser um inteiro positivo
+    if (!Number.isInteger(seconds) || seconds < -1) {
+      return res.status(400).json({
+        errcode: -3,
+        errmsg: "Tempo de fechamento automático inválido.",
+      });
+    }
+    const data = await lockService.setAutoLockTime(
+      req.body.accessToken,
+      req.body.lockId,
+      seconds,
+    );
+    res.json(data);
+  } catch (error) {
+    res.status(500).json(
+      error.response?.data || {
+        errcode: -1,
+        errmsg: "Erro ao configurar fechamento automático",
+      },
+    );
+  }
+});
+
 router.post("/delete", async (req, res) => {
   try {
     const data = await lockService.deleteLock(
