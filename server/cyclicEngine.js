@@ -1,5 +1,5 @@
-import prisma from './prismaClient.js';
-import { lockService } from './services/lock.service.js'; // Usa o serviço nativo sem precisar de HTTP
+import prisma from "./prismaClient.js";
+import { lockService } from "./services/lock.service.js"; // Usa o serviço nativo sem precisar de HTTP
 
 // Guarda apenas UM registro por teste: "existe um loop Node vivo para este testId agora?"
 // Todo o resto (pausar/retomar/parar/editar parâmetros) acontece via status no Postgres,
@@ -19,7 +19,8 @@ async function sleepCheckingStop(testId, ms) {
       where: { id: testId },
       select: { status: true },
     });
-    if (!row || row.status === 'stopped' || row.status === 'failed') return false;
+    if (!row || row.status === "stopped" || row.status === "failed")
+      return false;
     const chunk = Math.min(step, remaining);
     await sleep(chunk);
     remaining -= chunk;
@@ -43,7 +44,9 @@ export const cyclicEngine = {
     let lastKnownTotal = totalCycles;
 
     const log = async (type, level, message) => {
-      await prisma.cyclicTestLog.create({ data: { testId, type, level, message } });
+      await prisma.cyclicTestLog.create({
+        data: { testId, type, level, message },
+      });
     };
 
     const persistProgress = async (extra = {}) => {
@@ -54,13 +57,39 @@ export const cyclicEngine = {
     };
 
     try {
+      try {
+        const details = await lockService.getLockDetails(token, lockId);
+        if (details?.electricQuantity !== undefined) {
+          lastBattery = details.electricQuantity;
+          const initial = await prisma.cyclicTest.findUnique({
+            where: { id: testId },
+            select: { lowBatteryThreshold: true },
+          });
+          await prisma.cyclicTest.update({
+            where: { id: testId },
+            data: { battery: lastBattery, batteryStart: lastBattery },
+          });
+          await log("BATTERY", "info", `Bateria inicial: ${lastBattery}%`);
+          const threshold = initial?.lowBatteryThreshold ?? 20;
+          if (threshold > 0 && lastBattery <= threshold) {
+            await log(
+              "BATTERY",
+              "warning",
+              `ALERTA: ${lastBattery}% ≤ ${threshold}%`,
+            );
+          }
+        }
+      } catch (_) {}
+
       mainLoop: while (currentCycle < totalCycles) {
         // Fonte única de verdade: relê status e parâmetros do banco a cada volta.
         // Isso permite pausar/retomar/editar de qualquer lugar sem depender de estado em memória.
-        const cfg = await prisma.cyclicTest.findUnique({ where: { id: testId } });
-        if (!cfg || cfg.status === 'stopped' || cfg.status === 'failed') break;
+        const cfg = await prisma.cyclicTest.findUnique({
+          where: { id: testId },
+        });
+        if (!cfg || cfg.status === "stopped" || cfg.status === "failed") break;
 
-        if (cfg.status === 'paused') {
+        if (cfg.status === "paused") {
           await sleep(500);
           continue;
         }
@@ -74,7 +103,7 @@ export const cyclicEngine = {
         if (currentCycle >= effectiveTotal) break;
 
         // --- 1. SOLICITAR DESBLOQUEIO ---
-        await log('UNLOCK', 'info', 'Solicitando desbloqueio');
+        await log("UNLOCK", "info", "Solicitando desbloqueio");
         let unlockOk = false;
         try {
           const res = await lockService.remoteUnlock(token, lockId);
@@ -82,7 +111,11 @@ export const cyclicEngine = {
             currentCycle += 0.5;
             consecutiveFailures = 0;
             unlockOk = true;
-            await log('UNLOCK', 'success', `Desbloqueio OK · ${currentCycle.toFixed(1)} ciclos`);
+            await log(
+              "UNLOCK",
+              "success",
+              `Desbloqueio OK · ${currentCycle.toFixed(1)} ciclos`,
+            );
             await persistProgress();
           } else {
             throw new Error(res?.errmsg || `Código de erro: ${res?.errcode}`);
@@ -90,11 +123,18 @@ export const cyclicEngine = {
         } catch (e) {
           totalFailures++;
           consecutiveFailures++;
-          await log('UNLOCK', 'error', `Falha no desbloqueio: ${e.message}`);
+          await log("UNLOCK", "error", `Falha no desbloqueio: ${e.message}`);
           await persistProgress();
           if (consecutiveFailures >= maxFailures) {
-            await log('SYSTEM', 'error', `Teste interrompido por ${maxFailures} falhas consecutivas.`);
-            await prisma.cyclicTest.update({ where: { id: testId }, data: { status: 'failed', completedAt: new Date() } });
+            await log(
+              "SYSTEM",
+              "error",
+              `Teste interrompido por ${maxFailures} falhas consecutivas.`,
+            );
+            await prisma.cyclicTest.update({
+              where: { id: testId },
+              data: { status: "failed", completedAt: new Date() },
+            });
             break mainLoop;
           }
         }
@@ -109,13 +149,17 @@ export const cyclicEngine = {
         }
 
         // --- 2. SOLICITAR TRAVAMENTO ---
-        await log('LOCK', 'info', 'Solicitando travamento');
+        await log("LOCK", "info", "Solicitando travamento");
         try {
           const res = await lockService.remoteLock(token, lockId);
           if (res && res.errcode === 0) {
             currentCycle += 0.5;
             consecutiveFailures = 0;
-            await log('LOCK', 'success', `Travamento OK · ciclo ${currentCycle.toFixed(1)} concluído`);
+            await log(
+              "LOCK",
+              "success",
+              `Travamento OK · ciclo ${currentCycle.toFixed(1)} concluído`,
+            );
             await persistProgress();
           } else {
             throw new Error(res?.errmsg || `Código de erro: ${res?.errcode}`);
@@ -123,11 +167,18 @@ export const cyclicEngine = {
         } catch (e) {
           totalFailures++;
           consecutiveFailures++;
-          await log('LOCK', 'error', `Falha no travamento: ${e.message}`);
+          await log("LOCK", "error", `Falha no travamento: ${e.message}`);
           await persistProgress();
           if (consecutiveFailures >= maxFailures) {
-            await log('SYSTEM', 'error', `Teste interrompido por ${maxFailures} falhas consecutivas.`);
-            await prisma.cyclicTest.update({ where: { id: testId }, data: { status: 'failed', completedAt: new Date() } });
+            await log(
+              "SYSTEM",
+              "error",
+              `Teste interrompido por ${maxFailures} falhas consecutivas.`,
+            );
+            await prisma.cyclicTest.update({
+              where: { id: testId },
+              data: { status: "failed", completedAt: new Date() },
+            });
             break mainLoop;
           }
         }
@@ -139,10 +190,20 @@ export const cyclicEngine = {
             const details = await lockService.getLockDetails(token, lockId);
             if (details?.electricQuantity !== undefined) {
               lastBattery = details.electricQuantity;
-              await prisma.cyclicTest.update({ where: { id: testId }, data: { battery: lastBattery } });
-              await log('BATTERY', 'info', `Bateria: ${lastBattery}%`);
-              if (lowBatteryThreshold > 0 && lastBattery <= lowBatteryThreshold) {
-                await log('BATTERY', 'warning', `ALERTA: ${lastBattery}% ≤ ${lowBatteryThreshold}%`);
+              await prisma.cyclicTest.update({
+                where: { id: testId },
+                data: { battery: lastBattery },
+              });
+              await log("BATTERY", "info", `Bateria: ${lastBattery}%`);
+              if (
+                lowBatteryThreshold > 0 &&
+                lastBattery <= lowBatteryThreshold
+              ) {
+                await log(
+                  "BATTERY",
+                  "warning",
+                  `ALERTA: ${lastBattery}% ≤ ${lowBatteryThreshold}%`,
+                );
               }
             }
           } catch (_) {
@@ -156,29 +217,44 @@ export const cyclicEngine = {
       }
 
       // Finalização (se ainda não foi marcado como 'failed' dentro do loop)
-      const finalRow = await prisma.cyclicTest.findUnique({ where: { id: testId }, select: { status: true } });
-      if (finalRow && finalRow.status !== 'failed') {
-        const finalStatus = currentCycle >= lastKnownTotal ? 'completed' : 'stopped';
-        if (finalStatus === 'completed') {
-          await log('SYSTEM', 'success', `Concluído. Total de falhas: ${totalFailures}.`);
+      const finalRow = await prisma.cyclicTest.findUnique({
+        where: { id: testId },
+        select: { status: true },
+      });
+      if (finalRow && finalRow.status !== "failed") {
+        const finalStatus =
+          currentCycle >= lastKnownTotal ? "completed" : "stopped";
+        if (finalStatus === "completed") {
+          await log(
+            "SYSTEM",
+            "success",
+            `Concluído. Total de falhas: ${totalFailures}.`,
+          );
         } else {
-          await log('SYSTEM', 'info', 'Interrompido.');
+          await log("SYSTEM", "info", "Interrompido.");
         }
         await prisma.cyclicTest.update({
           where: { id: testId },
-          data: { status: finalStatus, completedAt: new Date(), batteryEnd: lastBattery },
+          data: {
+            status: finalStatus,
+            completedAt: new Date(),
+            batteryEnd: lastBattery,
+          },
         });
       } else if (finalRow) {
-        await prisma.cyclicTest.update({ where: { id: testId }, data: { batteryEnd: lastBattery } });
+        await prisma.cyclicTest.update({
+          where: { id: testId },
+          data: { batteryEnd: lastBattery },
+        });
       }
     } catch (err) {
-      console.error('[Engine] Erro crítico no robô de ciclagem:', err);
+      console.error("[Engine] Erro crítico no robô de ciclagem:", err);
       try {
         await prisma.cyclicTest.update({
           where: { id: testId },
-          data: { status: 'failed', completedAt: new Date() },
+          data: { status: "failed", completedAt: new Date() },
         });
-        await log('SYSTEM', 'error', `Erro crítico: ${err.message}`);
+        await log("SYSTEM", "error", `Erro crítico: ${err.message}`);
       } catch (_) {}
     } finally {
       activeEngines.delete(testId);
