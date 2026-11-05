@@ -1,4 +1,5 @@
 import { passcodeApi } from "../api/passcodeApi.js";
+import { localizeMessage } from "../utils/errors.js";
 import { session } from "../utils/session.js";
 import { appState } from "../state/appState.js";
 import { toast } from "../utils/toast.js";
@@ -240,7 +241,9 @@ export class PasscodePanel {
         this.showError(data.errmsg || "Falha na operação.");
       }
     } catch (err) {
-      this.showError(err.message || "Falha de conexão com o servidor.");
+      this.showError(
+        localizeMessage(err.message) || "Falha de conexão com o servidor.",
+      );
     } finally {
       this.btnGenerate.disabled = false;
       this.btnGenerateText.innerText = info.isCustom
@@ -258,7 +261,7 @@ export class PasscodePanel {
   }
 
   showError(message) {
-    this.errorText.innerText = message;
+    this.errorText.innerText = localizeMessage(message);
     this.errorPanel.classList.remove("hidden");
   }
 
