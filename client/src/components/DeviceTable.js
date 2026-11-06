@@ -9,6 +9,8 @@ export class DeviceTable {
     this.container = document.getElementById("device-table"); // Will now act as the grid container
     this.btnFetchLocks = document.getElementById("btn-fetch-locks");
     this.emptyText = document.getElementById("no-devices");
+    this.emptyTitle = document.getElementById("no-devices-title");
+    this.emptyDesc = document.getElementById("no-devices-text");
 
     this.tabOnline = document.getElementById("tab-online");
     this.tabOffline = document.getElementById("tab-offline");
@@ -73,6 +75,8 @@ export class DeviceTable {
       console.error(err);
 
       if (this.container) {
+        this.emptyText?.classList.add("hidden");
+        this.container.classList.remove("hidden");
         this.container.innerHTML = `
           <div class="text-center text-destructive py-8 font-semibold">
             Erro ao carregar dispositivos. Verifique a conexão com a API.
@@ -103,16 +107,17 @@ export class DeviceTable {
     this.render();
   }
 
+  // O aviso fica fora do container (que é limpo/escondido a cada render)
+  showEmpty(title, description) {
+    if (this.emptyTitle) this.emptyTitle.innerText = title;
+    if (this.emptyDesc) this.emptyDesc.innerText = description;
+    this.emptyText?.classList.remove("hidden");
+    this.container.classList.add("hidden");
+  }
+
   render() {
     if (!this.container) return;
     this.container.innerHTML = "";
-
-    if (this.allLocks.length === 0) {
-      this.emptyText.innerText = "Não há fechaduras vinculadas a esta conta.";
-      this.emptyText.classList.remove("hidden");
-      this.container.classList.add("hidden");
-      return;
-    }
 
     const filteredLocks = this.allLocks.filter((lock) => {
       return this.currentTab === "online"
@@ -122,9 +127,13 @@ export class DeviceTable {
 
     if (filteredLocks.length === 0) {
       const statusText = this.currentTab === "online" ? "online" : "offline";
-      this.emptyText.innerText = `Nenhuma fechadura ${statusText} encontrada.`;
-      this.emptyText.classList.remove("hidden");
-      this.container.classList.add("hidden");
+      const description =
+        this.allLocks.length === 0
+          ? "Não há fechaduras vinculadas a esta conta."
+          : this.currentTab === "online"
+            ? "Fechaduras sem gateway ficam na aba Offline."
+            : "Todas as fechaduras da conta estão conectadas a um gateway.";
+      this.showEmpty(`Não há nenhuma fechadura ${statusText}`, description);
       return;
     }
 
@@ -133,7 +142,7 @@ export class DeviceTable {
 
     // Switch container to CSS Grid instead of a block/table layout
     this.container.className =
-      "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4";
+      "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-5";
 
     const cardsHtml = filteredLocks
       .map((lock) => {
