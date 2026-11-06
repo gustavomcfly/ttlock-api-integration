@@ -1,4 +1,5 @@
 import { rfidApi } from "../api/rfidApi.js";
+import { localizeMessage } from "../utils/errors.js";
 import { session } from "../utils/session.js";
 import { appState } from "../state/appState.js";
 import { toast } from "../utils/toast.js";
@@ -149,7 +150,7 @@ export class RfidPanel {
         this.fetchCards();
       } else {
         this.errorText.innerText =
-          data.errmsg || "O Gateway não conseguiu registrar o cartão.";
+          localizeMessage(data.errmsg) || "O Gateway não conseguiu registrar o cartão.";
         this.errorPanel.classList.remove("hidden");
       }
     } catch (err) {

@@ -1,5 +1,6 @@
 import Toastify from "toastify-js";
 import "toastify-js/src/toastify.css";
+import { localizeMessage } from "./errors.js";
 
 export const toast = {
   success(message) {
@@ -19,7 +20,7 @@ export const toast = {
 
   error(message) {
     Toastify({
-      text: message,
+      text: localizeMessage(message),
       duration: 4000,
       close: true,
       gravity: "top",

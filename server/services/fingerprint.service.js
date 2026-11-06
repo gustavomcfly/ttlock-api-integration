@@ -1,4 +1,5 @@
 import axios from "axios";
+import "../utils/ttlockErrors.js";
 import "dotenv/config";
 
 const BASE_URL = "https://api.sciener.com";

@@ -2,73 +2,117 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node.js" />
-  <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript" />
   <img src="https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white" alt="Express" />
+  <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" />
+  <img src="https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white" alt="Prisma" />
+  <img src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite" />
   <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS" />
 </p>
 
-Sistema de controle e automação para testes de fechaduras digitais baseadas no firmware TTLock (Sciener). Permite a gestão completa dos dispositivos, execução de comandos remotos e rotinas de testes de estresse em hardware através de Gateways Wi-Fi.
+Sistema de controle e automação para testes de fechaduras digitais baseadas no firmware TTLock (Sciener). Permite gerenciar os dispositivos, executar comandos remotos, rodar testes de ciclagem em background e realizar auditorias de qualidade com geração de relatórios.
 
 ---
 
-## 🚀 Tecnologias Utilizadas
+## 🚀 Tecnologias
 
-A arquitetura foi modernizada para suportar processamento em background e armazenamento persistente:
-
-- **Frontend:** JavaScript (Vanilla/ES6+), HTML5, CSS3, construído e otimizado com [Vite](https://vitejs.dev/).
-- **Backend:** [Node.js](https://nodejs.org/) com [Express](https://expressjs.com/) (Proxy da API TTLock e Motor de Testes).
-- **Banco de Dados:** [PostgreSQL](https://www.postgresql.org/) para armazenamento seguro de logs, testes e configurações.
-- **ORM:** [Prisma](https://www.prisma.io/) para modelagem do banco e consultas tipadas.
-- **Integração:** TTLock Open API.
-
----
-
-## ⚙️ Principais Funcionalidades
-
-- **Gestão de Fechaduras:** Listagem, status de bateria e comandos remotos de abrir/travar.
-- **Motor de Ciclagem (Background):** Testes de estresse de abrir/fechar rodando nativamente no backend 24/7, sem depender do navegador aberto.
-- **Auditoria de Qualidade (QA):** Criação e acompanhamento de roteiros de testes detalhados com logs de execução etapa por etapa.
-- **Geração de Relatórios:** Histórico de testes em banco de dados para análise de falhas.
+- **Frontend:** JavaScript (ES Modules), HTML5 e Tailwind CSS 4, com [Vite](https://vitejs.dev/)
+- **Backend:** [Node.js](https://nodejs.org/) + [Express 5](https://expressjs.com/)
+- **Banco de dados:** [PostgreSQL](https://www.postgresql.org/) (administrado via [pgAdmin](https://www.pgadmin.org/))
+- **ORM:** [Prisma 7](https://www.prisma.io/) com `@prisma/adapter-pg`
+- **Sessão:** JWT (`jsonwebtoken`)
+- **Integração:** [TTLock Open API](https://euopen.ttlock.com/)
 
 ---
 
-## ⚙️ Como Executar
+## 💻 Como Executar Localmente
 
 ### 1. Pré-requisitos
 
-- [Node.js](https://nodejs.org/) (Versão 18+ recomendada)
-- [PostgreSQL](https://www.postgresql.org/) rodando localmente (ou uma URL de banco na nuvem)
+- [Node.js](https://nodejs.org/) **20.19+** (recomendado 22 LTS)
+- [PostgreSQL](https://www.postgresql.org/download/) 14+ com o **pgAdmin 4** (vem no instalador)
 - Git
+- Um app criado na [TTLock Open Platform](https://euopen.ttlock.com/) para obter o `Client ID` e o `Client Secret`
 
-### 2. Instalação das Dependências
+### 2. Instalar as dependências
 
-Abra o terminal na raiz do projeto e instale todas as dependências simultaneamente (raiz, frontend e backend) usando o script automatizado:
+Na raiz do projeto:
 
 ```bash
 npm run install:all
 ```
 
-### 3. Configuração do Banco de Dados (Prisma)
+Instala as dependências da raiz, de `client/` e de `server/`.
 
-Entre na pasta do servidor, gere o cliente do Prisma e crie as tabelas no seu banco de dados:
+### 3. Criar o banco no pgAdmin
+
+1. Abra o pgAdmin → botão direito em **Servers → Register → Server...**
+2. Aba **General:** `Name` = `Localhost`
+3. Aba **Connection:** `Host` = `localhost`, `Port` = `5432`, `Username` = `postgres`, `Password` = senha definida na instalação do PostgreSQL → **Save**
+4. Em **Servers → Localhost → Databases**, botão direito → **Create → Database...**
+5. `Database` = `testlock_db` → **Save**
+
+Crie apenas o banco vazio; as tabelas são geradas no passo 5.
+
+### 4. Configurar o `server/.env`
+
+Crie o arquivo `server/.env` (já é ignorado pelo Git):
+
+```env
+PORT=3001
+TTLOCK_CLIENT_ID=seu_client_id
+TTLOCK_CLIENT_SECRET=seu_client_secret
+JWT_SECRET=troque_por_um_segredo_longo_e_aleatorio
+DATABASE_URL="postgresql://postgres:SUA_SENHA@localhost:5432/testlock_db?schema=public"
+```
+
+- **`JWT_SECRET`:** assina a sessão do sistema. Para gerar um valor seguro:
+  ```bash
+  node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
+  ```
+- **`DATABASE_URL`:** se a senha tiver caracteres especiais, codifique-os na URL (`@` → `%40`, `#` → `%23`).
+
+### 5. Criar as tabelas (Prisma)
+
+Rode **de dentro da pasta `server/`**, pois é lá que o Prisma lê o `.env`:
 
 ```bash
 cd server
+npx prisma migrate deploy
 npx prisma generate
-npx prisma db push
 cd ..
 ```
 
-### 4. Executando o Projeto
+Para conferir, no pgAdmin vá em `testlock_db → Schemas → public → Tables` e clique em **Refresh**.
 
-Com tudo configurado, volte para a raiz do projeto e inicie os servidores (Frontend e Backend subirão juntos através do _concurrently_):
+### 6. Rodar o projeto
+
+Na raiz:
 
 ```bash
 npm run dev
 ```
 
-- **Frontend (Vite):** Geralmente acessível em `http://localhost:5173`
-- **Backend (Node.js):** Rodando em `http://localhost:3001`
+- **Frontend:** <http://localhost:5173>
+- **Backend:** <http://localhost:3001>
+
+Faça login com a mesma conta do app TTLock. No primeiro acesso o usuário é criado automaticamente no banco.
+
+---
+
+## 🛠️ Problemas comuns
+
+| Erro | Solução |
+| --- | --- |
+| `P1000` autenticação falhou | Confira usuário/senha na `DATABASE_URL` |
+| `P1001` não alcança o banco | Inicie o serviço do PostgreSQL e confirme a porta `5432` |
+| `P1003` banco não existe | Crie o `testlock_db` no pgAdmin |
+| `Cannot find module '.prisma/client'` | `cd server && npx prisma generate` |
+| `DATABASE_URL` não encontrada | O `.env` deve estar em `server/` e os comandos Prisma devem rodar dentro de `server/` |
+| `EADDRINUSE :::3001` | Libere a porta 3001 ou altere `PORT` |
+
+---
+
+_Desenvolvido para propósitos de pesquisa e desenvolvimento de integrações IoT e automação de controle de acessos._
 
 ---
 
@@ -76,18 +120,43 @@ npm run dev
 
 ```text
 /
-├── client/                 # Aplicação Frontend
-│   ├── src/                # Códigos fonte (Componentes, API, Estado)
-│   ├── index.html          # Ponto de entrada do Vite
-│   └── vite.config.js      # Configurações do empacotador
-├── server/                 # Aplicação Backend
-│   ├── prisma/             # Schema do banco de dados (schema.prisma)
-│   ├── db-routes/          # Rotas de comunicação com o PostgreSQL (Testes/Qualidade)
-│   ├── routes/             # Rotas de Proxy para a API da TTLock
-│   ├── services/           # Regras de negócio e comunicação direta (LockService, etc)
-│   ├── cyclicEngine.js     # Motor autônomo para o Teste de Ciclagem (Background)
-│   └── server.js           # Ponto de entrada do Express
-└── package.json            # Scripts globais do projeto (npm run dev, npm run install:all)
+├── client/                         # Frontend (Vite)
+│   ├── index.html                  # Ponto de entrada
+│   ├── vite.config.js              # Tailwind + proxy de /api e /db para :3001
+│   └── src/
+│       ├── main.js                 # Navegação entre páginas
+│       ├── config.js               # API_BASE (dev/prod)
+│       ├── api/                    # lockApi, qualityApi, settingsApi, ...
+│       ├── components/             # ActionPanel, QualityTestPanel, ReportsPanel, SettingsPanel, ...
+│       ├── pages/                  # Templates HTML de cada tela
+│       ├── state/                  # appState
+│       └── utils/                  # http, sessão, toast, helpers
+├── server/                         # Backend (Express)
+│   ├── server.js                   # Entrada, montagem das rotas e listen
+│   ├── prismaClient.js             # Prisma + Pool pg (adapter-pg)
+│   ├── prisma.config.ts            # Config do Prisma 7 (lê DATABASE_URL do .env)
+│   ├── prisma/
+│   │   ├── schema.prisma           # Modelos do banco
+│   │   └── migrations/             # Histórico de migrations SQL
+│   ├── middleware/auth.js          # JWT: signSession / requireAuth
+│   ├── routes/                     # auth, lock, passcode, rfid, fingerprint, record, quality, reports, settings
+│   ├── db-routes/cyclicTestsDB.js  # /db/cyclic-tests
+│   ├── services/                   # Regras de negócio e chamadas à TTLock
+│   ├── utils/ttlockErrors.js       # Tradução dos erros da TTLock
+│   ├── cyclicEngine.js             # Motor de ciclagem em background
+│   └── .env                        # Variáveis locais (não versionado)
+├── netlify/functions/api.js        # Wrapper serverless do Express
+├── netlify.toml                    # Build, functions e redirects do Netlify
+└── package.json                    # Scripts globais e dependências usadas pela Function
 ```
+
+---
+
+## 🔐 Segurança
+
+- Nunca versione o `server/.env`. Se alguma credencial (`TTLOCK_CLIENT_SECRET`, `JWT_SECRET`, senha do banco) já foi exposta em um repositório, **troque-a**.
+- Use um `JWT_SECRET` único e longo em cada ambiente.
+
+---
 
 _Desenvolvido para propósitos de pesquisa e desenvolvimento de integrações IoT e automação de controle de acessos._

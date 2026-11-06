@@ -58,14 +58,12 @@
     <div
       class="bg-card border-border flex flex-col gap-4 rounded-xl border p-6 shadow-sm"
     >
-      <h3 class="border-border border-b pb-2 ui-panel-title">
+      <h3 class="border-border ui-panel-title border-b pb-2">
         Dispositivo e Acesso
       </h3>
 
       <div class="flex flex-col gap-2">
-        <label class="ui-label"
-          >Renomear Fechadura</label
-        >
+        <label class="ui-label">Renomear Fechadura</label>
         <div class="flex gap-2">
           <input
             type="text"
@@ -83,9 +81,7 @@
       </div>
 
       <div class="flex flex-col gap-2">
-        <label class="ui-label"
-          >Alterar Senha de Admin (Super Senha)</label
-        >
+        <label class="ui-label">Alterar Senha de Admin (Super Senha)</label>
         <div class="flex gap-2">
           <input
             type="password"
@@ -103,9 +99,7 @@
       </div>
 
       <div class="flex flex-col gap-2">
-        <label class="ui-label"
-          >Modo Passagem</label
-        >
+        <label class="ui-label">Modo Passagem</label>
         <div class="flex gap-2">
           <select
             id="select-passage-mode"
@@ -121,6 +115,39 @@
             Aplicar
           </button>
         </div>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label class="ui-label">Fechamento Automático</label>
+        <div class="flex gap-2">
+          <select
+            id="select-auto-lock"
+            class="border-border bg-background focus:border-primary min-w-0 flex-1 rounded-lg border px-3 py-2 text-sm focus:outline-none"
+          >
+            <option value="0">Desativado</option>
+            <option value="1">Ativado</option>
+          </select>
+          <input
+            type="number"
+            id="input-auto-lock-seconds"
+            min="1"
+            step="1"
+            value="5"
+            placeholder="Segundos"
+            title="Segundos até trancar automaticamente"
+            class="border-border bg-background focus:border-primary w-24 shrink-0 rounded-lg border px-3 py-2 text-sm focus:outline-none disabled:opacity-50"
+          />
+          <button
+            id="btn-config-auto-lock"
+            class="bg-secondary text-secondary-foreground hover:bg-secondary-hover shrink-0 rounded-lg px-3 py-2 text-sm font-semibold transition-colors"
+          >
+            Aplicar
+          </button>
+        </div>
+        <p class="text-muted-foreground text-xs">
+          A fechadura tranca sozinha após o tempo (em segundos) definido. Requer
+          gateway ou fechadura WiFi.
+        </p>
       </div>
     </div>
 

@@ -1,4 +1,5 @@
 import { fingerprintApi } from "../api/fingerprintApi.js";
+import { localizeMessage } from "../utils/errors.js";
 import { session } from "../utils/session.js";
 import { appState } from "../state/appState.js";
 import { toast } from "../utils/toast.js";
@@ -151,7 +152,7 @@ export class FingerprintPanel {
         this.fetchFingerprints();
       } else {
         this.errorText.innerText =
-          data.errmsg || "O Gateway não conseguiu registrar a biometria.";
+          localizeMessage(data.errmsg) || "O Gateway não conseguiu registrar a biometria.";
         this.errorPanel.classList.remove("hidden");
       }
     } catch (err) {

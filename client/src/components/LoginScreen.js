@@ -170,9 +170,7 @@ export class LoginScreen {
         toast.success("Autenticação bem sucedida!");
         this.onLoginSuccess();
       } else {
-        toast.error(
-          "Falha no login: " + (data.description || "Cheque suas credenciais."),
-        );
+        toast.error("Falha no login: Cheque suas credenciais.");
       }
     } catch (err) {
       toast.error("Falha de conexão com o servidor.");

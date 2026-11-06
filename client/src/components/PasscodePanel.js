@@ -3,6 +3,75 @@ import { session } from "../utils/session.js";
 import { appState } from "../state/appState.js";
 import { toast } from "../utils/toast.js";
 
+const HOUR = 60 * 60 * 1000;
+
+const escapeHtml = (v) =>
+  String(v ?? "").replace(
+    /[&<>"']/g,
+    (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c],
+  );
+
+const STATUS_STYLES = {
+  success: "bg-green-500/10 text-green-500 border border-green-500/20",
+  danger: "bg-destructive/10 text-destructive border border-destructive/20",
+  info: "bg-blue-500/10 text-blue-500 border border-blue-500/20",
+  warning: "bg-yellow-500/10 text-yellow-500 border border-yellow-500/20",
+};
+
+// Campo "status" da TTLock: só existe em fechaduras NB-IoT.
+const NBIOT_STATUS = {
+  2: ["Expirada", "danger"],
+  3: ["Pendente", "warning"],
+  4: ["Adicionando", "warning"],
+  5: ["Falha ao adicionar", "danger"],
+  6: ["Modificando", "warning"],
+  7: ["Falha ao modificar", "danger"],
+  8: ["Excluindo", "warning"],
+  9: ["Falha ao excluir", "danger"],
+};
+
+// Fechaduras com Gateway (sem NB-IoT) NÃO enviam "status" na listagem, então o estado
+// precisa ser calculado a partir de startDate/endDate (timestamps em ms) e do tipo.
+// Limitação: a listagem não diz se a senha já foi usada, então não dá para saber se uma
+// senha aleatória permanente/limitada foi invalidada por não ser usada em 24h.
+function getPasscodeStatus(item, now = Date.now()) {
+  const type = Number(item.keyboardPwdType);
+  const start = Number(item.startDate) || 0;
+  const end = Number(item.endDate) || 0;
+
+  const nb = NBIOT_STATUS[Number(item.status)];
+  if (item.status != null && nb) return { label: nb[0], tone: nb[1] };
+
+  if (start && now < start) return { label: "Agendada", tone: "info" };
+
+  // Uso único: vale por 6 horas a partir do início.
+  if (type === 1 && ((start && now > start + 6 * HOUR) || (end && now > end))) {
+    return { label: "Expirada", tone: "danger" };
+  }
+  // Limitada e cíclicas expiram no fim da validade; a permanente (2) não tem fim.
+  if (type !== 1 && type !== 2 && end && now > end) {
+    return { label: "Expirada", tone: "danger" };
+  }
+
+  return { label: "Válida", tone: "success" };
+}
+
+function describeValidity(item) {
+  const type = Number(item.keyboardPwdType);
+  const start = Number(item.startDate) || 0;
+  const end = Number(item.endDate) || 0;
+  const fmt = (ts) =>
+    new Date(ts).toLocaleString("pt-BR", {
+      dateStyle: "short",
+      timeStyle: "short",
+    });
+  if (type === 2) return start ? `Permanente · a partir de ${fmt(start)}` : "Permanente";
+  if (type === 1) return start ? `Uso único · válida por 6 h após ${fmt(start)}` : "Uso único";
+  if (start && end) return `De ${fmt(start)} até ${fmt(end)}`;
+  return "";
+}
+
 const TYPE_INFO = {
   2: {
     label: "Permanente",
@@ -337,19 +406,18 @@ export class PasscodePanel {
       };
       const typeLabel = typeMap[item.keyboardPwdType] || "Outro";
 
-      // Default to true for display purposes if status isn't strictly defined by Sciener
-      const isActive = item.status === undefined || item.status === 1;
-      const statusClass = isActive
-        ? "bg-green-500/10 text-green-500 border border-green-500/20"
-        : "bg-yellow-500/10 text-yellow-500 border border-yellow-500/20";
-      const statusText = isActive ? "Válida" : "Inativa";
+      const now = Date.now();
+      const status = getPasscodeStatus(item, now);
+      const statusClass = STATUS_STYLES[status.tone];
+      const statusText = status.label;
+      const validity = describeValidity(item);
 
       tr.innerHTML = `
-        <td class="px-6 py-4 text-center whitespace-nowrap font-medium group-hover:text-primary transition-colors">${item.keyboardPwdName || "Sem Nome"}</td>
-        <td class="px-6 py-4 text-center whitespace-nowrap font-mono font-bold tracking-widest">${item.keyboardPwd}</td>
+        <td class="px-6 py-4 text-center whitespace-nowrap font-medium group-hover:text-primary transition-colors">${escapeHtml(item.keyboardPwdName || "Sem Nome")}</td>
+        <td class="px-6 py-4 text-center whitespace-nowrap font-mono font-bold tracking-widest">${escapeHtml(item.keyboardPwd)}</td>
         <td class="px-6 py-4 text-center whitespace-nowrap text-muted-foreground text-sm">${typeLabel}</td>
-        <td class="px-6 py-4 text-center whitespace-norap">
-            <span class="px-2.5 py-1.5 rounded-full text-xs font-bold ${statusClass}">${statusText}</span>
+        <td class="px-6 py-4 text-center whitespace-nowrap">
+            <span title="${escapeHtml(validity)}" class="px-2.5 py-1.5 rounded-full text-xs font-bold ${statusClass}">${statusText}</span>
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-center">
             <div class="flex items-center justify-center gap-2">

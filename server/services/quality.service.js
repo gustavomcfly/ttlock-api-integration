@@ -13,6 +13,7 @@ const STEP_NAMES = {
   add_fingerprint: "Registro de Biometria",
   rename_lock: "Renomear Fechadura",
   passage_mode: "Ativar/Desativar Modo Passagem",
+  auto_lock: "Ativar/Desativar Fechamento Automático",
   get_records: "Sincronizar Histórico de Registros",
   check_update: "Verificar Atualização de Firmware",
 };
@@ -250,6 +251,62 @@ export const qualityService = {
             } else {
               result.success = false;
               result.errmsg = pmOn.errmsg || "Falha ao ativar Modo Passagem";
+            }
+            break;
+          }
+
+          case "auto_lock": {
+            // Guarda a configuração atual para devolvê-la ao fim do teste
+            let originalSeconds = -1;
+            try {
+              const detail = await lockService.getLockDetails(
+                accessToken,
+                lockId,
+              );
+              const current = parseInt(detail?.autoLockTime);
+              if (ok(detail) && Number.isFinite(current) && current > 0)
+                originalSeconds = current;
+            } catch {
+              // sem leitura do estado atual: ao final o fechamento fica desativado
+            }
+
+            const testSeconds = 5;
+            await log(`Ativando Fechamento Automático (${testSeconds}s)...`);
+            const alOn = await lockService.setAutoLockTime(
+              accessToken,
+              lockId,
+              testSeconds,
+            );
+            if (ok(alOn)) {
+              await log("Fechamento Automático ativado.");
+              await log("Aguardando 2 segundos...");
+              await sleep(2000);
+              await log(
+                originalSeconds > 0
+                  ? `Restaurando Fechamento Automático original (${originalSeconds}s)...`
+                  : "Desativando Fechamento Automático...",
+              );
+              const alOff = await lockService.setAutoLockTime(
+                accessToken,
+                lockId,
+                originalSeconds > 0 ? originalSeconds : -1,
+              );
+              if (ok(alOff)) {
+                await log(
+                  originalSeconds > 0
+                    ? "Configuração original restaurada."
+                    : "Fechamento Automático desativado.",
+                );
+                result.success = true;
+              } else {
+                result.success = false;
+                result.errmsg =
+                  alOff.errmsg || "Falha ao desativar Fechamento Automático";
+              }
+            } else {
+              result.success = false;
+              result.errmsg =
+                alOn.errmsg || "Falha ao ativar Fechamento Automático";
             }
             break;
           }
